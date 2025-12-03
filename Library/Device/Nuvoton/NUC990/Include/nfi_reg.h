@@ -28,7 +28,7 @@
     @addtogroup NFI NAND Flash Interface(NFI)
     Memory Mapped Structure for NFI Controller
 @{ */
- 
+
 typedef struct
 {
 
@@ -407,7 +407,7 @@ typedef struct
  * |        |          |This field contains an 11-bit ECC error address 1 of first field
  * |        |          |If it is a correctable error, please read the error data, ERRDATA1 (NFI_NANDECCED0[15:8]), to correct this error.
  * @var NFI_T::NANDECCED
- * Offset: 0x960  NAND Flash ECC Error Data Register 
+ * Offset: 0x960  NAND Flash ECC Error Data Register
  * ---------------------------------------------------------------------------------------------------
  * |Bits    |Field     |Descriptions
  * | :----: | :----:   | :---- |
@@ -642,6 +642,10 @@ typedef struct
 
 /**@}*/ /* NFI_CONST */
 /**@}*/ /* end of NFI register group */
-
-
 /**@}*/ /* end of REGISTER group */
+
+#if defined ( __CC_ARM   )
+#pragma no_anon_unions
+#endif
+
+#endif /* __NFI_REG_H__ */

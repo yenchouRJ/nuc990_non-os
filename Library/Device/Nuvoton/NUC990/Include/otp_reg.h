@@ -28,7 +28,7 @@
     @addtogroup OTP One-Time Programming Controller(OTP)
     Memory Mapped Structure for OTP Controller
 @{ */
- 
+
 typedef struct
 {
 
@@ -331,6 +331,10 @@ typedef struct
 
 /**@}*/ /* OTP_CONST */
 /**@}*/ /* end of OTP register group */
-
-
 /**@}*/ /* end of REGISTER group */
+
+#if defined ( __CC_ARM   )
+#pragma no_anon_unions
+#endif
+
+#endif /* __OTP_REG_H__ */
