@@ -28,7 +28,7 @@
     @addtogroup HSUSBD USB Device Controller(HSUSBD)
     Memory Mapped Structure for HSUSBD Controller
 @{ */
- 
+
 typedef struct
 {
 /**
@@ -1437,6 +1437,10 @@ typedef struct
 
 /**@}*/ /* HSUSBD_CONST */
 /**@}*/ /* end of HSUSBD register group */
-
-
 /**@}*/ /* end of REGISTER group */
+
+#if defined ( __CC_ARM   )
+#pragma no_anon_unions
+#endif
+
+#endif /* __HSUSBD_REG_H__ */
