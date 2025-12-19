@@ -53,7 +53,7 @@ typedef struct
  * |        |          |0 = Chip select pin (EBI_nCS) is active low.
  * |        |          |1 = Chip select pin (EBI_nCS) is active high.
  * |[4]     |CACCESS   |Continuous Data Access Mode
- * |        |          |When continuous access mode enabled, the tASU, tALE and tLHD cycles are bypass for continuous data transfer request.
+ * |        |          |When continuous access mode enabled, the tASU and tLHD cycles are bypass for continuous data transfer request.
  * |        |          |0 = Continuous data access mode Disabled.
  * |        |          |1 = Continuous data access mode Enabled.
  * |[6:5]   |WAITVT    |Valid time of EBI_nWAIT signal
@@ -119,7 +119,7 @@ typedef struct
  * |        |          |0 = Chip select pin (EBI_nCS) is active low.
  * |        |          |1 = Chip select pin (EBI_nCS) is active high.
  * |[4]     |CACCESS   |Continuous Data Access Mode
- * |        |          |When continuous access mode enabled, the tASU, tALE and tLHD cycles are bypass for continuous data transfer request.
+ * |        |          |When continuous access mode enabled, the tASU and tLHD cycles are bypass for continuous data transfer request.
  * |        |          |0 = Continuous data access mode Disabled.
  * |        |          |1 = Continuous data access mode Enabled.
  * |[6:5]   |WAITVT    |Valid time of EBI_nWAIT signal
@@ -185,7 +185,7 @@ typedef struct
  * |        |          |0 = Chip select pin (EBI_nCS) is active low.
  * |        |          |1 = Chip select pin (EBI_nCS) is active high.
  * |[4]     |CACCESS   |Continuous Data Access Mode
- * |        |          |When continuous access mode enabled, the tASU, tALE and tLHD cycles are bypass for continuous data transfer request.
+ * |        |          |When continuous access mode enabled, the tASU and tLHD cycles are bypass for continuous data transfer request.
  * |        |          |0 = Continuous data access mode Disabled.
  * |        |          |1 = Continuous data access mode Enabled.
  * |[6:5]   |WAITVT    |Valid time of EBI_nWAIT signal
@@ -258,9 +258,6 @@ typedef struct
 #define EBI_CTL_CSPOLINV_Pos             (2)                                               /*!< EBI_T::CTL: CSPOLINV Position         */
 #define EBI_CTL_CSPOLINV_Msk             (0x1ul << EBI_CTL_CSPOLINV_Pos)                   /*!< EBI_T::CTL: CSPOLINV Mask             */
 
-#define EBI_CTL_ADSEPEN_Pos              (3)                                               /*!< EBI_T::CTL: ADSEPEN Position          */
-#define EBI_CTL_ADSEPEN_Msk              (0x1ul << EBI_CTL_ADSEPEN_Pos)                    /*!< EBI_T::CTL: ADSEPEN Mask              */
-
 #define EBI_CTL_CACCESS_Pos              (4)                                               /*!< EBI_T::CTL: CACCESS Position          */
 #define EBI_CTL_CACCESS_Msk              (0x1ul << EBI_CTL_CACCESS_Pos)                    /*!< EBI_T::CTL: CACCESS Mask              */
 
@@ -269,9 +266,6 @@ typedef struct
 
 #define EBI_CTL_MCLKDIV_Pos              (8)                                               /*!< EBI_T::CTL: MCLKDIV Position          */
 #define EBI_CTL_MCLKDIV_Msk              (0x7ul << EBI_CTL_MCLKDIV_Pos)                    /*!< EBI_T::CTL: MCLKDIV Mask              */
-
-#define EBI_CTL_TALE_Pos                 (16)                                              /*!< EBI_T::CTL: TALE Position             */
-#define EBI_CTL_TALE_Msk                 (0x7ul << EBI_CTL_TALE_Pos)                       /*!< EBI_T::CTL: TALE Mask                 */
 
 #define EBI_CTL_WBUFEN_Pos               (24)                                              /*!< EBI_T::CTL: WBUFEN Position           */
 #define EBI_CTL_WBUFEN_Msk               (0x1ul << EBI_CTL_WBUFEN_Pos)                     /*!< EBI_T::CTL: WBUFEN Mask               */
@@ -303,9 +297,6 @@ typedef struct
 #define EBI_CTL0_CSPOLINV_Pos            (2)                                               /*!< EBI_T::CTL0: CSPOLINV Position         */
 #define EBI_CTL0_CSPOLINV_Msk            (0x1ul << EBI_CTL0_CSPOLINV_Pos)                  /*!< EBI_T::CTL0: CSPOLINV Mask             */
 
-#define EBI_CTL0_ADSEPEN_Pos             (3)                                               /*!< EBI_T::CTL0: ADSEPEN Position          */
-#define EBI_CTL0_ADSEPEN_Msk             (0x1ul << EBI_CTL0_ADSEPEN_Pos)                   /*!< EBI_T::CTL0: ADSEPEN Mask              */
-
 #define EBI_CTL0_CACCESS_Pos             (4)                                               /*!< EBI_T::CTL0: CACCESS Position          */
 #define EBI_CTL0_CACCESS_Msk             (0x1ul << EBI_CTL0_CACCESS_Pos)                   /*!< EBI_T::CTL0: CACCESS Mask              */
 
@@ -314,9 +305,6 @@ typedef struct
 
 #define EBI_CTL0_MCLKDIV_Pos             (8)                                               /*!< EBI_T::CTL0: MCLKDIV Position          */
 #define EBI_CTL0_MCLKDIV_Msk             (0x7ul << EBI_CTL0_MCLKDIV_Pos)                   /*!< EBI_T::CTL0: MCLKDIV Mask              */
-
-#define EBI_CTL0_TALE_Pos                (16)                                              /*!< EBI_T::CTL0: TALE Position             */
-#define EBI_CTL0_TALE_Msk                (0x7ul << EBI_CTL0_TALE_Pos)                      /*!< EBI_T::CTL0: TALE Mask                 */
 
 #define EBI_CTL0_WBUFEN_Pos              (24)                                              /*!< EBI_T::CTL0: WBUFEN Position           */
 #define EBI_CTL0_WBUFEN_Msk              (0x1ul << EBI_CTL0_WBUFEN_Pos)                    /*!< EBI_T::CTL0: WBUFEN Mask               */
@@ -348,9 +336,6 @@ typedef struct
 #define EBI_CTL1_CSPOLINV_Pos            (2)                                               /*!< EBI_T::CTL1: CSPOLINV Position         */
 #define EBI_CTL1_CSPOLINV_Msk            (0x1ul << EBI_CTL1_CSPOLINV_Pos)                  /*!< EBI_T::CTL1: CSPOLINV Mask             */
 
-#define EBI_CTL1_ADSEPEN_Pos             (3)                                               /*!< EBI_T::CTL1: ADSEPEN Position          */
-#define EBI_CTL1_ADSEPEN_Msk             (0x1ul << EBI_CTL1_ADSEPEN_Pos)                   /*!< EBI_T::CTL1: ADSEPEN Mask              */
-
 #define EBI_CTL1_CACCESS_Pos             (4)                                               /*!< EBI_T::CTL1: CACCESS Position          */
 #define EBI_CTL1_CACCESS_Msk             (0x1ul << EBI_CTL1_CACCESS_Pos)                   /*!< EBI_T::CTL1: CACCESS Mask              */
 
@@ -359,9 +344,6 @@ typedef struct
 
 #define EBI_CTL1_MCLKDIV_Pos             (8)                                               /*!< EBI_T::CTL1: MCLKDIV Position          */
 #define EBI_CTL1_MCLKDIV_Msk             (0x7ul << EBI_CTL1_MCLKDIV_Pos)                   /*!< EBI_T::CTL1: MCLKDIV Mask              */
-
-#define EBI_CTL1_TALE_Pos                (16)                                              /*!< EBI_T::CTL1: TALE Position             */
-#define EBI_CTL1_TALE_Msk                (0x7ul << EBI_CTL1_TALE_Pos)                      /*!< EBI_T::CTL1: TALE Mask                 */
 
 #define EBI_CTL1_WBUFEN_Pos              (24)                                              /*!< EBI_T::CTL1: WBUFEN Position           */
 #define EBI_CTL1_WBUFEN_Msk              (0x1ul << EBI_CTL1_WBUFEN_Pos)                    /*!< EBI_T::CTL1: WBUFEN Mask               */
@@ -393,9 +375,6 @@ typedef struct
 #define EBI_CTL2_CSPOLINV_Pos            (2)                                               /*!< EBI_T::CTL2: CSPOLINV Position         */
 #define EBI_CTL2_CSPOLINV_Msk            (0x1ul << EBI_CTL2_CSPOLINV_Pos)                  /*!< EBI_T::CTL2: CSPOLINV Mask             */
 
-#define EBI_CTL2_ADSEPEN_Pos             (3)                                               /*!< EBI_T::CTL2: ADSEPEN Position          */
-#define EBI_CTL2_ADSEPEN_Msk             (0x1ul << EBI_CTL2_ADSEPEN_Pos)                   /*!< EBI_T::CTL2: ADSEPEN Mask              */
-
 #define EBI_CTL2_CACCESS_Pos             (4)                                               /*!< EBI_T::CTL2: CACCESS Position          */
 #define EBI_CTL2_CACCESS_Msk             (0x1ul << EBI_CTL2_CACCESS_Pos)                   /*!< EBI_T::CTL2: CACCESS Mask              */
 
@@ -404,9 +383,6 @@ typedef struct
 
 #define EBI_CTL2_MCLKDIV_Pos             (8)                                               /*!< EBI_T::CTL2: MCLKDIV Position          */
 #define EBI_CTL2_MCLKDIV_Msk             (0x7ul << EBI_CTL2_MCLKDIV_Pos)                   /*!< EBI_T::CTL2: MCLKDIV Mask              */
-
-#define EBI_CTL2_TALE_Pos                (16)                                              /*!< EBI_T::CTL2: TALE Position             */
-#define EBI_CTL2_TALE_Msk                (0x7ul << EBI_CTL2_TALE_Pos)                      /*!< EBI_T::CTL2: TALE Mask                 */
 
 #define EBI_CTL2_WBUFEN_Pos              (24)                                              /*!< EBI_T::CTL2: WBUFEN Position           */
 #define EBI_CTL2_WBUFEN_Msk              (0x1ul << EBI_CTL2_WBUFEN_Pos)                    /*!< EBI_T::CTL2: WBUFEN Mask               */
