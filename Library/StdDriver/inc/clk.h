@@ -53,10 +53,10 @@ typedef enum CLOCKn
 
 typedef enum REQn
 {
-	STR_CANFD0 = 1,
-	STR_CANFD1 = 2,
-	STR_CANFD2 = 3,
-	STR_CANFD3 = 4,
+    STR_CANFD0 = 1,
+    STR_CANFD1 = 2,
+    STR_CANFD2 = 3,
+    STR_CANFD3 = 4,
 } CLK_Stop;
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -335,7 +335,6 @@ typedef enum REQn
 #define PDMA1_MODULE     ((MODULE_HCLKEN0<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(17UL<<0))
 #define EMAC0_MODULE     ((MODULE_HCLKEN0<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(18UL<<0))
 #define EMAC1_MODULE     ((MODULE_HCLKEN0<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(19UL<<0))
-#define FMI_MODULE       ((MODULE_HCLKEN0<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(20UL<<0))
 #define NAND_MODULE      ((MODULE_HCLKEN0<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(21UL<<0))
 #define SDH0_MODULE      ((MODULE_HCLKEN0<<29)|(3UL<<25)         |(2UL<<22)         |(3UL<<17)         |(3UL<<13)         |(7UL<<10)         |(5UL<<5)         |(22UL<<0))
 #define SDH1_MODULE      ((MODULE_HCLKEN0<<29)|(3UL<<25)         |(2UL<<22)         |(19UL<<17)        |(3UL<<13)         |(7UL<<10)         |(21UL<<5)        |(23UL<<0))
@@ -345,10 +344,9 @@ typedef enum REQn
 
 /* HCLKEN1 */
 #define I2S_MODULE       ((MODULE_HCLKEN1<<29)|(1UL<<25)         |(2UL<<22)         |(19UL<<17)        |(1UL<<13)         |(7UL<<10)         |(24UL<<5)        |(0UL<<0))
-#define CRPT_MODULE      ((MODULE_HCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(1UL<<0))
+#define CRYPTO_MODULE    ((MODULE_HCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(1UL<<0))
 #define KS_MODULE        ((MODULE_HCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(2UL<<0))
-#define OPT_MODULE       ((MODULE_HCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(3UL<<0))
-#define IBR_MODULE       ((MODULE_HCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(4UL<<0))
+#define OTP_MODULE       ((MODULE_HCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(3UL<<0))
 
 #define CANFD0_MODULE    ((MODULE_HCLKEN1<<29)|(2UL<<25)         |(1UL<<22)         |(0UL<<17)         |(7UL<<13)         |(4UL<<10)         |(0UL<<5)         |(8UL<<0))
 #define CANFD1_MODULE    ((MODULE_HCLKEN1<<29)|(2UL<<25)         |(1UL<<22)         |(1UL<<17)         |(7UL<<13)         |(4UL<<10)         |(4UL<<5)         |(9UL<<0))
@@ -376,7 +374,6 @@ typedef enum REQn
 #define UART5_MODULE     ((MODULE_PCLKEN0<<29)|(5UL<<25)         |(2UL<<22)         |(11UL<<17)        |(5UL<<13)         |(3UL<<10)         |(13UL<<5)        |(21UL<<0))
 #define UART6_MODULE     ((MODULE_PCLKEN0<<29)|(5UL<<25)         |(2UL<<22)         |(19UL<<17)        |(5UL<<13)         |(3UL<<10)         |(21UL<<5)        |(22UL<<0))
 #define UART7_MODULE     ((MODULE_PCLKEN0<<29)|(5UL<<25)         |(2UL<<22)         |(27UL<<17)        |(5UL<<13)         |(3UL<<10)         |(29UL<<5)        |(23UL<<0))
-
 #define UART8_MODULE     ((MODULE_PCLKEN0<<29)|(6UL<<25)         |(2UL<<22)         |(3UL<<17)         |(6UL<<13)         |(3UL<<10)         |(5UL<<5)         |(24UL<<0))
 #define UART9_MODULE     ((MODULE_PCLKEN0<<29)|(6UL<<25)         |(2UL<<22)         |(11UL<<17)        |(6UL<<13)         |(3UL<<10)         |(13UL<<5)        |(25UL<<0))
 
@@ -394,17 +391,13 @@ typedef enum REQn
 #define CAN1_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(9UL<<0))
 #define CAN2_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(10UL<<0))
 #define CAN3_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(11UL<<0))
-#define CAN4_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(12UL<<0))
-#define CAN5_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(13UL<<0))
-#define CAN6_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(14UL<<0))
-#define CAN7_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(15UL<<0))
 
 #define SMC0_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(6UL<<13)         |(4UL<<10)         |(24UL<<5)        |(16UL<<0))
 #define SMC1_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(6UL<<13)         |(4UL<<10)         |(28UL<<5)        |(17UL<<0))
 #define QSPI0_MODULE     ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(8UL<<17)         |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(20UL<<0))
 #define ADC_MODULE       ((MODULE_PCLKEN1<<29)|(7UL<<25)         |(2UL<<22)         |(20UL<<17)        |(7UL<<13)         |(7UL<<10)         |(24UL<<5)        |(24UL<<0))
 #define EADC_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(7UL<<13)         |(4UL<<10)         |(16UL<<5)        |(25UL<<0))
-//#define BPWM0_MODULE   ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(24UL<<17)        |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(26UL<<0))
+//#define BPWM0_MODULE     ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(24UL<<17)        |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(26UL<<0))
 #define BPWM0_MODULE     ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(26UL<<0))
 //#define BPWM1_MODULE   ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(26UL<<17)        |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(27UL<<0))
 #define BPWM1_MODULE     ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(27UL<<0))

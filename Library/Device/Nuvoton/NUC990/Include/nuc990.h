@@ -611,6 +611,12 @@ typedef unsigned int           REG32;   /*!< Define 32-bit register data type   
 
 #define NON_CACHE_MASK         (0x80000000U)
 
+#define ptr_to_u32(x)          ((uint32_t)(x))
+#define nc_ptr(x)              ((void *)((uint32_t)(x) | NON_CACHE_MASK))
+
+/* add non-cache mask to get a pointer for non-cache access */
+#define nc_ptr(x)       ((void *)nc_addr64(x))
+
 #define __HXT                  (12000000UL)    /*!< External Crystal Clock Frequency     */
 #define __LXT                  (32768UL)       /*!< External Crystal Clock Frequency 32.768KHz */
 
