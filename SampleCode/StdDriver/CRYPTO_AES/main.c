@@ -1,21 +1,41 @@
-/******************************************************************************
-* @file main.c
-* @version V1.00
-* @brief Demonstrate the AES encryption/decryption capabilities of the
-*        Cryptographic Accelerator (Crypto), including modes such as
-*        AES CBC, CCM, and GCM, and show how to support multiple
-*        concurrent AES encryption/decryption tasks.
-*
-* @copyright SPDX-License-Identifier: Apache-2.0
-* @copyright (C) 2025 Nuvoton Technology Corp. All rights reserved.
-*****************************************************************************/
-
+/**
+ ******************************************************************************
+ * @file    main.c
+ * @version V1.00
+ * @brief   NUC990 Series Crypto Engine AES (Advanced Encryption Standard) 
+ * Demonstration Program.
+ *
+ * This program demonstrates the hardware AES acceleration capabilities of the 
+ * NUC990 Crypto Engine, supporting various operational modes and advanced 
+ * DMA data handling techniques.
+ *
+ * @details
+ * The demonstration covers the following key features:
+ * - Basic Encryption/Decryption: ECB mode with 128/256-bit key length.
+ * - DMA Cascade Mode: Demonstrates processing large data sets by breaking them 
+ * into smaller DMA chunks (FIRST, CONTINUE, LAST) while maintaining context.
+ * - NIST KAT (Known Answer Test): Validation of the AES engine against standard 
+ * vectors (ECB, CBC, CFB, etc.) to ensure cryptographic correctness.
+ * - Multi-channel Concurrency: Demonstration of the hardware's ability to 
+ * handle multiple AES tasks or contexts.
+ * - Data Swap Support: Hardware-level byte/word swap for different endianness.
+ * - Interrupt-driven and Polling Workflows: Integration with the system ISR.
+ *
+ * @note    This sample utilizes non-cacheable DMA buffers to ensure data 
+ * consistency between the CPU and the Crypto hardware.
+ *
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
+ ******************************************************************************
+ */
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "NuMicro.h"
 
 #define BUFF_SIZE           1024
+#define GCM_BUFF_SIZE       0x10000
 
 uint32_t au32MyAESKey[8] = {
     0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f,
@@ -42,6 +62,11 @@ uint8_t  *au8FDBCK;
 
 volatile int  g_AES_done, g_AESERR_done;
 volatile int  g_PRNG_done;
+
+void dump_buff_hex(uint8_t *pucBuff, int nBytes);
+extern int AES_multi_channel_test(void);
+
+#include "aes_kat.c"
 
 void CRYPTO_IRQHandler(void)
 {
@@ -79,7 +104,7 @@ void do_swap(uint8_t *buff, int len)
     }
 }
 
-void  dump_buff_hex(uint8_t *pucBuff, int nBytes)
+void dump_buff_hex(uint8_t *pucBuff, int nBytes)
 {
     uint32_t  addr, end_addr;
     int       i;
@@ -119,16 +144,16 @@ int AES_basic_test(int polling_mode)
     /*-----------------------------------------------------------------------*/
     /*  AES-128 ECB mode encrypt                                             */
     /*-----------------------------------------------------------------------*/
-    AES_Open(0, 1, AES_MODE_ECB, AES_KEY_SIZE_128, AES_IN_OUT_SWAP);
-    AES_SetKey(0, au32MyAESKey, AES_KEY_SIZE_128);
-    AES_SetInitVect(0, au32MyAESIV);
-    AES_SetDMATransfer(0, (uint32_t)au8InputData, (uint32_t)au8OutputData, BUFF_SIZE);
+    AES_Open(AES_ENCRYPT, AES_MODE_ECB, AES_KEY_SIZE_128, AES_IN_OUT_SWAP);
+    AES_SetKey(au32MyAESKey, AES_KEY_SIZE_128);
+    AES_SetInitVect(au32MyAESIV);
+    AES_SetDMATransfer((uint32_t)au8InputData, (uint32_t)au8OutputData, BUFF_SIZE);
 
     dump_buff_hex(au8InputData, 16);
 
     AES_ENABLE_INT();
     g_AES_done = 0;
-    AES_Start(0, CRYPTO_DMA_ONE_SHOT);
+    AES_Start(CRYPTO_DMA_ONE_SHOT, CRYPTO_AES_FB_NONE, 0);
     while (!g_AES_done);
 
     printf("AES encrypt done.\n\n");
@@ -137,23 +162,23 @@ int AES_basic_test(int polling_mode)
     /*-----------------------------------------------------------------------*/
     /*  AES-128 ECB mode decrypt                                             */
     /*-----------------------------------------------------------------------*/
-    AES_Open(0, 0, AES_MODE_ECB, AES_KEY_SIZE_128, AES_IN_OUT_SWAP);
-    AES_SetKey(0, au32MyAESKey, AES_KEY_SIZE_128);
-    AES_SetInitVect(0, au32MyAESIV);
-    AES_SetDMATransfer(0, (uint32_t)au8OutputData,
+    AES_Open(AES_DECRYPT, AES_MODE_ECB, AES_KEY_SIZE_128, AES_IN_OUT_SWAP);
+    AES_SetKey(au32MyAESKey, AES_KEY_SIZE_128);
+    AES_SetInitVect(au32MyAESIV);
+    AES_SetDMATransfer((uint32_t)au8OutputData,
                       (uint32_t)au8InputData, sizeof(au8InputData_Pool));
 
 	if (polling_mode)
     {
         AES_DISABLE_INT();
-        AES_Start(0, CRYPTO_DMA_ONE_SHOT);
+        AES_Start(CRYPTO_DMA_ONE_SHOT, CRYPTO_AES_FB_NONE, 0);
         while (CRYPTO->AES_STS & CRYPTO_AES_STS_BUSY_Msk);
     }
     else
     {
         AES_ENABLE_INT();
         g_AES_done = 0;
-        AES_Start(0, CRYPTO_DMA_ONE_SHOT);
+        AES_Start(CRYPTO_DMA_ONE_SHOT, CRYPTO_AES_FB_NONE, 0);
         while (!g_AES_done);
     }
 
@@ -174,13 +199,13 @@ int AES_cascade_test(int keysz, int opmode)
     /*-----------------------------------------------------------------------*/
     /*  AES-256 CBC mode one-shot encrypt                                    */
     /*-----------------------------------------------------------------------*/
-    AES_Open(0, 1, opmode, keysz, AES_IN_OUT_SWAP);
-    AES_SetKey(0, au32MyAESKey, keysz);
-    AES_SetInitVect(0, au32MyAESIV);
-    AES_SetDMATransfer(0, (uint32_t)au8InputData, (uint32_t)au8OutputData, BUFF_SIZE);
+    AES_Open(AES_ENCRYPT, opmode, keysz, AES_IN_OUT_SWAP);
+    AES_SetKey(au32MyAESKey, keysz);
+    AES_SetInitVect(au32MyAESIV);
+    AES_SetDMATransfer((uint32_t)au8InputData, (uint32_t)au8OutputData, BUFF_SIZE);
 
     g_AES_done = 0;
-    AES_Start(0, CRYPTO_DMA_ONE_SHOT);
+    AES_Start(CRYPTO_DMA_ONE_SHOT, CRYPTO_AES_FB_NONE, 0);
     while (!g_AES_done);
 
     printf("AES one-shot encrypt done.\n\n");
@@ -188,21 +213,21 @@ int AES_cascade_test(int keysz, int opmode)
     /*-----------------------------------------------------------------------*/
     /*  AES-256 CBC mode cascade encrypt                                     */
     /*-----------------------------------------------------------------------*/
-    AES_Open(0, 1, opmode, keysz, AES_IN_OUT_SWAP);
-    AES_SetKey(0, au32MyAESKey, keysz);
-    AES_SetInitVect(0, au32MyAESIV);
-    AES_SetDMATransfer(0, (uint32_t)au8InputData, (uint32_t)au8CascadeOut, BUFF_SIZE);
+    AES_Open(AES_ENCRYPT, opmode, keysz, AES_IN_OUT_SWAP);
+    AES_SetKey(au32MyAESKey, keysz);
+    AES_SetInitVect(au32MyAESIV);
+    AES_SetDMATransfer((uint32_t)au8InputData, (uint32_t)au8CascadeOut, BUFF_SIZE);
 
     for (count = 0; count < BUFF_SIZE; count += 64)
     {
-        AES_SetDMATransfer(0, (uint32_t)au8InputData+count, (uint32_t)au8CascadeOut+count, 64);
+        AES_SetDMATransfer((uint32_t)au8InputData+count, (uint32_t)au8CascadeOut+count, 64);
         g_AES_done = 0;
         if (count == 0)
-            AES_Start(0, CRYPTO_DMA_FIRST);
+            AES_Start(CRYPTO_DMA_FIRST, CRYPTO_AES_FB_NONE, 0);
         else if (count >= BUFF_SIZE - 64)
-            AES_Start(0, CRYPTO_DMA_LAST);
+            AES_Start(CRYPTO_DMA_LAST, CRYPTO_AES_FB_NONE, 0);
         else
-            AES_Start(0, CRYPTO_DMA_CONTINUE);
+            AES_Start(CRYPTO_DMA_CONTINUE, CRYPTO_AES_FB_NONE, 0);
 
         while (!g_AES_done);
     }
@@ -225,6 +250,8 @@ int AES_cascade_test(int keysz, int opmode)
 
 void SYS_Init()
 {
+    CLK_SetModuleClock(UART0_MODULE, CLK_DIV4_UART0SEL_HXT, CLK_DIV4_UART0(1));
+
     CLK_EnableModuleClock(CRYPTO_MODULE);
     CLK_EnableModuleClock(KS_MODULE);
     CLK_EnableModuleClock(UART0_MODULE);
@@ -235,24 +262,24 @@ void SYS_Init()
 
 void UART0_Init(void)
 {
-    SYS_ResetModule(UART0_RST);
-    UART_Open(UART0, 9600);
+    sysResetModule(UART0_RST);
+    UART_Open(UART0, 115200);
+    UART0->BAUD = 0x3000000E;  /* for palladium */
 }
 
 int main(void)
 {
-    int        item, ret;
-    uint32_t   i, j;
+    int item, ret;
 
     SYS_UnlockReg();
-
-    SYS_Init();
-
-    UART_Init();
 
     sysDisableCache();
     sysFlushCache(I_D_CACHE);
     sysEnableCache(CACHE_WRITE_BACK);
+
+    SYS_Init();
+
+    UART0_Init();
 
     /* Get pointer for non-cacheable DMA buffer */
     au8InputData  = nc_ptr(au8InputData_Pool);
@@ -260,9 +287,9 @@ int main(void)
     au8CascadeOut = nc_ptr(au8CascadeOut_Pool);
     au8FDBCK      = nc_ptr(au8FDBCK_Pool);
 
-    sysInstallISR(IRQ_LEVEL_1, IRQ_CRYPTO, (PVOID)CRYPTO_IRQHandler);
+    sysInstallISR(IRQ_LEVEL_1, CRYPTO_IRQn, (PVOID)CRYPTO_IRQHandler);
     sysSetLocalInterrupt(ENABLE_IRQ);
-    sysEnableInterrupt(IRQ_CRYPTO);
+    sysEnableInterrupt(CRYPTO_IRQn);
 
     AES_ENABLE_INT();
     PRNG_ENABLE_INT();
@@ -276,13 +303,10 @@ int main(void)
         printf("| [1] AES encode/decode pair demo                               |\n");
         printf("| [2] AES DMA cascade demo                                      |\n");
         printf("| [3] AES NIST known answer test                                |\n");
-        printf("| [4] AES encrypt/decrypt polling                               |\n");
-        printf("| [5] AES multi-channel test                                    |\n");
-        printf("| [6] AES-GCM mode test                                         |\n");
-        printf("| [7] AES-CCM mode test                                         |\n");
+        printf("| [4] AES multi-channel test                                    |\n");
         printf("+---------------------------------------------------------------+\n");
 
-        printf("\nSelect [1~7]: \n");
+        printf("\nSelect [1~4]: \n");
 
         item = getchar();
 
@@ -300,17 +324,8 @@ int main(void)
                 ret = AES_KAT_test();
                 break;
 
-            case '5':
-                ret = AES_basic_test(1);
-                AES_ENABLE_INT();
-                break;
-
-            case '6':
-                ret = AES_GCM_Test();
-                break;
-
-            case '7':
-                ret = AES_CCM_Test();
+            case '4':
+                AES_multi_channel_test();
                 break;
 
             default:

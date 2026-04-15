@@ -269,13 +269,10 @@ void sysInitializeAIC()
  */
 INT32 sysDisableInterrupt(IRQn_Type eIntNo)
 {
-	uint32_t u32IDIS = 0UL;
-
     if ((eIntNo > AIC_MAX_INT_SOURCE) || (eIntNo < AIC_MIN_INT_SOURCE))
         return Fail;
 
-    u32IDIS = (uint32_t)&AIC->IDIS0 + ((eIntNo / 32UL) * 4UL);
-	M32(u32IDIS) = 1UL << (eIntNo % 32UL);
+    AIC->IDIS[eIntNo / 32] = 1UL << (eIntNo % 32UL);
 
     return Successful;
 }
@@ -289,13 +286,10 @@ INT32 sysDisableInterrupt(IRQn_Type eIntNo)
  */
 INT32 sysEnableInterrupt(IRQn_Type eIntNo)
 {
-	uint32_t u32IEN = 0UL;
-
     if ((eIntNo > AIC_MAX_INT_SOURCE) || (eIntNo < AIC_MIN_INT_SOURCE))
         return Fail;
 
-    u32IEN = (uint32_t)&AIC->IEN0 + ((eIntNo / 32UL) * 4UL);
-	M32(u32IEN) = 1UL << (eIntNo % 32UL);
+    AIC->IEN[eIntNo / 32] = 1UL << (eIntNo % 32UL);
 
     return Successful;
 }
@@ -385,25 +379,20 @@ PVOID sysInstallIrqHandler(PVOID pvNewISR)
 PVOID sysInstallISR(INT32 nIntTypeLevel, IRQn_Type eIntNo, PVOID pvNewISR)
 {
     PVOID   _mOldVect;
-    UINT32  _mRegAddr;
-    INT     shift;
+    INT     idx, shift;
 
     if (!_sys_bIsAICInitial)
     {
-#if 0  // temporarily ..... for compatibility with the original test code
-        CLK_EnableModuleClock(AIC_MODULE);
-#else
-        CLK->PCLKEN0 |= 0x8;
-#endif
+        CLK->PCLKEN0 |= CLK_PCLKEN0_AICCKEN_Msk;
         sysInitializeAIC();
-        _sys_bIsAICInitial = TRUE;
+        _sys_bIsAICInitial = 1;
     }
 
-    _mRegAddr = (uint32_t)&AIC->SRC00 + ((eIntNo / 4) * 4);
+    idx = eIntNo / 4;
     shift = (eIntNo % 4) * 8;
     nIntTypeLevel &= 0x7;
 
-    outpw(_mRegAddr, (inpw(_mRegAddr) & ~(0x7 << shift)) | (nIntTypeLevel << shift));
+    AIC->SRC[idx] = (AIC->SRC[idx] & ~(0x7 << shift)) | (nIntTypeLevel << shift);
 
     if ((nIntTypeLevel & 0x7) == FIQ_LEVEL_0)
     {
@@ -423,15 +412,15 @@ INT32 sysSetGlobalInterrupt(INT32 nIntState)
     switch (nIntState)
     {
 		case ENABLE_ALL_INTERRUPTS:
-			AIC->IEN0 = 0xFFFFFFFF;
-			AIC->IEN1 = 0xFFFFFFFF;
-			AIC->IEN2 = 0xFFFFFFFF;
+			AIC->IEN[0] = 0xFFFFFFFF;
+			AIC->IEN[1] = 0xFFFFFFFF;
+			AIC->IEN[2] = 0xFFFFFFFF;
 			break;
 
 		case DISABLE_ALL_INTERRUPTS:
-			AIC->IDIS0 = 0xFFFFFFFF;
-			AIC->IDIS1 = 0xFFFFFFFF;
-			AIC->IDIS2 = 0xFFFFFFFF;
+			AIC->IDIS[0] = 0xFFFFFFFF;
+			AIC->IDIS[1] = 0xFFFFFFFF;
+			AIC->IDIS[2] = 0xFFFFFFFF;
 			break;
 
 		default:
@@ -451,17 +440,16 @@ INT32 sysSetGlobalInterrupt(INT32 nIntState)
  */
 INT32 sysSetInterruptPriorityLevel(IRQn_Type eIntNo, UINT32 uIntLevel)
 {
-    UINT32  _mRegAddr;
-    INT     shift;
+    INT idx, shift;
 
     if ((eIntNo > AIC_MAX_INT_SOURCE) || (eIntNo < AIC_MIN_INT_SOURCE))
         return Fail;
 
-    _mRegAddr = (uint32_t)&AIC->SRC00 + ((eIntNo / 4) * 4);
+    idx = eIntNo / 4;
     shift = (eIntNo % 4) * 8;
     uIntLevel &= 0x7;
 
-    outpw(_mRegAddr, (inpw(_mRegAddr) & ~(0x7 << shift)) | (uIntLevel << shift));
+    AIC->SRC[idx] = (AIC->SRC[idx] & ~(0x7 << shift)) | (uIntLevel << shift);
 
     return Successful;
 }
@@ -529,39 +517,38 @@ INT32 sysSetLocalInterrupt(INT32 nIntState)
     return 0;
 }
 
-UINT32  sysGetInterruptEnableStatus(void)
-{
-    return (AIC->IE0);
-}
-
-UINT32  sysGetInterruptEnableStatusH(void)
-{
-    return (AIC->IE1);
-}
-
 /**
- *  @brief  system AIC - Get Interrupt Enable Status
+ *  @brief  system AIC - Get Interrupt Enable State
  *
  *  @param[in]  eIntNo  Interrupt number. \ref IRQn_Type
  *
  *  @return   0 (Disable) / 1 (Enable)
  */
-INT32 sysGetIEStatus(IRQn_Type eIntNo)
+INT32 sysGetInterruptEnableState(IRQn_Type eIntNo)
 {
-    uint32_t u32IsEnable;
-    uint32_t u32IEN = 0UL;
+    int idx, offs;
 
-    if ((eIntNo >= AIC_MIN_INT_SOURCE) && (eIntNo <= AIC_MAX_INT_SOURCE))
-    {
-        u32IEN = (uint32_t)&AIC->IE0 + ((eIntNo / 32UL) * 4UL);
-        u32IsEnable = (M32(u32IEN) >> (eIntNo % 32UL)) & 0x1;
-    }
-    else
-    {
-        u32IsEnable = 0;
-    }
+    idx = eIntNo / 4;
+    offs = eIntNo % 32;
 
-    return (u32IsEnable);
+    return (AIC->IE[idx] >> offs) & 0x1;
+}
+
+/**
+ *  @brief  system AIC - Get Interrupt Status
+ *
+ *  @param[in]  eIntNo  Interrupt number. \ref IRQn_Type
+ *
+ *  @return   0 (interrupt source is inactive) / 1 (interrupt source is active)
+ */
+INT32 sysGetInterruptStatus(IRQn_Type eIntNo)
+{
+    int idx, offs;
+
+    idx = eIntNo / 4;
+    offs = eIntNo % 32;
+
+    return (AIC->IS[idx] >> offs) & 0x1;
 }
 
 BOOL sysGetIBitState(void)
@@ -589,10 +576,12 @@ BOOL sysGetIBitState(void)
 INT32 sysGetPLL(UINT32 reg)
 {
     UINT32 N,M,P;
-    N =((inpw(reg) & 0x007F)>>0)+1;
-    M =((inpw(reg) & 0x1F80)>>7)+1;
-    P =((inpw(reg) & 0xE000)>>13)+1;
-    return (__HXT*N/(M*P));    /* 12MHz HXT */
+
+    N = ((inpw(reg) & 0x007F) >> 0) + 1;
+    M = ((inpw(reg) & 0x1F80) >> 7) + 1;
+    P = ((inpw(reg) & 0xE000) >> 13) + 1;
+
+    return ((__HXT * N) / (M * P));    /* 12MHz HXT */
 }
 
 UINT32 sysGetClock(CLK_Type clk)
@@ -602,24 +591,24 @@ UINT32 sysGetClock(CLK_Type clk)
     switch(clk)
     {
         case SYS_UPLL:
-            return sysGetPLL(REG_CLK_UPLLCON);
+            return sysGetPLL((UINT32)&CLK->UPLLCON);
 
         case SYS_APLL:
-            return sysGetPLL(REG_CLK_APLLCON);
+            return sysGetPLL((UINT32)&CLK->APLLCON);
 
         case SYS_SYSTEM:
         {
-            reg = inpw(REG_CLK_DIVCTL0);
+            reg = CLK->DIVCTL0;
             switch (reg & 0x18)
             {
                 case 0x0:
                     src = __HXT;
                     break;
                 case 0x10:
-                    src = sysGetPLL(REG_CLK_APLLCON);
+                    src = sysGetPLL((UINT32)&CLK->APLLCON);
                     break;
                 case 0x18:
-                    src = sysGetPLL(REG_CLK_UPLLCON);
+                    src = sysGetPLL((UINT32)&CLK->UPLLCON);
                     break;
                 default:
                     return 0;
@@ -629,17 +618,17 @@ UINT32 sysGetClock(CLK_Type clk)
 
         case SYS_HCLK:
         {
-            reg = inpw(REG_CLK_DIVCTL0);
+            reg = CLK->DIVCTL0;
             switch (reg & 0x18)
             {
                 case 0x0:
                     src = __HXT;
                     break;
                 case 0x10:
-                    src = sysGetPLL(REG_CLK_APLLCON);
+                    src = sysGetPLL((UINT32)&CLK->APLLCON);
                     break;
                 case 0x18:
-                    src = sysGetPLL(REG_CLK_UPLLCON);
+                    src = sysGetPLL((UINT32)&CLK->UPLLCON);
                     break;
                 default:
                     return 0;
@@ -649,17 +638,17 @@ UINT32 sysGetClock(CLK_Type clk)
 
         case SYS_PCLK01:
         {
-            reg = inpw(REG_CLK_DIVCTL0);
+            reg = CLK->DIVCTL0;
             switch (reg & 0x18)
             {
                 case 0x0:
                     src = __HXT;
                     break;
                 case 0x10:
-                    src = sysGetPLL(REG_CLK_APLLCON);
+                    src = sysGetPLL((UINT32)&CLK->APLLCON);
                     break;
                 case 0x18:
-                    src = sysGetPLL(REG_CLK_UPLLCON);
+                    src = sysGetPLL((UINT32)&CLK->UPLLCON);
                     break;
                 default:
                     return 0;
@@ -669,17 +658,17 @@ UINT32 sysGetClock(CLK_Type clk)
 
         case SYS_CPU:
         {
-            reg = inpw(REG_CLK_DIVCTL0);
+            reg = CLK->DIVCTL0;
             switch (reg & 0x18)
             {
                 case 0x0:
                     src = __HXT;   /* HXT */
                     break;
                 case 0x10:
-                    src = sysGetPLL(REG_CLK_APLLCON);
+                    src = sysGetPLL((UINT32)&CLK->APLLCON);
                     break;
                 case 0x18:
-                    src = sysGetPLL(REG_CLK_UPLLCON);
+                    src = sysGetPLL((UINT32)&CLK->UPLLCON);
                     break;
                 default:
                     return 0;
@@ -690,26 +679,23 @@ UINT32 sysGetClock(CLK_Type clk)
 
         case SYS_PCLK2:
         {
-            reg = inpw(REG_CLK_DIVCTL0);
+            reg = CLK->DIVCTL0;
             switch (reg & 0x18)
             {
                 case 0x0:
                     src = __HXT;
                     break;
                 case 0x10:
-                    src = sysGetPLL(REG_CLK_APLLCON);
+                    src = sysGetPLL((UINT32)&CLK->APLLCON);
                     break;
                 case 0x18:
-                    src = sysGetPLL(REG_CLK_UPLLCON);
+                    src = sysGetPLL((UINT32)&CLK->UPLLCON);
                     break;
                 default:
                     return 0;
             }
             return (src / 4);
         }
-
-        default:
-            ;
     }
 
     return 0;

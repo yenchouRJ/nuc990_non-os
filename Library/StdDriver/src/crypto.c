@@ -37,8 +37,6 @@
 
 /** @cond HIDDEN_SYMBOLS */
 
-static uint32_t g_AES_CTL[AES_MAX_CHN];
-
 static char  hex_char_tbl[] = "0123456789abcdef";
 
 static void dump_ecc_reg(char *str, uint32_t volatile regs[], int count);
@@ -57,10 +55,18 @@ void  dump_buff_hex(uint8_t *pucBuff, int nBytes);
 /**
   * @brief  Open PRNG function
   * @param[in]  u32KeySize   is PRNG key size, including:
-  *                             \ref PRNG_KEY_SIZE_64
   *                             \ref PRNG_KEY_SIZE_128
+  *                             \ref PRNG_KEY_SIZE_163
   *                             \ref PRNG_KEY_SIZE_192
+  *                             \ref PRNG_KEY_SIZE_224
+  *                             \ref PRNG_KEY_SIZE_233
   *                             \ref PRNG_KEY_SIZE_256
+  *                             \ref PRNG_KEY_SIZE_283
+  *                             \ref PRNG_KEY_SIZE_384
+  *                             \ref PRNG_KEY_SIZE_409
+  *                             \ref PRNG_KEY_SIZE_512
+  *                             \ref PRNG_KEY_SIZE_521
+  *                             \ref PRNG_KEY_SIZE_571
   * @param[in]  u32SeedReload is PRNG seed reload or not, including:
   *                             \ref PRNG_SEED_CONT
   *                             \ref PRNG_SEED_RELOAD
@@ -77,6 +83,31 @@ void PRNG_Open(uint32_t u32KeySize, uint32_t u32SeedReload, uint32_t u32Seed)
 }
 
 /**
+  * @brief  PRNG Re-seed
+  * @param[in]  u32KeySize   is PRNG key size, including:
+  *                             \ref PRNG_KEY_SIZE_128
+  *                             \ref PRNG_KEY_SIZE_163
+  *                             \ref PRNG_KEY_SIZE_192
+  *                             \ref PRNG_KEY_SIZE_224
+  *                             \ref PRNG_KEY_SIZE_233
+  *                             \ref PRNG_KEY_SIZE_256
+  *                             \ref PRNG_KEY_SIZE_283
+  *                             \ref PRNG_KEY_SIZE_384
+  *                             \ref PRNG_KEY_SIZE_409
+  *                             \ref PRNG_KEY_SIZE_512
+  *                             \ref PRNG_KEY_SIZE_521
+  *                             \ref PRNG_KEY_SIZE_571
+  * @param[in]  u32Seed       The new seed. Only valid when u32SeedReload is PRNG_SEED_RELOAD.
+  * @return     None
+  */
+void PRNG_ReSeed(uint32_t u32KeySize, uint32_t u32Seed)
+{
+    CRYPTO->PRNG_SEED = u32Seed;
+    CRYPTO->PRNG_CTL = CRYPTO_PRNG_CTL_SEEDRLD_Msk | (u32KeySize << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
+    while (CRYPTO->PRNG_STS & CRYPTO_PRNG_STS_BUSY_Msk);
+}
+
+/**
   * @brief  Start to generate one PRNG key.
   * @return     None
   */
@@ -86,29 +117,29 @@ void PRNG_Start(void)
 }
 
 /**
-  * @brief  Read the PRNG key.
-  * @param[out] u32RandKey   The key buffer to store newly generated PRNG key.
-  * @return     None
-  */
-void PRNG_Read(uint32_t u32RandKey[])
+ * @brief       Read the generated PRNG key from hardware registers.
+ *
+ * @param[in]   wcnt         Number of words to read from the PRNG key registers.
+ * @param[out]  u32RandKey   The destination buffer to store the newly generated PRNG key.
+ *
+ * @details     This function copies the generated random numbers from the Crypto Engine's
+ * PRNG_KEY registers into the user-specified buffer.
+ */
+void PRNG_Read(uint32_t wcnt, uint32_t u32RandKey[])
 {
-    uint32_t  i, wcnt;
+    uint32_t  i;
 
-    wcnt = (((CRYPTO->PRNG_CTL & CRYPTO_PRNG_CTL_KEYSZ_Msk) >> CRYPTO_PRNG_CTL_KEYSZ_Pos) + 1U) * 2U;
-
-    for (i = 0U; i < wcnt; i++)
+    for (i = 0; i < wcnt; i++)
     {
         u32RandKey[i] = CRYPTO->PRNG_KEY[i];
     }
-
-    CRYPTO->PRNG_CTL &= ~CRYPTO_PRNG_CTL_SEEDRLD_Msk;
 }
-
 
 /**
   * @brief  Open AES encrypt/decrypt function.
-  * @param[in]  u32Channel   AES channel. Must be 0~3.
-  * @param[in]  u32EncDec    1: AES encode;  0: AES decode
+  * @param[in]  u32EncDec    Diecrt AES to perform encrypt/decrypt operation
+  *                              \ref AES_DECRYPT
+  *                              \ref AES_ENCRYPT
   * @param[in]  u32OpMode    AES operation mode, including:
   *                              \ref AES_MODE_ECB
   *                              \ref AES_MODE_CBC
@@ -118,6 +149,8 @@ void PRNG_Read(uint32_t u32RandKey[])
   *                              \ref AES_MODE_CBC_CS1
   *                              \ref AES_MODE_CBC_CS2
   *                              \ref AES_MODE_CBC_CS3
+  *                              \ref AES_MODE_GCM
+  *                              \ref AES_MODE_CCM
   * @param[in]  u32KeySize   is AES key size, including:
   *                              \ref AES_KEY_SIZE_128
   *                              \ref AES_KEY_SIZE_192
@@ -127,73 +160,22 @@ void PRNG_Read(uint32_t u32RandKey[])
   *                              \ref AES_OUT_SWAP
   *                              \ref AES_IN_SWAP
   *                              \ref AES_IN_OUT_SWAP
+  *
   * @retval     0            Successful
   * @retval     -1           Fail
   */
-int AES_Open(uint32_t u32Channel, uint32_t u32EncDec, uint32_t u32OpMode,
-             uint32_t u32KeySize, uint32_t u32SwapType)
+int AES_Open(uint32_t u32EncDec, uint32_t u32OpMode, uint32_t u32KeySize, uint32_t u32SwapType)
 {
-    if (u32Channel >= AES_MAX_CHN)
-        return -1;
-
     CRYPTO->AES_CTL = (u32EncDec << CRYPTO_AES_CTL_ENCRYPT_Pos) |
                       (u32OpMode << CRYPTO_AES_CTL_OPMODE_Pos) |
                       (u32KeySize << CRYPTO_AES_CTL_KEYSZ_Pos) |
                       (u32SwapType << CRYPTO_AES_CTL_OUTSWAP_Pos);
-    g_AES_CTL[u32Channel] = CRYPTO->AES_CTL;
-    return 0;
-}
 
-/**
-  * @brief  Start AES encrypt/decrypt
-  * @param[in]  u32Channel   AES channel. Must be 0~3.
-  * @param[in]  u32DMAMode   AES DMA control, including:
-  *                              \ref CRYPTO_DMA_ONE_SHOT   One shop AES encrypt/decrypt.
-  *                              \ref CRYPTO_DMA_CONTINUE   Continuous AES encrypt/decrypt.
-  *                              \ref CRYPTO_DMA_LAST       Last AES encrypt/decrypt of a series of AES_Start.
-  * @retval     0            Successful
-  * @retval     -1           Fail
-  */
-int AES_Start(uint32_t u32Channel, uint32_t u32DMAMode)
-{
-    if (u32Channel >= AES_MAX_CHN)
-        return -1;
-    CRYPTO->AES_CTL = g_AES_CTL[u32Channel];
-    CRYPTO->AES_CTL |= CRYPTO_AES_CTL_START_Msk | (u32DMAMode << CRYPTO_AES_CTL_DMALAST_Pos);
-    return 0;
-}
-
-/**
-  * @brief  Start AES encrypt/decrypt
-  * @param[in]  u32Channel   AES channel. Must be 0~3.
-  * @param[in]  u32DMAMode   AES DMA control, including:
-  *                              \ref CRYPTO_DMA_ONE_SHOT   One shop AES encrypt/decrypt.
-  *                              \ref CRYPTO_DMA_CONTINUE   Continuous AES encrypt/decrypt.
-  *                              \ref CRYPTO_DMA_LAST       Last AES encrypt/decrypt of a series of AES_Start.
-  * @param[in]  ksel         0: AES key is from Key Store SRAM
-  *                          2: AES key is from Key Store OTP
-  * @param[in]  knum         Use Key Store OTP/SRAM key number "knum" as AES key
-  * @retval     0            Successful
-  * @retval     -1           Fail
-  */
-int AES_Start_KS(uint32_t u32Channel, uint32_t u32DMAMode, int ksel, int knum)
-{
-    if (u32Channel >= AES_MAX_CHN)
-        return -1;
-
-    if (ksel == 0)
-        CRYPTO->AES_KSCTL = CRYPTO_AES_KSCTL_RSRC_Msk | knum;     /* from KS SRAM */
-    else
-        CRYPTO->AES_KSCTL = (2 << CRYPTO_AES_KSCTL_RSSRC_Pos) | CRYPTO_AES_KSCTL_RSRC_Msk | knum; /* from KS OTP */
-
-    CRYPTO->AES_CTL = g_AES_CTL[u32Channel];
-    CRYPTO->AES_CTL |= CRYPTO_AES_CTL_START_Msk | (u32DMAMode << CRYPTO_AES_CTL_DMALAST_Pos);
     return 0;
 }
 
 /**
   * @brief  Set AES keys
-  * @param[in]  u32Channel   AES channel. Must be 0~3.
   * @param[in]  au32Keys     An word array contains AES keys.
   * @param[in]  u32KeySize   is AES key size, including:
   *                              \ref AES_KEY_SIZE_128
@@ -202,75 +184,131 @@ int AES_Start_KS(uint32_t u32Channel, uint32_t u32DMAMode, int ksel, int knum)
   * @retval     0            Successful
   * @retval     -1           Fail
   */
-int AES_SetKey(uint32_t u32Channel, uint32_t au32Keys[], uint32_t u32KeySize)
+int AES_SetKey(uint32_t au32Keys[], uint32_t u32KeySize)
 {
     uint32_t  i, wcnt;
-    uint32_t  *key_reg_addr;
 
-    if (u32Channel >= AES_MAX_CHN)
+    if (u32KeySize == AES_KEY_SIZE_128)
+        wcnt = 4;
+    else if (u32KeySize == AES_KEY_SIZE_192)
+        wcnt = 6;
+    else if (u32KeySize == AES_KEY_SIZE_256)
+        wcnt = 8;
+    else
         return -1;
 
-    key_reg_addr = (uint32_t *)((uint32_t)&CRYPTO->AES_KEY[0] + (u32Channel * 0x3CUL));
-    wcnt = 4UL + u32KeySize*2UL;
+    for (i = 0; i < wcnt; i++)
+        CRYPTO->AES_KEY[i] = au32Keys[i];
 
-    for (i = 0U; i < wcnt; i++)
-    {
-        outpw(key_reg_addr, au32Keys[i]);
-        key_reg_addr++;
-    }
     return 0;
 }
 
 /**
   * @brief  Set AES initial vectors
-  * @param[in]  u32Channel   AES channel. Must be 0~3.
   * @param[in]  au32IV       A four entry word array contains AES initial vectors.
   * @retval     0            Successful
   * @retval     -1           Fail
   */
-int AES_SetInitVect(uint32_t u32Channel, uint32_t au32IV[])
+int AES_SetInitVect(uint32_t au32IV[])
 {
     uint32_t  i;
-    uint32_t  *key_reg_addr;
 
-    if (u32Channel >= AES_MAX_CHN)
-        return -1;
+    for (i = 0; i < 4; i++)
+        CRYPTO->AES_IV[i] = au32IV[i];
 
-    key_reg_addr = (uint32_t *)((uint32_t)&CRYPTO->AES_IV[0] + (u32Channel * 0x3CUL));
+    return 0;
+}
 
-    for (i = 0U; i < 4U; i++)
-    {
-        outpw(key_reg_addr, au32IV[i]);
-        key_reg_addr++;
-    }
+/**
+  * @brief  Configure AES CCM/GCM mode data
+  * @param[in]  u32IvCnt     Byte count of initial vector
+  * @param[in]  u32ACnt      Byte count of the additional authenticated data
+  * @param[in]  u32PCnt      byte count of the plaintext/ciphertext
+  * @retval     0            Successful
+  * @retval     -1           Fail
+  */
+int AES_CCM_GCM_Config(uint32_t u32IvCnt, uint32_t u32ACnt, uint32_t u32PCnt)
+{
+    CRYPTO->AES_GCM_IVCNT[0] = u32IvCnt;
+    CRYPTO->AES_GCM_IVCNT[1] = 0;
+    CRYPTO->AES_GCM_ACNT[0]  = u32ACnt;
+    CRYPTO->AES_GCM_ACNT[1]  = 0;
+    CRYPTO->AES_GCM_PCNT[0]  = u32PCnt;
+    CRYPTO->AES_GCM_PCNT[1]  = 0;
     return 0;
 }
 
 /**
   * @brief  Set AES DMA transfer configuration.
-  * @param[in]  u32Channel   AES channel. Must be 0~3.
   * @param[in]  u32SrcAddr   AES DMA source address
   * @param[in]  u32DstAddr   AES DMA destination address
   * @param[in]  u32TransCnt  AES DMA transfer byte count
   * @retval     0            Successful
   * @retval     -1           Fail
   */
-int AES_SetDMATransfer(uint32_t u32Channel, uint32_t u32SrcAddr,
-                       uint32_t u32DstAddr, uint32_t u32TransCnt)
+int AES_SetDMATransfer(uint32_t u32SrcAddr, uint32_t u32DstAddr, uint32_t u32TransCnt)
 {
-    void * reg_addr;
+    CRYPTO->AES_SADDR = u32SrcAddr;
+    CRYPTO->AES_DADDR = u32DstAddr;
+    CRYPTO->AES_CNT   = u32TransCnt;
+    return 0;
+}
 
-    if (u32Channel >= AES_MAX_CHN)
-        return -1;
+/**
+  * @brief  Start AES encrypt/decrypt
+  * @param[in]  u32DMAMode   AES DMA control, including:
+  *                              \ref CRYPTO_DMA_ONE_SHOT   One shop AES encrypt/decrypt.
+  *                              \ref CRYPTO_DMA_CONTINUE   Continuous AES encrypt/decrypt.
+  *                              \ref CRYPTO_DMA_LAST       Last AES encrypt/decrypt of a series of AES_Start.
+  * @param[in]  u32FBmode    AES feedback mode selection.
+  *                              \ref CRYPTO_AES_FB_NONE    Do not enable DMA feedback function.
+  *                              \ref CRYPTO_AES_FB_IN      Enable DMA automatic feedback input function.
+  *                              \ref CRYPTO_AES_FB_OUT     Enable DMA automatic feedback input function.
+  *                              \ref CRYPTO_AES_FB_INOUT   Enable DMA automatic feedback input and output function.
+  * @param[in]  u32FBAddr    AES feedback address. Not used if u32FBmode is CRYPTO_AES_FB_NONE.
+  * @retval     0            Successful
+  * @retval     -1           Fail
+  */
+int AES_Start(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr)
+{
+    CRYPTO->AES_FBADDR = u32FBAddr;
 
-    reg_addr = (void *)((uint32_t)&CRYPTO->AES_SADDR + (u32Channel * 0x3CUL));
-    outpw(reg_addr, u32SrcAddr);
+    CRYPTO->AES_CTL |=  (u32FBmode << CRYPTO_AES_CTL_FBIN_Pos) |
+                        (u32DMAMode << CRYPTO_AES_CTL_DMALAST_Pos) |
+                        CRYPTO_AES_CTL_START_Msk;
+    return 0;
+}
 
-    reg_addr = (void *)((uint32_t)&CRYPTO->AES_DADDR + (u32Channel * 0x3CUL));
-    outpw(reg_addr, u32DstAddr);
+/**
+  * @brief  Start AES encrypt/decrypt
+  * @param[in]  u32DMAMode   AES DMA control, including:
+  *                              \ref CRYPTO_DMA_ONE_SHOT   One shop AES encrypt/decrypt.
+  *                              \ref CRYPTO_DMA_CONTINUE   Continuous AES encrypt/decrypt.
+  *                              \ref CRYPTO_DMA_LAST       Last AES encrypt/decrypt of a series of AES_Start.
+  * @param[in]  u32FBmode    AES feedback mode selection.
+  *                              \ref CRYPTO_AES_FB_NONE    Do not enable DMA feedback function.
+  *                              \ref CRYPTO_AES_FB_IN      Enable DMA automatic feedback input function.
+  *                              \ref CRYPTO_AES_FB_OUT     Enable DMA automatic feedback input function.
+  *                              \ref CRYPTO_AES_FB_INOUT   Enable DMA automatic feedback input and output function.
+  * @param[in]  u32FBAddr    AES feedback address. Not used if u32FBmode is CRYPTO_AES_FB_NONE.
+  * @param[in]  ksel         0: AES key is from Key Store SRAM
+  *                          2: AES key is from Key Store OTP
+  * @param[in]  knum         Use Key Store OTP/SRAM key number "knum" as AES key
+  * @retval     0            Successful
+  * @retval     -1           Fail
+  */
+int AES_Start_KS(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr, int ksel, int knum)
+{
+    if (ksel == 0)
+        CRYPTO->AES_KSCTL = CRYPTO_AES_KSCTL_RSRC_Msk | knum;     /* from KS SRAM */
+    else
+        CRYPTO->AES_KSCTL = (2 << CRYPTO_AES_KSCTL_RSSRC_Pos) | CRYPTO_AES_KSCTL_RSRC_Msk | knum; /* from KS OTP */
 
-    reg_addr = (void *)((uint32_t)&CRYPTO->AES_CNT + (u32Channel * 0x3CUL));
-    outpw(reg_addr, u32TransCnt);
+    CRYPTO->AES_FBADDR = u32FBAddr;
+
+    CRYPTO->AES_CTL |=  (u32FBmode << CRYPTO_AES_CTL_FBIN_Pos) |
+                        (u32DMAMode << CRYPTO_AES_CTL_DMALAST_Pos) |
+                        CRYPTO_AES_CTL_START_Msk;
     return 0;
 }
 
@@ -1417,11 +1455,11 @@ int  ECC_Mutiply_KS(E_ECC_CURVE ecc_curve, int x1_ksnum, char x1[], int y1_ksnum
 
         if (x1_ksnum >= 0x80)
         {
-            ecc_ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCX_Pos) | CRYPTO_ECC_KSXY_RSRCXY_Msk | (x1_ksnum - 0x80);
+            ecc_ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCX1_Pos) | CRYPTO_ECC_KSXY_RSRCXY1_Msk | (x1_ksnum - 0x80);
         }
         else if (x1_ksnum >= 0)
         {
-            ecc_ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCX_Pos) | CRYPTO_ECC_KSXY_RSRCXY_Msk | (x1_ksnum);
+            ecc_ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCX1_Pos) | CRYPTO_ECC_KSXY_RSRCXY1_Msk | (x1_ksnum);
         }
         else
         {
@@ -1430,11 +1468,11 @@ int  ECC_Mutiply_KS(E_ECC_CURVE ecc_curve, int x1_ksnum, char x1[], int y1_ksnum
 
         if (y1_ksnum >= 0x80)
         {
-            ecc_ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCY_Pos) | CRYPTO_ECC_KSXY_RSRCXY_Msk | (y1_ksnum - 0x80);
+            ecc_ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCY1_Pos) | CRYPTO_ECC_KSXY_RSRCXY1_Msk | (y1_ksnum - 0x80);
         }
         else if (x1_ksnum >= 0)
         {
-            ecc_ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCY_Pos) | CRYPTO_ECC_KSXY_RSRCXY_Msk | (y1_ksnum);
+            ecc_ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCY1_Pos) | CRYPTO_ECC_KSXY_RSRCXY1_Msk | (y1_ksnum);
         }
         else
         {
@@ -2585,26 +2623,26 @@ int  ECC_VerifySignature_KS(E_ECC_CURVE ecc_curve, char *message, int x_ksnum, i
         //Hex2Reg(public_k1, CRYPTO->ECC_X1);
         //Hex2Reg(public_k2, CRYPTO->ECC_Y1);
 
-        ksxy = CRYPTO_ECC_KSXY_RSRCXY_Msk;
+        ksxy = CRYPTO_ECC_KSXY_RSRCXY1_Msk;
 
         if (x_ksnum >= 0x80)
         {
-            ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCX_Pos) | (x_ksnum - 0x80);
+            ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCX1_Pos) | (x_ksnum - 0x80);
         }
         else if (x_ksnum >= 0)
         {
-            ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCX_Pos) | (x_ksnum);
+            ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCX1_Pos) | (x_ksnum);
         }
         else
             return -3;
 
         if (y_ksnum >= 0x80)
         {
-            ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCY_Pos) | ((y_ksnum - 0x80) << 8);
+            ksxy |= (2 << CRYPTO_ECC_KSXY_RSSRCY1_Pos) | ((y_ksnum - 0x80) << 8);
         }
         else if (y_ksnum >= 0)
         {
-            ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCY_Pos) | (y_ksnum << 8);
+            ksxy |= (0 << CRYPTO_ECC_KSXY_RSSRCY1_Pos) | (y_ksnum << 8);
         }
         else
         {
@@ -2719,5 +2757,5 @@ int  ECC_VerifySignature_KS(E_ECC_CURVE ecc_curve, char *message, int x_ksnum, i
 
 /*@}*/ /* end of group Standard_Driver */
 
-/*** (C) COPYRIGHT 2017 Nuvoton Technology Corp. ***/
+/*** (C) COPYRIGHT 2025 Nuvoton Technology Corp. ***/
 

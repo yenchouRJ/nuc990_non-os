@@ -53,9 +53,10 @@ extern INT32 sysGetSdramSizebyMB(void);
 void sys_flush_and_clean_dcache(void)
 {
     asm volatile(
-    "tci_loop:  \n\t"
-    "MRC p15, #0, r15, c7, c14, #3  \n\t" // test clean and invalidate
-    "BNE tci_loop  \n\t"
+        "1: \n\t"
+        "MRC p15, #0, r15, c7, c14, #3 \n\t" // test clean and invalidate 
+        "BNE 1b \n\t"
+        : : : "memory"
     );
 }
 #else

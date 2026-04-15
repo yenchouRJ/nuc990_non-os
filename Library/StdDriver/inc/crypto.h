@@ -28,24 +28,22 @@ extern "C"
   @{
 */
 
-#define PRNG_KEY_SIZE_128       0UL
-#define PRNG_KEY_SIZE_163       1UL
-#define PRNG_KEY_SIZE_192       2UL
-#define PRNG_KEY_SIZE_224       3UL
-#define PRNG_KEY_SIZE_233       4UL
-#define PRNG_KEY_SIZE_255       5UL
-#define PRNG_KEY_SIZE_256       6UL
-#define PRNG_KEY_SIZE_283       7UL
-#define PRNG_KEY_SIZE_384       8UL
-#define PRNG_KEY_SIZE_409       9UL
-#define PRNG_KEY_SIZE_512       10UL
-#define PRNG_KEY_SIZE_521       11UL
-#define PRNG_KEY_SIZE_571       12UL
+#define PRNG_KEY_SIZE_128       0UL     /*!< Generate 128 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_163       1UL     /*!< Generate 163 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_192       2UL     /*!< Generate 192 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_224       3UL     /*!< Generate 224 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_233       4UL     /*!< Generate 233 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_255       5UL     /*!< Generate 255 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_256       6UL     /*!< Generate 256 bits                       \hideinitializer */
+#define PRNG_KEY_SIZE_283       7UL     /*!< Generate 283 bits (only for Key Store)  \hideinitializer */
+#define PRNG_KEY_SIZE_384       8UL     /*!< Generate 384 bits (only for Key Store)  \hideinitializer */
+#define PRNG_KEY_SIZE_409       9UL     /*!< Generate 409 bits (only for Key Store)  \hideinitializer */
+#define PRNG_KEY_SIZE_512       10UL    /*!< Generate 512 bits (only for Key Store)  \hideinitializer */
+#define PRNG_KEY_SIZE_521       11UL    /*!< Generate 521 bits (only for Key Store)  \hideinitializer */
+#define PRNG_KEY_SIZE_571       12UL    /*!< Generate 571 bits (only for Key Store)  \hideinitializer */
 
 #define PRNG_SEED_CONT          0UL     /*!< PRNG using current seed                 \hideinitializer */
 #define PRNG_SEED_RELOAD        1UL     /*!< PRNG reload new seed                    \hideinitializer */
-
-#define AES_MAX_CHN             16      /*!< Maximum number of AES channels          \hideinitializer */
 
 #define AES_KEY_SIZE_128        0UL     /*!< AES select 128-bit key length           \hideinitializer */
 #define AES_KEY_SIZE_192        1UL     /*!< AES select 192-bit key length           \hideinitializer */
@@ -63,14 +61,18 @@ extern "C"
 #define AES_MODE_GHASH          0x21UL  /*!< AES select GHASH (Galois Hash Function) \hideinitializer */
 #define AES_MODE_CCM            0x22UL  /*!< AES select CCM (Counter with CBC-MAC Mode)   \hideinitializer */
 
+#define AES_DECRYPT             0UL     /*!< Execute AES encrypt operation           \hideinitializer */
+#define AES_ENCRYPT             1UL     /*!< Execute AES decrypt operation           \hideinitializer */
+
 #define AES_NO_SWAP             0UL     /*!< AES do not swap input and output data   \hideinitializer */
 #define AES_OUT_SWAP            1UL     /*!< AES swap output data                    \hideinitializer */
 #define AES_IN_SWAP             2UL     /*!< AES swap input data                     \hideinitializer */
 #define AES_IN_OUT_SWAP         3UL     /*!< AES swap both input and output data     \hideinitializer */
 
-#define CHAPOLY_MODE_CHACHA20   0UL     /*!< CHAPOLY select ChaCha20 mode            \hideinitializer */
-#define CHAPOLY_MODE_POLY1305   1UL     /*!< CHAPOLY select Poly1305 mode            \hideinitializer */
-#define CHAPOLY_MODE_AEAD       2UL     /*!< CHAPOLY select AEAD mode                \hideinitializer */
+#define CRYPTO_AES_FB_NONE      0UL     /*!< Do not enable DMA feedback function     \hideinitializer */
+#define CRYPTO_AES_FB_IN        0x1UL   /*!< Enable DMA feedback input function.     \hideinitializer */
+#define CRYPTO_AES_FB_OUT       0x2UL   /*!< Enable DMA feedback out function.       \hideinitializer */
+#define CRYPTO_AES_FB_INOUT     0x3UL   /*!< Enable DMA feedback in/out function.    \hideinitializer */
 
 #define SHA_MODE_SEL_SHA1       0UL     /*!< SHA engine select SHA1                  \hideinitializer */
 #define SHA_MODE_SEL_SHA2       0UL     /*!< SHA engine select SHA2                  \hideinitializer */
@@ -293,17 +295,23 @@ extern volatile uint32_t g_ECC_done, g_ECCERR_done;
 /*---------------------------------------------------------------------------------------------------------*/
 
 void PRNG_Open(uint32_t u32KeySize, uint32_t u32SeedReload, uint32_t u32Seed);
+void PRNG_ReSeed(uint32_t u32KeySize, uint32_t u32Seed);
 void PRNG_Start(void);
-void PRNG_Read(uint32_t u32RandKey[]);
-int  AES_Open(uint32_t u32Channel, uint32_t u32EncDec, uint32_t u32OpMode, uint32_t u32KeySize, uint32_t u32SwapType);
-int  AES_Start(uint32_t u32Channel, uint32_t u32DMAMode);
-int  AES_SetKey(uint32_t u32Channel, uint32_t au32Keys[], uint32_t u32KeySize);
-int  AES_SetInitVect(uint32_t u32Channel, uint32_t au32IV[]);
-int  AES_SetDMATransfer(uint32_t u32Channel, uint32_t u32SrcAddr, uint32_t u32DstAddr, uint32_t u32TransCnt);
+void PRNG_Read(uint32_t wcnt, uint32_t u32RandKey[]);
+
+int AES_Open(uint32_t u32EncDec, uint32_t u32OpMode, uint32_t u32KeySize, uint32_t u32SwapType);
+int AES_Start(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr);
+int AES_Start_KS(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr, int ksel, int knum);
+int AES_SetKey(uint32_t au32Keys[], uint32_t u32KeySize);
+int AES_SetInitVect(uint32_t au32IV[]);
+int AES_CCM_GCM_Config(uint32_t u32IvCnt, uint32_t u32ACnt, uint32_t u32PCnt);
+int AES_SetDMATransfer(uint32_t u32SrcAddr, uint32_t u32DstAddr, uint32_t u32TransCnt);
+
 void SHA_Open(uint32_t u32OpMode, uint32_t u32SwapType, uint32_t hmac_key_len);
 void SHA_Start(uint32_t u32DMAMode);
 void SHA_SetDMATransfer(uint32_t u32SrcAddr, uint32_t u32TransCnt);
 void SHA_Read(uint32_t u32Digest[]);
+
 void ECC_Start(uint32_t ecc_ctl);
 void ECC_Complete(void);
 int  ECC_IsPrivateKeyValid(E_ECC_CURVE ecc_curve,  char private_k[]);
@@ -313,7 +321,6 @@ int  ECC_GenerateSecretZ(E_ECC_CURVE ecc_curve, char *private_k, char public_k1[
 int  ECC_GenerateSignature(E_ECC_CURVE ecc_curve, char *message, char *d, char *k, char *R, char *S);
 int  ECC_VerifySignature(E_ECC_CURVE ecc_curve, char *message, char *public_k1, char *public_k2, char *R, char *S);
 
-int  AES_Start_KS(uint32_t u32Channel, uint32_t u32DMAMode, int ksel, int knum);
 int  ECC_Write_N(E_ECC_CURVE ecc_curve);
 int  ECC_GeneratePublicKey_KS(E_ECC_CURVE ecc_curve, int k_ksnum, char public_k1[], char public_k2[]);
 int  ECC_Mutiply_KS(E_ECC_CURVE ecc_curve, int x1_ksnum, char x1[], int y1_ksnum, char y1[], int k_ksnum, char *k, char x2[], char y2[]);

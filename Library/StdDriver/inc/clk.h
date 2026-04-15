@@ -26,29 +26,19 @@ extern "C"
   @{
 */
 
-
-//#define FREQ_180MHZ        180000000UL  /*!< 180  MHz \hideinitializer */
-
-//#define CAPLL    (0x0UL)
-//#define SYSPLL   (0x1UL)
-//#define DDRPLL   (0x2UL)
-//#define APLL     (0x3UL)
-//#define EPLL     (0x4UL)
-//#define VPLL     (0x5UL)
-
 /** \brief  Structure type of clock source
  */
 typedef enum CLOCKn
 {
-    CLK_UPLL     = 1,   /*!< UPLL clock */
-    CLK_APLL     = 2,   /*!< APLL clock */
+    CLK_UPLL     = 1,   /*!< UPLL clock   */
+    CLK_APLL     = 2,   /*!< APLL clock   */
     CLK_SYSTEM   = 3,   /*!< System clock */
-    CLK_HCLK     = 4,   /*!< HCLK clock */
-    CLK_HCLK1    = 5,   /*!< HCLK1 clock */
-    CLK_PCLK0    = 6,   /*!< PCLK0 clock */
-    CLK_PCLK1    = 7,   /*!< PCLK1 clock */
-    CLK_PCLK2    = 8,   /*!< PCLK2 clock */
-    CLK_CPU      = 9,   /*!< CPU clock */
+    CLK_HCLK     = 4,   /*!< HCLK clock   */
+    CLK_HCLK1    = 5,   /*!< HCLK1 clock  */
+    CLK_PCLK0    = 6,   /*!< PCLK0 clock  */
+    CLK_PCLK1    = 7,   /*!< PCLK1 clock  */
+    CLK_PCLK2    = 8,   /*!< PCLK2 clock  */
+    CLK_CPU      = 9,   /*!< CPU clock    */
 } CLOCK_Type;
 
 typedef enum REQn
@@ -71,7 +61,9 @@ typedef enum REQn
 #define CLK_DIV0_PCLK3SEL_APLL             (0x2UL << CLK_DIVCTL0_PCLK3_S_Pos)
 #define CLK_DIV0_PCLK3SEL_UPLL             (0x3UL << CLK_DIVCTL0_PCLK3_S_Pos)
 
-#define CLK_DIV0_CPUDIV2(x)                (((x) - 1UL) << CLK_DIVCTL0_CPUDIV2EN_Pos)  /*!< DIVCTL0 Setting for CPU clock divided by 2. It could be 1~2 \hideinitializer */
+#define CLK_DIV0_CPU_DIV1                  (0UL << CLK_DIVCTL0_CPUDIV2EN_Pos)
+#define CLK_DIV0_CPU_DIV2                  (1UL << CLK_DIVCTL0_CPUDIV2EN_Pos)
+
 #define CLK_DIV0_PCLK3(x)                  (((x) - 1UL) << CLK_DIVCTL0_PCLK3DIV_Pos)   /*!< DIVCTL0 Setting for PCLK3 clock divider. It could be 1~7 \hideinitializer */
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -94,8 +86,6 @@ typedef enum REQn
 #define CLK_DIV2_CANFD2SEL_UPLL            (0x1UL << CLK_DIVCTL2_CANFD2_S_Pos)
 #define CLK_DIV2_CANFD3SEL_APLL            (0x0UL << CLK_DIVCTL2_CANFD3_S_Pos)
 #define CLK_DIV2_CANFD3SEL_UPLL            (0x1UL << CLK_DIVCTL2_CANFD3_S_Pos)
-//#define CLK_DIV2_USBHSEL_PHY0              (0x0UL << CLK_DIVCTL2_USBH_S_Pos)
-//#define CLK_DIV2_USBHSEL_PHY1              (0x1UL << CLK_DIVCTL2_USBH_S_Pos)
 #define CLK_DIV2_QSPI0SEL_HXT              (0x0UL << CLK_DIVCTL2_QSPI0_S_Pos)
 #define CLK_DIV2_QSPI0SEL_PCLK0            (0x1UL << CLK_DIVCTL2_QSPI0_S_Pos)
 #define CLK_DIV2_QSPI0SEL_APLL             (0x2UL << CLK_DIVCTL2_QSPI0_S_Pos)
@@ -116,12 +106,6 @@ typedef enum REQn
 #define CLK_DIV2_SPI3SEL_PCLK1             (0x1UL << CLK_DIVCTL2_SPI3_S_Pos)
 #define CLK_DIV2_SPI3SEL_APLL              (0x2UL << CLK_DIVCTL2_SPI3_S_Pos)
 #define CLK_DIV2_SPI3SEL_UPLL              (0x3UL << CLK_DIVCTL2_SPI3_S_Pos)
-//#define CLK_DIV2_BPWM0SEL_HXT              (0x0UL << CLK_DIVCTL2_BPWM0_S_Pos)
-//#define CLK_DIV2_BPWM0SEL_PCLK0            (0x1UL << CLK_DIVCTL2_BPWM0_S_Pos)
-//#define CLK_DIV2_BPWM0SEL_HCLK             (0x2UL << CLK_DIVCTL2_BPWM0_S_Pos)
-//#define CLK_DIV2_BPWM1SEL_HXT              (0x0UL << CLK_DIVCTL2_BPWM1_S_Pos)
-//#define CLK_DIV2_BPWM1SEL_PCLK1            (0x1UL << CLK_DIVCTL2_BPWM1_S_Pos)
-//#define CLK_DIV2_BPWM1SEL_HCLK             (0x2UL << CLK_DIVCTL2_BPWM1_S_Pos)
 
 /*---------------------------------------------------------------------------------------------------------*/
 /*  DIVCTL3 constant definitions.                                                                          */
@@ -214,7 +198,6 @@ typedef enum REQn
 #define CLK_DIV7_CANFD1(x)                 (((x) - 1UL) << CLK_DIVCTL7_CANFD1_N_Pos)
 #define CLK_DIV7_CANFD2(x)                 (((x) - 1UL) << CLK_DIVCTL7_CANFD2_N_Pos)
 #define CLK_DIV7_CANFD3(x)                 (((x) - 1UL) << CLK_DIVCTL7_CANFD3_N_Pos)
-#define CLK_DIV7_EADC(x)                   (((x) - 1UL) << CLK_DIVCTL7_EADC_N_Pos)
 #define CLK_DIV7_ADC(x)                    (((x) - 1UL) << CLK_DIVCTL7_ADC_N_Pos)
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -222,12 +205,12 @@ typedef enum REQn
 /*---------------------------------------------------------------------------------------------------------*/
 #define CLK_DIV8_WDTSEL_HXT                (0x0UL << CLK_DIVCTL8_WDTSEL_Pos)
 #define CLK_DIV8_WDTSEL_HXT_DIV512         (0x1UL << CLK_DIVCTL8_WDTSEL_Pos)
-#define CLK_DIV8_WDTSEL_PLCK2_DIV4096      (0x2UL << CLK_DIVCTL8_WDTSEL_Pos)
+#define CLK_DIV8_WDTSEL_PCLK2_DIV4096      (0x2UL << CLK_DIVCTL8_WDTSEL_Pos)
 #define CLK_DIV8_WDTSEL_LXT                (0x3UL << CLK_DIVCTL8_WDTSEL_Pos)
 
 #define CLK_DIV8_WWDTSEL_HXT               (0x0UL << CLK_DIVCTL8_WWDTSEL_Pos)
 #define CLK_DIV8_WWDTSEL_HXT_DIV512        (0x1UL << CLK_DIVCTL8_WWDTSEL_Pos)
-#define CLK_DIV8_WWDTSEL_PLCK2_DIV4096     (0x2UL << CLK_DIVCTL8_WWDTSEL_Pos)
+#define CLK_DIV8_WWDTSEL_PCLK2_DIV4096     (0x2UL << CLK_DIVCTL8_WWDTSEL_Pos)
 #define CLK_DIV8_WWDTSEL_LXT               (0x3UL << CLK_DIVCTL8_WWDTSEL_Pos)
 
 #define CLK_DIV8_TMR0SEL_HXT               (0x0UL << CLK_DIVCTL8_TMR0SEL_Pos)
@@ -397,9 +380,7 @@ typedef enum REQn
 #define QSPI0_MODULE     ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(8UL<<17)         |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(20UL<<0))
 #define ADC_MODULE       ((MODULE_PCLKEN1<<29)|(7UL<<25)         |(2UL<<22)         |(20UL<<17)        |(7UL<<13)         |(7UL<<10)         |(24UL<<5)        |(24UL<<0))
 #define EADC_MODULE      ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(7UL<<13)         |(4UL<<10)         |(16UL<<5)        |(25UL<<0))
-//#define BPWM0_MODULE     ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(24UL<<17)        |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(26UL<<0))
 #define BPWM0_MODULE     ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(26UL<<0))
-//#define BPWM1_MODULE   ((MODULE_PCLKEN1<<29)|(2UL<<25)         |(2UL<<22)         |(26UL<<17)        |(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(27UL<<0))
 #define BPWM1_MODULE     ((MODULE_PCLKEN1<<29)|(MODULE_NoMsk<<25)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<13)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(27UL<<0))
 
 /*@}*/ /* end of group CLK_EXPORTED_CONSTANTS */
@@ -419,8 +400,6 @@ void CLK_DisableCLKO(void);
 uint32_t CLK_GetUPLLClockFreq(void);
 uint32_t CLK_GetAPLLClockFreq(void);
 uint32_t CLK_GetClockFreq(CLOCK_Type clk);
-void CLK_EnableXtalRC(void);
-void CLK_DisableXtalRC(void);
 void CLK_EnterPowerDown(void);
 void CLK_EnterIdle(void);
 void CLK_StopClock(CLK_Stop req);

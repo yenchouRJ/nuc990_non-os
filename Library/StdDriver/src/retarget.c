@@ -16,30 +16,25 @@
 #if defined (__CC_ARM)
 
 #pragma import(__use_no_semihosting_swi)
+
 /// @cond HIDDEN_SYMBOLS
+
 int sendchar(int ch)
 {
-    while ((inpw(REG_UART0_FSR) & (1<<23))); //waits for TX_FULL bit is clear
-#ifdef FOR_SIMULATION
-	outpw((void *)0xFFF04400, ch);
-#else
-    outpw(REG_UART0_THR, ch);
-#endif
-    if(ch == '\n')
+    while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
+    UART0->DAT = ch;
+
+    if (ch == '\n')
     {
-        while((inpw(REG_UART0_FSR) & (1<<23))); //waits for TX_FULL bit is clear
-#ifdef FOR_SIMULATION
-		outpw((void *)0xFFF04400, '\r');
-#else
-        outpw(REG_UART0_THR, '\r');
-#endif
+        while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
+        UART0->DAT = '\r';
     }
     return (ch);
 }
 
 static void flush_uart(void)
 {
-    while(inpw(REG_UART0_FSR) & (1<<23));  //waits for TX_FULL bit is clear
+    while (!(UART0->FIFOSTS & UART_FIFOSTS_TXEMPTY_Msk));
 }
 
 /**
@@ -55,16 +50,16 @@ static void flush_uart(void)
 
 int kbhit(void)
 {
-    return !((inpw(REG_UART0_FSR) & (1 << 14)) == 0);
+    return !((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0);
 }
 
 int recvchar(void)
 {
     while(1)
     {
-        if ((inpw(REG_UART0_FSR) & (1 << 14)) == 0)  // waits RX not empty
+        if ((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0)
         {
-            return inpw(REG_UART0_RBR);
+            return UART0->DAT;
         }
     }
 }
@@ -73,9 +68,9 @@ int sysGetChar(void)
 {
     while(1)
     {
-        if ((inpw(REG_UART0_FSR) & (1 << 14)) == 0)  // waits RX not empty
+        if ((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0)
         {
-            return inpw(REG_UART0_RBR);
+            return UART0->DAT;
         }
     }
 }
@@ -155,77 +150,63 @@ __value_in_regs struct __initial_stackheap __user_initial_stackheap(unsigned int
 
 /// @cond HIDDEN_SYMBOLS
 
-int kbhit(void)
-{
-    return !((inpw(REG_UART0_FSR) & (1 << 14)) == 0);
-}
-
-int _write (int fd, char *ptr, int len)
+int _write(int fd, char *ptr, int len)
 {
     int i = len;
 
-    while(i--)
+    while (i--)
     {
-        while ((inpw(REG_UART0_FSR) & (1<<23))); //waits for TX_FULL bit is clear
+        while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
+        UART0->DAT = *ptr;
 
-#ifdef FOR_SIMULATION
-		outpw((void *)0xFFF04400, *ptr);
-#else
-        outpw(REG_UART0_THR, *ptr);
-#endif
-
-        if(*ptr == '\n')
+        if (*ptr == '\n')
         {
-            while ((inpw(REG_UART0_FSR) & (1<<23)));
-#ifdef FOR_SIMULATION
-			outpw((void *)0xFFF04400, '\r');
-#else
-            outpw(REG_UART0_THR, '\r');
-#endif
+            while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
+            UART0->DAT = '\r';
         }
-
         ptr++;
-
     }
     return len;
 }
 
 int _read (int fd, char *ptr, int len)
 {
-    while( (inpw(REG_UART0_FSR) & (1 << 14)) != 0);  // waits RX not empty
-    *ptr = inpw(REG_UART0_RBR);
+    while (UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk);
+
+    *ptr = UART0->DAT;
 
     return 1;
 }
 
 void C_SWI_Handler( int swi_num, int *regs )
 {
+    int w, x, y, z;
+
     switch( swi_num )
     {
-    case 0:
-        regs[0] = regs[0] * regs[1];
-        break;
-    case 1:
-        regs[0] = regs[0] + regs[1];
-        break;
-    case 2:
-        regs[0] = (regs[0] * regs[1]) + (regs[2] * regs[3]);
-        break;
-    case 3:
-    {
-        int w, x, y, z;
+        case 0:
+            regs[0] = regs[0] * regs[1];
+            break;
 
-        w = regs[0];
-        x = regs[1];
-        y = regs[2];
-        z = regs[3];
+        case 1:
+            regs[0] = regs[0] + regs[1];
+            break;
 
-        regs[0] = w + x + y + z;
-        regs[1] = w - x - y - z;
-        regs[2] = w * x * y * z;
-        regs[3] =(w + x) * (y - z);
-    }
-    break;
+        case 2:
+            regs[0] = (regs[0] * regs[1]) + (regs[2] * regs[3]);
+            break;
+
+        case 3:
+            w = regs[0];
+            x = regs[1];
+            y = regs[2];
+            z = regs[3];
+
+            regs[0] = w + x + y + z;
+            regs[1] = w - x - y - z;
+            regs[2] = w * x * y * z;
+            regs[3] =(w + x) * (y - z);
+        break;
     }
 }
 

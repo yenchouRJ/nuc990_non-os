@@ -308,33 +308,6 @@ typedef struct
 /**@}*/ /* end of GPIO register group */
 /**@}*/ /* end of REGISTER group */
 
-/** @addtogroup PERIPHERAL_DECLARATION Peripheral Pointer
-  The Declaration of Peripherals
-  @{
- */
-
-#define GPIO_DBCTL_BASE       (0xB0004440ul)
-#define PA                    ((GPIO_T *)  PA_BA)
-#define PB                    ((GPIO_T *)  PB_BA)
-#define PC                    ((GPIO_T *)  PC_BA)
-#define PD                    ((GPIO_T *)  PD_BA)
-#define PE                    ((GPIO_T *)  PE_BA)
-#define PF                    ((GPIO_T *)  PF_BA)
-#define PG                    ((GPIO_T *)  PG_BA)
-#define GPIOA                 ((GPIO_T *)  PA_BA)
-#define GPIOB                 ((GPIO_T *)  PB_BA)
-#define GPIOC                 ((GPIO_T *)  PC_BA)
-#define GPIOD                 ((GPIO_T *)  PD_BA)
-#define GPIOE                 ((GPIO_T *)  PE_BA)
-#define GPIOF                 ((GPIO_T *)  PF_BA)
-#define GPIOG                 ((GPIO_T *)  PG_BA)
-#define GPIO                  ((GPIO_DBCTL_T *) GPIO_DBCTL_BASE)
-#define GPIO_PIN_DATA_BASE    (0xB0004800ul)
-/*@}*/ /* end of group ERIPHERAL_DECLARATION */
-
-
-
-
 /** @addtogroup Standard_Driver Standard Driver
   @{
 */
@@ -445,6 +418,7 @@ typedef struct
 
    If GPIO PA.0 pin status is high, then set GPIO PA.0 data output to low.
  */
+#define GPIO_PIN_DATA_BASE          (0xB0004800ul)
 #define GPIO_PIN_DATA(port, pin)    (*((volatile uint32_t *)((GPIO_PIN_DATA_BASE+(0x40*(port))) + ((pin)<<2)))) /*!< Pin Data Input/Output \hideinitializer */
 #define PA0             GPIO_PIN_DATA(0, 0 ) /*!< Specify PA.0 Pin Data Input/Output \hideinitializer */
 #define PA1             GPIO_PIN_DATA(0, 1 ) /*!< Specify PA.1 Pin Data Input/Output \hideinitializer */

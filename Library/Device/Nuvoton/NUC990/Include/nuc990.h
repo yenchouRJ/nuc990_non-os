@@ -61,88 +61,96 @@ extern "C" {
  */
 typedef enum IRQn
 {
-    WDT_IRQn             = 1,      /*! Watchdog Timer Interrupt                 */
-    WWDT_IRQn            = 2,      /*! Windowed WDT Interrupt                   */
-    LVD_IRQn             = 3,      /*! Low Voltage Detect Interrupt             */
-    EXTI0_IRQn           = 4,      /*! External Interrupt 0                     */
-    EXTI1_IRQn           = 5,      /*! External Interrupt 1                     */
-    EXTI2_IRQn           = 6,      /*! External Interrupt 2                     */
-    EXTI3_IRQn           = 7,      /*! External Interrupt 3                     */
-    GPA_IRQn             = 8,      /*! GPIO A Interrupt                         */
-    GPB_IRQn             = 9,      /*! GPIO B Interrupt                         */
-    GPC_IRQn             = 10,     /*! GPIO C Interrupt                         */
-    GPD_IRQn             = 11,     /*! GPIO D Interrupt                         */
-    GPE_IRQn             = 12,     /*! GPIO E Interrupt                         */
-    GPF_IRQn             = 13,     /*! GPIO F Interrupt                         */
-    GPG_IRQn             = 14,     /*! GPIO G Interrupt                         */
-    GPH_IRQn             = 15,     /*! GPIO H Interrupt                         */
-    I2S_IRQn             = 16,     /*! I2S Interrupt                            */
-    RTC_IRQn             = 17,     /*! RTC Interrupt                            */
-    TIMER0_IRQn          = 18,     /*! Timer 0 interrupt                        */
-    TIMER1_IRQn          = 19,     /*! Timer 1 interrupt                        */
-    TIMER2_IRQn          = 20,     /*! Timer 2 interrupt                        */
-    TIMER3_IRQn          = 21,     /*! Timer 3 interrupt                        */
-    TIMER4_IRQn          = 22,     /*! Timer 4 interrupt                        */
-    TIMER5_IRQn          = 23,     /*! Timer 5 interrupt                        */
-    I2C0_IRQn            = 24,     /*! I2C 0 interrupt                          */
-    I2C1_IRQn            = 25,     /*! I2C 1 interrupt                          */
-    I2C2_IRQn            = 26,     /*! I2C 2 interrupt                          */
-    I2C3_IRQn            = 27,     /*! I2C 3 interrupt                          */
-    SMC0_IRQn            = 28,     /*! Smart Card 0 interrupt                   */
-    SMC1_IRQn            = 29,     /*! Smart Card 1 interrupt                   */
-    BPWM0_IRQn           = 30,     /*! BPWM0 interrupt                          */
-    BPWM1_IRQn           = 31,     /*! BPWM1 interrupt                          */
-    UART0_IRQn           = 32,     /*! UART 0 interrupt                         */
-    UART1_IRQn           = 33,     /*! UART 1 interrupt                         */
-    UART2_IRQn           = 34,     /*! UART 2 interrupt                         */
-    UART3_IRQn           = 35,     /*! UART 3 interrupt                         */
-    UART4_IRQn           = 36,     /*! UART 4 interrupt                         */
-    UART5_IRQn           = 37,     /*! UART 5 interrupt                         */
-    UART6_IRQn           = 38,     /*! UART 6 interrupt                         */
-    UART7_IRQn           = 39,     /*! UART 7 interrupt                         */
-    UART8_IRQn           = 40,     /*! UART 8 interrupt                         */
-    UART9_IRQn           = 41,     /*! UART 9 interrupt                         */
-    ADC_IRQn             = 42,     /*! ADC interrupt                            */
-    EADC00_IRQn          = 43,     /*! EADC interrupt 0                         */
-    EADC01_IRQn          = 44,     /*! EADC interrupt 1                         */
-    EADC02_IRQn          = 45,     /*! EADC interrupt 2                         */
-    EADC03_IRQn          = 46,     /*! EADC interrupt 3                         */
-    QSPI0_IRQn           = 47,     /*! QSPI 0 interrupt                         */
-    SPI0_IRQn            = 48,     /*! SPI 0 interrupt                          */
-    SPI1_IRQn            = 49,     /*! SPI 1 interrupt                          */
-    SPI2_IRQn            = 50,     /*! SPI 2 interrupt                          */
-    SPI3_IRQn            = 51,     /*! SPI 3 interrupt                          */
-    PDMA0_IRQn           = 52,     /*! PDMA Channel Interrupt                   */
-    PDMA1_IRQn           = 53,     /*! PDMA Channel Interrupt                   */
-    EHCI_IRQn            = 54,     /*! USB 2.0 Host Controller Interrupt        */
-    OHCI_IRQn            = 55,     /*! USB 1.1 Host Controller Interrupt        */
-    UDC_IRQn             = 56,     /*! USB Device Controller Interrupt          */
-    SDH0_IRQn            = 57,     /*! SD/SDIO Host 0 Interrupt                 */
-    SDH1_IRQn            = 58,     /*! SD/SDIO Host 1 Interrupt                 */
-    NAND_IRQn            = 59,     /*! NAND Flash Controller Interrupt          */
-    EMAC0_RX_IRQn        = 60,     /*! EMAC 0 RX Interrupt                      */
-    EMAC0_TX_IRQn        = 61,     /*! EMAC 0 TX Interrupt                      */
-    EMAC1_RX_IRQn        = 62,     /*! EMAC 1 RX Interrupt                      */
-    EMAC1_TX_IRQn        = 63,     /*! EMAC 1 TX Interrupt                      */
-    CAN0_IRQn            = 64,     /*! CAN 0 Interrupt                          */
-    CAN1_IRQn            = 65,     /*! CAN 1 Interrupt                          */
-    CAN2_IRQn            = 66,     /*! CAN 2 Interrupt                          */
-    CAN3_IRQn            = 67,     /*! CAN 3 Interrupt                          */
-    CANFD00_IRQn         = 72,     /*! CAN FD 0 Interrupt 0                     */
-    CANFD01_IRQn         = 73,     /*! CAN FD 0 Interrupt 1                     */
-    CANFD10_IRQn         = 74,     /*! CAN FD 1 Interrupt 0                     */
-    CANFD11_IRQn         = 75,     /*! CAN FD 1 Interrupt 1                     */
-    CANFD20_IRQn         = 76,     /*! CAN FD 2 Interrupt 0                     */
-    CANFD21_IRQn         = 77,     /*! CAN FD 2 Interrupt 1                     */
-    CANFD30_IRQn         = 78,     /*! CAN FD 3 Interrupt 0                     */
-    CANFD31_IRQn         = 79,     /*! CAN FD 3 Interrupt 1                     */
-    CRYPTO_IRQn          = 80,     /*! CRYPTO Engine Interrupt                  */
-    KS_IRQn              = 81,     /*! Key Store Interrupt                      */
+    WDT_IRQn             = 1,      /*! Watchdog Timer Interrupt           */
+    WWDT_IRQn            = 2,      /*! Windowed WDT Interrupt             */
+    LVD_IRQn             = 3,      /*! Low Voltage Detect Interrupt       */
+    EXTI0_IRQn           = 4,      /*! External Interrupt 0               */
+    EXTI1_IRQn           = 5,      /*! External Interrupt 1               */
+    EXTI2_IRQn           = 6,      /*! External Interrupt 2               */
+    EXTI3_IRQn           = 7,      /*! External Interrupt 3               */
+    GPA_IRQn             = 8,      /*! GPIO A Interrupt                   */
+    GPB_IRQn             = 9,      /*! GPIO B Interrupt                   */
+    GPC_IRQn             = 10,     /*! GPIO C Interrupt                   */
+    GPD_IRQn             = 11,     /*! GPIO D Interrupt                   */
+    GPE_IRQn             = 12,     /*! GPIO E Interrupt                   */
+    GPF_IRQn             = 13,     /*! GPIO F Interrupt                   */
+    GPG_IRQn             = 14,     /*! GPIO G Interrupt                   */
+    GPH_IRQn             = 15,     /*! GPIO H Interrupt                   */
+    I2S_IRQn             = 16,     /*! I2S Interrupt                      */
+    RTC_IRQn             = 17,     /*! RTC Interrupt                      */
+    TIMER0_IRQn          = 18,     /*! Timer 0 interrupt                  */
+    TIMER1_IRQn          = 19,     /*! Timer 1 interrupt                  */
+    TIMER2_IRQn          = 20,     /*! Timer 2 interrupt                  */
+    TIMER3_IRQn          = 21,     /*! Timer 3 interrupt                  */
+    TIMER4_IRQn          = 22,     /*! Timer 4 interrupt                  */
+    TIMER5_IRQn          = 23,     /*! Timer 5 interrupt                  */
+    I2C0_IRQn            = 24,     /*! I2C 0 interrupt                    */
+    I2C1_IRQn            = 25,     /*! I2C 1 interrupt                    */
+    I2C2_IRQn            = 26,     /*! I2C 2 interrupt                    */
+    I2C3_IRQn            = 27,     /*! I2C 3 interrupt                    */
+    SMC0_IRQn            = 28,     /*! Smart Card 0 interrupt             */
+    SMC1_IRQn            = 29,     /*! Smart Card 1 interrupt             */
+    BPWM0_IRQn           = 30,     /*! BPWM0 interrupt                    */
+    BPWM1_IRQn           = 31,     /*! BPWM1 interrupt                    */
+    UART0_IRQn           = 32,     /*! UART 0 interrupt                   */
+    UART1_IRQn           = 33,     /*! UART 1 interrupt                   */
+    UART2_IRQn           = 34,     /*! UART 2 interrupt                   */
+    UART3_IRQn           = 35,     /*! UART 3 interrupt                   */
+    UART4_IRQn           = 36,     /*! UART 4 interrupt                   */
+    UART5_IRQn           = 37,     /*! UART 5 interrupt                   */
+    UART6_IRQn           = 38,     /*! UART 6 interrupt                   */
+    UART7_IRQn           = 39,     /*! UART 7 interrupt                   */
+    UART8_IRQn           = 40,     /*! UART 8 interrupt                   */
+    UART9_IRQn           = 41,     /*! UART 9 interrupt                   */
+    ADC_IRQn             = 42,     /*! ADC interrupt                      */
+    EADC00_IRQn          = 43,     /*! EADC interrupt 0                   */
+    EADC01_IRQn          = 44,     /*! EADC interrupt 1                   */
+    EADC02_IRQn          = 45,     /*! EADC interrupt 2                   */
+    EADC03_IRQn          = 46,     /*! EADC interrupt 3                   */
+    QSPI0_IRQn           = 47,     /*! QSPI 0 interrupt                   */
+    SPI0_IRQn            = 48,     /*! SPI 0 interrupt                    */
+    SPI1_IRQn            = 49,     /*! SPI 1 interrupt                    */
+    SPI2_IRQn            = 50,     /*! SPI 2 interrupt                    */
+    SPI3_IRQn            = 51,     /*! SPI 3 interrupt                    */
+    PDMA0_IRQn           = 52,     /*! PDMA Channel Interrupt             */
+    PDMA1_IRQn           = 53,     /*! PDMA Channel Interrupt             */
+    EHCI_IRQn            = 54,     /*! USB 2.0 Host Controller Interrupt  */
+    OHCI_IRQn            = 55,     /*! USB 1.1 Host Controller Interrupt  */
+    UDC_IRQn             = 56,     /*! USB Device Controller Interrupt    */
+    SDH0_IRQn            = 57,     /*! SD/SDIO Host 0 Interrupt           */
+    SDH1_IRQn            = 58,     /*! SD/SDIO Host 1 Interrupt           */
+    NAND_IRQn            = 59,     /*! NAND Flash Controller Interrupt    */
+    EMAC0_RX_IRQn        = 60,     /*! EMAC 0 RX Interrupt                */
+    EMAC0_TX_IRQn        = 61,     /*! EMAC 0 TX Interrupt                */
+    EMAC1_RX_IRQn        = 62,     /*! EMAC 1 RX Interrupt                */
+    EMAC1_TX_IRQn        = 63,     /*! EMAC 1 TX Interrupt                */
+    CAN0_IRQn            = 64,     /*! CAN 0 Interrupt                    */
+    CAN1_IRQn            = 65,     /*! CAN 1 Interrupt                    */
+    CAN2_IRQn            = 66,     /*! CAN 2 Interrupt                    */
+    CAN3_IRQn            = 67,     /*! CAN 3 Interrupt                    */
+    CANFD00_IRQn         = 72,     /*! CAN FD 0 Interrupt 0               */
+    CANFD01_IRQn         = 73,     /*! CAN FD 0 Interrupt 1               */
+    CANFD10_IRQn         = 74,     /*! CAN FD 1 Interrupt 0               */
+    CANFD11_IRQn         = 75,     /*! CAN FD 1 Interrupt 1               */
+    CANFD20_IRQn         = 76,     /*! CAN FD 2 Interrupt 0               */
+    CANFD21_IRQn         = 77,     /*! CAN FD 2 Interrupt 1               */
+    CANFD30_IRQn         = 78,     /*! CAN FD 3 Interrupt 0               */
+    CANFD31_IRQn         = 79,     /*! CAN FD 3 Interrupt 1               */
+    CRYPTO_IRQn          = 80,     /*! CRYPTO Engine Interrupt            */
+    KS_IRQn              = 81,     /*! Key Store Interrupt                */
 } IRQn_Type;
 
-/******************************************************************************/
-/*                            Register definitions                            */
-/******************************************************************************/
+#ifdef __cplusplus
+#define __I     volatile           /*!< Defines 'read only' permissions   */
+#else
+#define __I     volatile const     /*!< Defines 'read only' permissions   */
+#endif
+#define __O     volatile           /*!< Defines 'write only' permissions  */
+#define __IO    volatile           /*!< Defines 'read/write' permissions  */
+
+/**************************************************************************/
+/*                        Register definitions                            */
+/**************************************************************************/
 #include "adc_reg.h"
 #include "aic_reg.h"
 #include "bpwm_reg.h"
@@ -167,7 +175,7 @@ typedef enum IRQn
 #include "sys_reg.h"
 #include "timer_reg.h"
 #include "uart_reg.h"
-#include "usbd_reg.h"
+//#include "usbd_reg.h"
 #include "usbh_reg.h"
 #include "wdt_reg.h"
 #include "wwdt_reg.h"
@@ -182,6 +190,7 @@ typedef enum IRQn
 #define CLK_BASE         0xB0000200
 #define SDIC_BASE        0xB0002000
 #define GPIO_BASE        0xB0004000
+#define GPIO_DBCTL_BASE  0xB0004440
 #define PDMA0_BASE       0xB0008000
 #define PDMA1_BASE       0xB0009000
 #define EBI_BASE         0xB0010000
@@ -191,7 +200,6 @@ typedef enum IRQn
 #define HSUSBH_BASE      0xB0015000
 #define USBD_BASE        0xB0016000
 #define USBH_BASE        0xB0017000
-#define SDH0_BASE        0xB001A000
 #define SDH1_BASE        0xB0018000
 #define NFI_BASE         0xB0019000
 #define SDH0_BASE        0xB001A000
@@ -264,85 +272,90 @@ typedef enum IRQn
 
 /*@}*/ /* end of group NUC990_PERIPHERAL_MEM_MAP */
 
-/******************************************************************************/
-/*                         Peripheral Declaration                             */
-/******************************************************************************/
+/**************************************************************************/
+/*                      Peripheral Declaration                            */
+/**************************************************************************/
 
 /** @addtogroup PERIPHERAL_DECLARATION Peripheral Pointer
   The Declaration of Peripheral Pointer
   @{
  */
-#define SYS              ((SYS_T *)          SYS_BASE)
-#define CLK              ((CLK_T *)          CLK_BASE)
-#define SDIC             ((SDIC_T *)         SDIC_BASE)
-#define GPIO             ((GPIO_DBCTL_T *)   GPIO_DBCTL_BASE)
-#define PDMA0            ((PDMA_T *)         PDMA0_BASE)
-#define PDMA1            ((PDMA_T *)         PDMA1_BASE)
-#define EBI              ((EBI_T *)          EBI_BASE)
-#define EMAC0            ((EMAC_T *)         EMAC0_BASE)
-#define EMAC1            ((EMAC_T *)         EMAC1_BASE)
-#define USBD             ((USBD_T *)         USBD_BASE)
-#define OTP              ((OTP_T *)          OTP_BASE)
-#define USBH             ((USBH_T *)         USBH_BASE)
-#define HSUSBH           ((HSUSBH_T *)       HSUSBH_BASE)
-#define SDH0             ((SDH_T *)          SDH0_BASE)
-#define SDH1             ((SDH_T *)          SDH1_BASE)
-#define NFI              ((NFI_T *)          NFI_BASE)
-#define CRYPTO           ((CRYPTO_T *)       CRYPTO_BASE)
-#define I2S              ((I2S_T *)          I2S_BASE)
-#define KS               ((KS_T *)           KEYSTORE_BASE)
-#define PA               ((GPIO_T *)         PA_BASE)
-#define PB               ((GPIO_T *)         PB_BASE)
-#define PC               ((GPIO_T *)         PC_BASE)
-#define PD               ((GPIO_T *)         PD_BASE)
-#define PE               ((GPIO_T *)         PE_BASE)
-#define PF               ((GPIO_T *)         PF_BASE)
-#define PG               ((GPIO_T *)         PG_BASE)
-#define PH               ((GPIO_T *)         PH_BASE)
-#define WDT              ((WDT_T *)          WDT_BASE)
-#define WWDT             ((WWDT_T *)         WWDT_BASE)
-#define RTC              ((RTC_T *)          RTC_BASE)
-#define AIC              ((AIC_T *)          AIC_BASE)
-#define ADC              ((ADC_T *)          ADC_BASE)
-#define TIMER0           ((TIMER_T *)        TIMER0_BASE)
-#define TIMER1           ((TIMER_T *)        TIMER1_BASE)
-#define TIMER2           ((TIMER_T *)        TIMER2_BASE)
-#define TIMER3           ((TIMER_T *)        TIMER3_BASE)
-#define TIMER4           ((TIMER_T *)        TIMER4_BASE)
-#define TIMER5           ((TIMER_T *)        TIMER5_BASE)
-#define PWM0             ((PWM_T *)          PWM0_BASE)
-#define PWM1             ((PWM_T *)          PWM1_BASE)
-#define BPWM0            ((BPWM_T *)         BPWM0_BASE)
-#define BPWM1            ((BPWM_T *)         BPWM1_BASE)
-#define QSPI0            ((QSPI_T *)         QSPI0_BASE)
-#define SPI0             ((SPI_T *)          SPI0_BASE)
-#define SPI1             ((SPI_T *)          SPI1_BASE)
-#define SPI2             ((SPI_T *)          SPI2_BASE)
-#define SPI3             ((SPI_T *)          SPI3_BASE)
-#define UART0            ((UART_T *)         UART0_BASE)
-#define UART1            ((UART_T *)         UART1_BASE)
-#define UART2            ((UART_T *)         UART2_BASE)
-#define UART3            ((UART_T *)         UART3_BASE)
-#define UART4            ((UART_T *)         UART4_BASE)
-#define UART5            ((UART_T *)         UART5_BASE)
-#define UART6            ((UART_T *)         UART6_BASE)
-#define UART7            ((UART_T *)         UART7_BASE)
-#define UART8            ((UART_T *)         UART8_BASE)
-#define UART9            ((UART_T *)         UART9_BASE)
-#define I2C0             ((I2C_T *)          I2C0_BASE)
-#define I2C1             ((I2C_T *)          I2C1_BASE)
-#define I2C2             ((I2C_T *)          I2C2_BASE)
-#define I2C3             ((I2C_T *)          I2C3_BASE)
-#define SC0              ((SC_T *)           SC0_BASE)
-#define SC1              ((SC_T *)           SC1_BASE)
-#define CAN0             ((CAN_T *)          CAN0_BASE)
-#define CAN1             ((CAN_T *)          CAN1_BASE)
-#define CAN2             ((CAN_T *)          CAN2_BASE)
-#define CAN3             ((CAN_T *)          CAN3_BASE)
-#define CANFD0           ((CANFD_T *)        CANFD0_BASE)
-#define CANFD1           ((CANFD_T *)        CANFD1_BASE)
-#define CANFD2           ((CANFD_T *)        CANFD2_BASE)
-#define CANFD3           ((CANFD_T *)        CANFD3_BASE)
+#define SYS              ((SYS_T *)        SYS_BASE)
+#define CLK              ((CLK_T *)        CLK_BASE)
+#define SDIC             ((SDIC_T *)       SDIC_BASE)
+#define GPIO             ((GPIO_DBCTL_T *) GPIO_DBCTL_BASE)
+#define PDMA0            ((PDMA_T *)       PDMA0_BASE)
+#define PDMA1            ((PDMA_T *)       PDMA1_BASE)
+#define EBI              ((EBI_T *)        EBI_BASE)
+#define EMAC0            ((EMAC_T *)       EMAC0_BASE)
+#define EMAC1            ((EMAC_T *)       EMAC1_BASE)
+#define USBD             ((USBD_T *)       USBD_BASE)
+#define OTP              ((OTP_T *)        OTP_BASE)
+#define USBH             ((USBH_T *)       USBH_BASE)
+#define HSUSBH           ((HSUSBH_T *)     HSUSBH_BASE)
+#define SDH0             ((SDH_T *)        SDH0_BASE)
+#define SDH1             ((SDH_T *)        SDH1_BASE)
+#define NFI              ((NFI_T *)        NFI_BASE)
+#define CRYPTO           ((CRYPTO_T *)     CRYPTO_BASE)
+#define I2S              ((I2S_T *)        I2S_BASE)
+#define KS               ((KS_T *)         KEYSTORE_BASE)
+#define PA               ((GPIO_T *)       PA_BASE)
+#define PB               ((GPIO_T *)       PB_BASE)
+#define PC               ((GPIO_T *)       PC_BASE)
+#define PD               ((GPIO_T *)       PD_BASE)
+#define PE               ((GPIO_T *)       PE_BASE)
+#define PF               ((GPIO_T *)       PF_BASE)
+#define PG               ((GPIO_T *)       PG_BASE)
+#define PH               ((GPIO_T *)       PH_BASE)
+#define GPIOA            ((GPIO_T *)       PA_BASE)
+#define GPIOB            ((GPIO_T *)       PB_BASE)
+#define GPIOC            ((GPIO_T *)       PC_BASE)
+#define GPIOD            ((GPIO_T *)       PD_BASE)
+#define GPIOE            ((GPIO_T *)       PE_BASE)
+#define GPIOF            ((GPIO_T *)       PF_BASE)
+#define GPIOG            ((GPIO_T *)       PG_BASE)
+#define WDT              ((WDT_T *)        WDT_BASE)
+#define WWDT             ((WWDT_T *)       WWDT_BASE)
+#define RTC              ((RTC_T *)        RTC_BASE)
+#define AIC              ((AIC_T *)        AIC_BASE)
+#define ADC              ((ADC_T *)        ADC_BASE)
+#define TIMER0           ((TIMER_T *)      TIMER0_BASE)
+#define TIMER1           ((TIMER_T *)      TIMER1_BASE)
+#define TIMER2           ((TIMER_T *)      TIMER2_BASE)
+#define TIMER3           ((TIMER_T *)      TIMER3_BASE)
+#define TIMER4           ((TIMER_T *)      TIMER4_BASE)
+#define TIMER5           ((TIMER_T *)      TIMER5_BASE)
+#define BPWM0            ((BPWM_T *)       BPWM0_BASE)
+#define BPWM1            ((BPWM_T *)       BPWM1_BASE)
+#define QSPI0            ((QSPI_T *)       QSPI0_BASE)
+#define SPI0             ((SPI_T *)        SPI0_BASE)
+#define SPI1             ((SPI_T *)        SPI1_BASE)
+#define SPI2             ((SPI_T *)        SPI2_BASE)
+#define SPI3             ((SPI_T *)        SPI3_BASE)
+#define UART0            ((UART_T *)       UART0_BASE)
+#define UART1            ((UART_T *)       UART1_BASE)
+#define UART2            ((UART_T *)       UART2_BASE)
+#define UART3            ((UART_T *)       UART3_BASE)
+#define UART4            ((UART_T *)       UART4_BASE)
+#define UART5            ((UART_T *)       UART5_BASE)
+#define UART6            ((UART_T *)       UART6_BASE)
+#define UART7            ((UART_T *)       UART7_BASE)
+#define UART8            ((UART_T *)       UART8_BASE)
+#define UART9            ((UART_T *)       UART9_BASE)
+#define I2C0             ((I2C_T *)        I2C0_BASE)
+#define I2C1             ((I2C_T *)        I2C1_BASE)
+#define I2C2             ((I2C_T *)        I2C2_BASE)
+#define I2C3             ((I2C_T *)        I2C3_BASE)
+#define SC0              ((SC_T *)         SC0_BASE)
+#define SC1              ((SC_T *)         SC1_BASE)
+#define CAN0             ((CAN_T *)        CAN0_BASE)
+#define CAN1             ((CAN_T *)        CAN1_BASE)
+#define CAN2             ((CAN_T *)        CAN2_BASE)
+#define CAN3             ((CAN_T *)        CAN3_BASE)
+#define CANFD0           ((CANFD_T *)      CANFD0_BASE)
+#define CANFD1           ((CANFD_T *)      CANFD1_BASE)
+#define CANFD2           ((CANFD_T *)      CANFD2_BASE)
+#define CANFD3           ((CANFD_T *)      CANFD3_BASE)
 
 /*@}*/ /* end of group PERIPHERAL_DECLARATION */
 
@@ -478,9 +491,9 @@ typedef volatile unsigned long  vu32;  /*!< Define 32-bit unsigned volatile data
 
 /*@}*/ /* end of group IO_ROUTINE */
 
-/******************************************************************************/
-/*                Legacy Constants                                            */
-/******************************************************************************/
+/**************************************************************************/
+/*                Legacy Constants                                        */
+/**************************************************************************/
 /** @addtogroup Legacy_Constants Legacy Constants
   NUC990 Legacy Constants
   @{
@@ -601,56 +614,44 @@ typedef unsigned int           REG32;   /*!< Define 32-bit register data type   
 #define GET_BYTE2(u32Param)    ((u32Param & BYTE2_Msk) >> 16)  /*!< Extract Byte 2 (Bit 16~23) from parameter u32Param */
 #define GET_BYTE3(u32Param)    ((u32Param & BYTE3_Msk) >> 24)  /*!< Extract Byte 3 (Bit 24~31) from parameter u32Param */
 
-#ifdef __cplusplus
-#define __I     volatile       /*!< Defines 'read only' permissions                     */
-#else
-#define __I     volatile const /*!< Defines 'read only' permissions                     */
-#endif
-#define __O     volatile       /*!< Defines 'write only' permissions                    */
-#define __IO    volatile       /*!< Defines 'read / write' permissions                  */
-
 #define NON_CACHE_MASK         (0x80000000U)
 
 #define ptr_to_u32(x)          ((uint32_t)(x))
 #define nc_ptr(x)              ((void *)((uint32_t)(x) | NON_CACHE_MASK))
 
-/* add non-cache mask to get a pointer for non-cache access */
-#define nc_ptr(x)       ((void *)nc_addr64(x))
-
 #define __HXT                  (12000000UL)    /*!< External Crystal Clock Frequency     */
 #define __LXT                  (32768UL)       /*!< External Crystal Clock Frequency 32.768KHz */
 
-/******************************************************************************/
-/*                         Peripheral header files                            */
-/******************************************************************************/
-#include "adc.h"
-#include "aic.h"
-#include "bpwm.h"
-#include "can.h"
-#include "canfd.h"
+/**************************************************************************/
+/*                         Peripheral header files                        */
+/**************************************************************************/
+//#include "adc.h"
+//#include "bpwm.h"
+//#include "can.h"
+//#include "canfd.h"
 #include "clk.h"
 #include "crypto.h"
-#include "ebi.h"
-#include "emac.h"
-#include "gpio.h"
-#include "hsusbh.h"
-#include "i2c.h"
-#include "i2s.h"
-#include "nfi.h"
-#include "keystore.h"
-#include "otp.h"
-#include "pdma.h"
-#include "qspi.h"
-#include "rtc.h"
-#include "sc.h"
-#include "sdh.h"
+//#include "ebi.h"
+//#include "emac.h"
+//#include "gpio.h"
+//#include "hsusbh.h"
+//#include "i2c.h"
+//#include "i2s.h"
+//#include "nfi.h"
+//#include "keystore.h"
+//#include "otp.h"
+//#include "pdma.h"
+//#include "qspi.h"
+//#include "rtc.h"
+//#include "sc.h"
+//#include "sdh.h"
 #include "sys.h"
-#include "timer.h"
+//#include "timer.h"
 #include "uart.h"
-#include "usbd.h"
-#include "usbh.h"
-#include "wdt.h"
-#include "wwdt.h"
+//#include "usbd.h"
+//#include "usbh.h"
+//#include "wdt.h"
+//#include "wwdt.h"
 
 /*@}*/ /* end of group Legacy_Constants */
 
@@ -658,4 +659,4 @@ typedef unsigned int           REG32;   /*!< Define 32-bit register data type   
 }
 #endif
 
-#endif /* __NUC990_H__ */
+#endif

@@ -230,51 +230,39 @@ void CLK_SetModuleClock(uint32_t u32ModuleIdx, uint32_t u32ClkSrc, uint32_t u32C
 {
     uint32_t u32sel = 0UL, u32div = 0UL;
 
-	// For clock divider over 8-bit cases
     if (u32ModuleIdx == MII_MODULE)
     {
         CLK->DIVCTL8 = (CLK->DIVCTL8 & ~(CLK_DIVCTL8_MDCLKDIV_Msk)) | u32ClkDiv;
-        //printf("Div = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL8_MDCLKDIV_Msk)) | u32ClkDiv);
     }
     else if (u32ModuleIdx == CLKO_MODULE)
     {
-        CLK->DIVCTL9 = (CLK->DIVCTL9 & ~(CLK_DIVCTL9_CLKO_N_Msk)) | u32ClkDiv;
-        CLK->DIVCTL9 = (CLK->DIVCTL9 & ~(CLK_DIVCTL9_CLKO_S_Msk)) | u32ClkSrc;
-        CLK->HCLKEN0 = (CLK->HCLKEN0 & ~(CLK_HCLKEN0_CLKOCKEN_Msk)) | CLK_HCLKEN0_CLKOCKEN_Msk;
-        //printf("Div = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL9_CKO_N_Msk)) | u32ClkDiv);
-        //printf("Sel = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL9_CKO_S_Msk)) | u32ClkSrc);
+        CLK->DIVCTL9 = (CLK->DIVCTL9 & ~(CLK_DIVCTL9_CKO_N_Msk)) | u32ClkDiv;
+        CLK->DIVCTL9 = (CLK->DIVCTL9 & ~(CLK_DIVCTL9_CKO_S_Msk)) | u32ClkSrc;
+        CLK->HCLKEN0 |= CLK_HCLKEN0_CLKOCKEN_Msk;
     }
     else if (u32ModuleIdx == I2S_MODULE)
     {
         CLK->DIVCTL1 = (CLK->DIVCTL1 & ~(CLK_DIVCTL1_I2S_N_Msk)) | u32ClkDiv;
         CLK->DIVCTL1 = (CLK->DIVCTL1 & ~(CLK_DIVCTL1_I2S_S_Msk)) | u32ClkSrc;
-        CLK->HCLKEN1 = (CLK->HCLKEN1 & ~(CLK_HCLKEN1_I2S_Msk)) | CLK_HCLKEN1_I2S_Msk;
-        //printf("Div = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL1_I2S_N_Msk)) | u32ClkDiv);
-        //printf("Sel = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL1_I2S_S_Msk)) | u32ClkSrc);
+        CLK->HCLKEN1 |= CLK_HCLKEN1_I2SCKEN_Msk;
     }
     else if (u32ModuleIdx == SDH0_MODULE)
     {
         CLK->DIVCTL3 = (CLK->DIVCTL3 & ~(CLK_DIVCTL3_SD0_N_Msk)) | u32ClkDiv;
         CLK->DIVCTL3 = (CLK->DIVCTL3 & ~(CLK_DIVCTL3_SD0_S_Msk)) | u32ClkSrc;
-        CLK->HCLKEN0 = (CLK->HCLKEN0 & ~(CLK_HCLKEN0_SDH0_Msk)) | CLK_HCLKEN0_SDH0_Msk;
-        //printf("Div = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL3_SD0_N_Msk)) | u32ClkDiv);
-        //printf("Sel = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL3_SD0_S_Msk)) | u32ClkSrc);
+        CLK->HCLKEN0 |= CLK_HCLKEN0_SDH0EN_Msk;
     }
     else if (u32ModuleIdx == SDH1_MODULE)
     {
         CLK->DIVCTL3 = (CLK->DIVCTL3 & ~(CLK_DIVCTL3_SD1_N_Msk)) | u32ClkDiv;
         CLK->DIVCTL3 = (CLK->DIVCTL3 & ~(CLK_DIVCTL3_SD1_S_Msk)) | u32ClkSrc;
-        CLK->HCLKEN0 = (CLK->HCLKEN0 & ~(CLK_HCLKEN0_SDH1_Msk)) | CLK_HCLKEN0_SDH1_Msk;
-        //printf("Div = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL3_SD1_N_Msk)) | u32ClkDiv);
-        //printf("Sel = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL3_SD1_S_Msk)) | u32ClkSrc);
+        CLK->HCLKEN0 |= CLK_HCLKEN0_SDH1EN_Msk;
     }
     else if (u32ModuleIdx == ADC_MODULE)
     {
         CLK->DIVCTL7 = (CLK->DIVCTL7 & ~(CLK_DIVCTL7_ADC_N_Msk)) | u32ClkDiv;
         CLK->DIVCTL7 = (CLK->DIVCTL7 & ~(CLK_DIVCTL7_ADC_S_Msk)) | u32ClkSrc;
-        CLK->PCLKEN1 = (CLK->PCLKEN1 & ~(CLK_PCLKEN1_ADCCKEN_Msk)) | CLK_PCLKEN1_ADCCKEN_Msk;
-        //printf("Div = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL7_ADC_N_Msk)) | u32ClkDiv);
-        //printf("Sel = 0x%08x\n", (0xFFFFFFFF & ~(CLK_DIVCTL7_ADC_S_Msk)) | u32ClkSrc);
+        CLK->PCLKEN1 |= CLK_PCLKEN1_ADCCKEN_Msk;
     }
     else
     {
@@ -284,8 +272,6 @@ void CLK_SetModuleClock(uint32_t u32ModuleIdx, uint32_t u32ClkSrc, uint32_t u32C
             u32div = (uint32_t)&CLK->DIVCTL0 + ((MODULE_CLKDIV(u32ModuleIdx)) * 4UL);
             /* Apply new divider */
             M32(u32div) = (M32(u32div) & (~(((1UL << MODULE_CLKDIV_Msk(u32ModuleIdx)) - 1) << MODULE_CLKDIV_Pos(u32ModuleIdx)))) | u32ClkDiv;
-            //printf("Div Addr = 0x%08x\n", u32div);
-            //printf("Div Val  = 0x%08x\n", (0xFFFFFFFF & (~(((1U << MODULE_CLKDIV_Msk(u32ModuleIdx)) - 1) << MODULE_CLKDIV_Pos(u32ModuleIdx)))) | u32ClkDiv);
         }
 
         if (MODULE_CLKSEL_Msk(u32ModuleIdx) != MODULE_NoMsk)
@@ -294,140 +280,21 @@ void CLK_SetModuleClock(uint32_t u32ModuleIdx, uint32_t u32ClkSrc, uint32_t u32C
             u32sel = (uint32_t)&CLK->DIVCTL0 + ((MODULE_CLKSEL(u32ModuleIdx)) * 4UL);
             /* Set new clock selection setting */
             M32(u32sel) = (M32(u32sel) & (~(((1UL << MODULE_CLKSEL_Msk(u32ModuleIdx)) - 1) << MODULE_CLKSEL_Pos(u32ModuleIdx)))) | u32ClkSrc;
-            //printf("Sel Addr = 0x%08x\n", u32sel);
-            //printf("Sel Val  = 0x%08x\n", (0xFFFFFFFF & (~(((1U << MODULE_CLKSEL_Msk(u32ModuleIdx)) - 1) << MODULE_CLKSEL_Pos(u32ModuleIdx)))) | u32ClkSrc);
         }
     }
 }
 
 /**
-  * @brief      Get selected module clock source
-  * @param[in]  u32ModuleIdx is module index.
-  *             - \ref PDMA0_MODULE
-  *             - \ref PDMA1_MODULE
-  *             - \ref PDMA2_MODULE
-  *             - \ref PDMA3_MODULE
-  *             - \ref WH0_MODULE
-  *             - \ref WH1_MODULE
-  *             - \ref HWS_MODULE
-  *             - \ref EBI_MODULE
-  *             - \ref SRAM0_MODULE
-  *             - \ref SRAM1_MODULE
-  *             - \ref ROM_MODULE
-  *             - \ref TRA_MODULE
-  *             - \ref DBG_MODULE
-  *             - \ref CLKO_MODULE
-  *             - \ref GTMR_MODULE
-  *             - \ref GPA_MODULE
-  *             - \ref GPB_MODULE
-  *             - \ref GPC_MODULE
-  *             - \ref GPD_MODULE
-  *             - \ref GPE_MODULE
-  *             - \ref GPF_MODULE
-  *             - \ref GPG_MODULE
-  *             - \ref GPH_MODULE
-  *             - \ref GPI_MODULE
-  *             - \ref GPJ_MODULE
-  *             - \ref GPK_MODULE
-  *             - \ref GPL_MODULE
-  *             - \ref GPM_MODULE
-  *             - \ref GPN_MODULE
-  *             - \ref CA35_MODULE
-  *             - \ref SYSCK0_MODULE
-  *             - \ref SYSCK1_MODULE
-  *             - \ref RTPST_MODULE
-  *             - \ref LVRDB_MODULE
-  *             - \ref DDR0_MODULE
-  *             - \ref DDR6_MODULE
-  *             - \ref CANFD0_MODULE
-  *             - \ref CANFD1_MODULE
-  *             - \ref CANFD2_MODULE
-  *             - \ref CANFD3_MODULE
-  *             - \ref SDH0_MODULE
-  *             - \ref SDH1_MODULE
-  *             - \ref NAND_MODULE
-  *             - \ref USBD_MODULE
-  *             - \ref USBH_MODULE
-  *             - \ref HUSBH0_MODULE
-  *             - \ref HUSBH1_MODULE
-  *             - \ref GFX_MODULE
-  *             - \ref VDEC_MODULE
-  *             - \ref DCU_MODULE
-  *             - \ref DCUP_MODULE
-  *             - \ref GMAC0_MODULE
-  *             - \ref GMAC1_MODULE
-  *             - \ref CCAP0_MODULE
-  *             - \ref CCAP1_MODULE
-  *             - \ref TMR0_MODULE
-  *             - \ref TMR1_MODULE
-  *             - \ref TMR2_MODULE
-  *             - \ref TMR3_MODULE
-  *             - \ref TMR4_MODULE
-  *             - \ref TMR5_MODULE
-  *             - \ref TMR6_MODULE
-  *             - \ref TMR7_MODULE
-  *             - \ref TMR8_MODULE
-  *             - \ref TMR9_MODULE
-  *             - \ref TMR10_MODULE
-  *             - \ref TMR11_MODULE
-  *             - \ref UART0_MODULE
-  *             - \ref UART1_MODULE
-  *             - \ref UART2_MODULE
-  *             - \ref UART3_MODULE
-  *             - \ref UART4_MODULE
-  *             - \ref UART5_MODULE
-  *             - \ref UART6_MODULE
-  *             - \ref UART7_MODULE
-  *             - \ref UART8_MODULE
-  *             - \ref UART9_MODULE
-  *             - \ref UART10_MODULE
-  *             - \ref UART11_MODULE
-  *             - \ref UART12_MODULE
-  *             - \ref UART13_MODULE
-  *             - \ref UART14_MODULE
-  *             - \ref UART15_MODULE
-  *             - \ref UART16_MODULE
-  *             - \ref RTC_MODULE
-  *             - \ref DDRP_MODULE
-  *             - \ref KPI_MODULE
-  *             - \ref I2C0_MODULE
-  *             - \ref I2C1_MODULE
-  *             - \ref I2C2_MODULE
-  *             - \ref I2C3_MODULE
-  *             - \ref I2C4_MODULE
-  *             - \ref I2C5_MODULE
-  *             - \ref QSPI0_MODULE
-  *             - \ref QSPI1_MODULE
-  *             - \ref SC0_MODULE
-  *             - \ref SC1_MODULE
-  *             - \ref WDT0_MODULE
-  *             - \ref WDT1_MODULE
-  *             - \ref WDT2_MODULE
-  *             - \ref WWDT0_MODULE
-  *             - \ref WWDT1_MODULE
-  *             - \ref WWDT2_MODULE
-  *             - \ref EPWM0_MODULE
-  *             - \ref EPWM1_MODULE
-  *             - \ref EPWM2_MODULE
-  *             - \ref I2S0_MODULE
-  *             - \ref I2S1_MODULE
-  *             - \ref SSMCC_MODULE
-  *             - \ref SSPCC_MODULE
-  *             - \ref SPI0_MODULE
-  *             - \ref SPI1_MODULE
-  *             - \ref SPI2_MODULE
-  *             - \ref SPI3_MODULE
-  *             - \ref ECAP0_MODULE
-  *             - \ref ECAP1_MODULE
-  *             - \ref ECAP2_MODULE
-  *             - \ref QEI0_MODULE
-  *             - \ref QEI1_MODULE
-  *             - \ref QEI2_MODULE
-  *             - \ref ADC_MODULE
-  *             - \ref EADC_MODULE
-  * @return     Selected module clock source setting
-  * @details    This function get selected module clock source.
-  */
+ * @brief      Get module clock source selection value
+ *
+ * @details
+ * This function returns the clock source selection value (CLKSEL)
+ * for modules that support clock source selection.
+ * For modules without clock source selection, this function returns 0.
+ *
+ * @return
+ * Raw CLKSEL field value, or 0 if the module does not support CLKSEL.
+ */
 uint32_t CLK_GetModuleClockSource(uint32_t u32ModuleIdx)
 {
     uint32_t u32sel = 0;
@@ -445,133 +312,29 @@ uint32_t CLK_GetModuleClockSource(uint32_t u32ModuleIdx)
 }
 
 /**
-  * @brief      Get selected module clock divider number
-  * @param[in]  u32ModuleIdx is module index.
-  *             - \ref PDMA0_MODULE
-  *             - \ref PDMA1_MODULE
-  *             - \ref PDMA2_MODULE
-  *             - \ref PDMA3_MODULE
-  *             - \ref WH0_MODULE
-  *             - \ref WH1_MODULE
-  *             - \ref HWS_MODULE
-  *             - \ref EBI_MODULE
-  *             - \ref SRAM0_MODULE
-  *             - \ref SRAM1_MODULE
-  *             - \ref ROM_MODULE
-  *             - \ref TRA_MODULE
-  *             - \ref DBG_MODULE
-  *             - \ref CLKO_MODULE
-  *             - \ref GTMR_MODULE
-  *             - \ref GPA_MODULE
-  *             - \ref GPB_MODULE
-  *             - \ref GPC_MODULE
-  *             - \ref GPD_MODULE
-  *             - \ref GPE_MODULE
-  *             - \ref GPF_MODULE
-  *             - \ref GPG_MODULE
-  *             - \ref GPH_MODULE
-  *             - \ref GPI_MODULE
-  *             - \ref GPJ_MODULE
-  *             - \ref GPK_MODULE
-  *             - \ref GPL_MODULE
-  *             - \ref GPM_MODULE
-  *             - \ref GPN_MODULE
-  *             - \ref CA35_MODULE
-  *             - \ref SYSCK0_MODULE
-  *             - \ref SYSCK1_MODULE
-  *             - \ref RTPST_MODULE
-  *             - \ref LVRDB_MODULE
-  *             - \ref DDR0_MODULE
-  *             - \ref DDR6_MODULE
-  *             - \ref CANFD0_MODULE
-  *             - \ref CANFD1_MODULE
-  *             - \ref CANFD2_MODULE
-  *             - \ref CANFD3_MODULE
-  *             - \ref SDH0_MODULE
-  *             - \ref SDH1_MODULE
-  *             - \ref NAND_MODULE
-  *             - \ref USBD_MODULE
-  *             - \ref USBH_MODULE
-  *             - \ref HUSBH0_MODULE
-  *             - \ref HUSBH1_MODULE
-  *             - \ref GFX_MODULE
-  *             - \ref VDEC_MODULE
-  *             - \ref DCU_MODULE
-  *             - \ref DCUP_MODULE
-  *             - \ref GMAC0_MODULE
-  *             - \ref GMAC1_MODULE
-  *             - \ref CCAP0_MODULE
-  *             - \ref CCAP1_MODULE
-  *             - \ref TMR0_MODULE
-  *             - \ref TMR1_MODULE
-  *             - \ref TMR2_MODULE
-  *             - \ref TMR3_MODULE
-  *             - \ref TMR4_MODULE
-  *             - \ref TMR5_MODULE
-  *             - \ref TMR6_MODULE
-  *             - \ref TMR7_MODULE
-  *             - \ref TMR8_MODULE
-  *             - \ref TMR9_MODULE
-  *             - \ref TMR10_MODULE
-  *             - \ref TMR11_MODULE
-  *             - \ref UART0_MODULE
-  *             - \ref UART1_MODULE
-  *             - \ref UART2_MODULE
-  *             - \ref UART3_MODULE
-  *             - \ref UART4_MODULE
-  *             - \ref UART5_MODULE
-  *             - \ref UART6_MODULE
-  *             - \ref UART7_MODULE
-  *             - \ref UART8_MODULE
-  *             - \ref UART9_MODULE
-  *             - \ref UART10_MODULE
-  *             - \ref UART11_MODULE
-  *             - \ref UART12_MODULE
-  *             - \ref UART13_MODULE
-  *             - \ref UART14_MODULE
-  *             - \ref UART15_MODULE
-  *             - \ref UART16_MODULE
-  *             - \ref RTC_MODULE
-  *             - \ref DDRP_MODULE
-  *             - \ref KPI_MODULE
-  *             - \ref I2C0_MODULE
-  *             - \ref I2C1_MODULE
-  *             - \ref I2C2_MODULE
-  *             - \ref I2C3_MODULE
-  *             - \ref I2C4_MODULE
-  *             - \ref I2C5_MODULE
-  *             - \ref QSPI0_MODULE
-  *             - \ref QSPI1_MODULE
-  *             - \ref SC0_MODULE
-  *             - \ref SC1_MODULE
-  *             - \ref WDT0_MODULE
-  *             - \ref WDT1_MODULE
-  *             - \ref WDT2_MODULE
-  *             - \ref WWDT0_MODULE
-  *             - \ref WWDT1_MODULE
-  *             - \ref WWDT2_MODULE
-  *             - \ref EPWM0_MODULE
-  *             - \ref EPWM1_MODULE
-  *             - \ref EPWM2_MODULE
-  *             - \ref I2S0_MODULE
-  *             - \ref I2S1_MODULE
-  *             - \ref SSMCC_MODULE
-  *             - \ref SSPCC_MODULE
-  *             - \ref SPI0_MODULE
-  *             - \ref SPI1_MODULE
-  *             - \ref SPI2_MODULE
-  *             - \ref SPI3_MODULE
-  *             - \ref ECAP0_MODULE
-  *             - \ref ECAP1_MODULE
-  *             - \ref ECAP2_MODULE
-  *             - \ref QEI0_MODULE
-  *             - \ref QEI1_MODULE
-  *             - \ref QEI2_MODULE
-  *             - \ref ADC_MODULE
-  *             - \ref EADC_MODULE
-  * @return     Selected module clock divider number setting
-  * @details    This function get selected module clock divider number.
-  */
+ * @brief      Get module clock divider setting
+ *
+ * @param[in]  u32ModuleIdx  Module index.
+ *
+ * @return     Raw clock divider register value (N).
+ *
+ * @details
+ * This function returns the clock divider field value configured for the
+ * specified module if the module supports clock divider configuration
+ * (i.e. the module has a CLKDIV field).
+ *
+ * For modules that do not support clock divider configuration, this function
+ * returns 0.
+ *
+ * @note
+ * The returned value is the raw divider field value (N).
+ * The effective clock division factor applied to the module clock is (N + 1).
+ *
+ * @note
+ * This function does not indicate whether the module clock is enabled.
+ * Please use CLK_EnableModuleClock() or CLK_DisableModuleClock() to control
+ * the module clock enable state.
+ */
 uint32_t CLK_GetModuleClockDivider(uint32_t u32ModuleIdx)
 {
     uint32_t u32div = 0;
@@ -585,7 +348,7 @@ uint32_t CLK_GetModuleClockDivider(uint32_t u32ModuleIdx)
 		}
 		else if (u32ModuleIdx == CLKO_MODULE)
 		{
-			u32div = (CLK->DIVCTL9 & CLK_DIVCTL9_CLKO_N_Msk) >> CLK_DIVCTL9_CLKO_N_Pos;
+			u32div = (CLK->DIVCTL9 & CLK_DIVCTL9_CKO_N_Msk) >> CLK_DIVCTL9_CKO_N_Pos;
 			return u32div;
 		}
 		else if (u32ModuleIdx == I2S_MODULE)
@@ -621,481 +384,463 @@ uint32_t CLK_GetModuleClockDivider(uint32_t u32ModuleIdx)
 }
 
 /**
-  * @brief      Enable module clock
-  * @param[in]  u32ModuleIdx is module index. Including :
-  *             - \ref PDMA0_MODULE
-  *             - \ref PDMA1_MODULE
-  *             - \ref PDMA2_MODULE
-  *             - \ref PDMA3_MODULE
-  *             - \ref WH0_MODULE
-  *             - \ref WH1_MODULE
-  *             - \ref HWS_MODULE
-  *             - \ref EBI_MODULE
-  *             - \ref SRAM0_MODULE
-  *             - \ref SRAM1_MODULE
-  *             - \ref ROM_MODULE
-  *             - \ref TRA_MODULE
-  *             - \ref DBG_MODULE
-  *             - \ref CLKO_MODULE
-  *             - \ref GTMR_MODULE
-  *             - \ref GPA_MODULE
-  *             - \ref GPB_MODULE
-  *             - \ref GPC_MODULE
-  *             - \ref GPD_MODULE
-  *             - \ref GPE_MODULE
-  *             - \ref GPF_MODULE
-  *             - \ref GPG_MODULE
-  *             - \ref GPH_MODULE
-  *             - \ref GPI_MODULE
-  *             - \ref GPJ_MODULE
-  *             - \ref GPK_MODULE
-  *             - \ref GPL_MODULE
-  *             - \ref GPM_MODULE
-  *             - \ref GPN_MODULE
-  *             - \ref CA35_MODULE
-  *             - \ref SYSCK0_MODULE
-  *             - \ref SYSCK1_MODULE
-  *             - \ref RTPST_MODULE
-  *             - \ref LVRDB_MODULE
-  *             - \ref DDR0_MODULE
-  *             - \ref DDR6_MODULE
-  *             - \ref CANFD0_MODULE
-  *             - \ref CANFD1_MODULE
-  *             - \ref CANFD2_MODULE
-  *             - \ref CANFD3_MODULE
-  *             - \ref SDH0_MODULE
-  *             - \ref SDH1_MODULE
-  *             - \ref NAND_MODULE
-  *             - \ref USBD_MODULE
-  *             - \ref USBH_MODULE
-  *             - \ref HUSBH0_MODULE
-  *             - \ref HUSBH1_MODULE
-  *             - \ref GFX_MODULE
-  *             - \ref VDEC_MODULE
-  *             - \ref DCU_MODULE
-  *             - \ref DCUP_MODULE
-  *             - \ref GMAC0_MODULE
-  *             - \ref GMAC1_MODULE
-  *             - \ref CCAP0_MODULE
-  *             - \ref CCAP1_MODULE
-  *             - \ref TMR0_MODULE
-  *             - \ref TMR1_MODULE
-  *             - \ref TMR2_MODULE
-  *             - \ref TMR3_MODULE
-  *             - \ref TMR4_MODULE
-  *             - \ref TMR5_MODULE
-  *             - \ref TMR6_MODULE
-  *             - \ref TMR7_MODULE
-  *             - \ref TMR8_MODULE
-  *             - \ref TMR9_MODULE
-  *             - \ref TMR10_MODULE
-  *             - \ref TMR11_MODULE
-  *             - \ref UART0_MODULE
-  *             - \ref UART1_MODULE
-  *             - \ref UART2_MODULE
-  *             - \ref UART3_MODULE
-  *             - \ref UART4_MODULE
-  *             - \ref UART5_MODULE
-  *             - \ref UART6_MODULE
-  *             - \ref UART7_MODULE
-  *             - \ref UART8_MODULE
-  *             - \ref UART9_MODULE
-  *             - \ref UART10_MODULE
-  *             - \ref UART11_MODULE
-  *             - \ref UART12_MODULE
-  *             - \ref UART13_MODULE
-  *             - \ref UART14_MODULE
-  *             - \ref UART15_MODULE
-  *             - \ref UART16_MODULE
-  *             - \ref RTC_MODULE
-  *             - \ref DDRP_MODULE
-  *             - \ref KPI_MODULE
-  *             - \ref I2C0_MODULE
-  *             - \ref I2C1_MODULE
-  *             - \ref I2C2_MODULE
-  *             - \ref I2C3_MODULE
-  *             - \ref I2C4_MODULE
-  *             - \ref I2C5_MODULE
-  *             - \ref QSPI0_MODULE
-  *             - \ref QSPI1_MODULE
-  *             - \ref SC0_MODULE
-  *             - \ref SC1_MODULE
-  *             - \ref WDT0_MODULE
-  *             - \ref WDT1_MODULE
-  *             - \ref WDT2_MODULE
-  *             - \ref WWDT0_MODULE
-  *             - \ref WWDT1_MODULE
-  *             - \ref WWDT2_MODULE
-  *             - \ref EPWM0_MODULE
-  *             - \ref EPWM1_MODULE
-  *             - \ref EPWM2_MODULE
-  *             - \ref I2S0_MODULE
-  *             - \ref I2S1_MODULE
-  *             - \ref SSMCC_MODULE
-  *             - \ref SSPCC_MODULE
-  *             - \ref SPI0_MODULE
-  *             - \ref SPI1_MODULE
-  *             - \ref SPI2_MODULE
-  *             - \ref SPI3_MODULE
-  *             - \ref ECAP0_MODULE
-  *             - \ref ECAP1_MODULE
-  *             - \ref ECAP2_MODULE
-  *             - \ref QEI0_MODULE
-  *             - \ref QEI1_MODULE
-  *             - \ref QEI2_MODULE
-  *             - \ref ADC_MODULE
-  *             - \ref EADC_MODULE
-  * @details    This function is used to enable module clock.
-  */
+ * @brief      Enable module clock
+ *
+ * @param[in]  u32ModuleIdx  Module index.
+ *
+ * @details
+ * This function enables the clock of the specified module by setting
+ * the corresponding clock enable bit in HCLKEN or PCLKEN registers.
+ *
+ * Only modules that provide a valid clock enable bit will be affected.
+ * For modules without an associated clock enable control bit, calling
+ * this function has no effect.
+ *
+ * @note
+ * This function only controls the module clock enable state.
+ * It does not configure clock source or clock divider.
+ * Please use CLK_SetModuleClock() to configure clock source or divider
+ * before enabling the module clock, if required.
+ */
 void CLK_EnableModuleClock(uint32_t u32ModuleIdx)
 {
-    uint32_t u32tmpVal = 0UL, u32tmpAddr = 0UL;
+    uint32_t u32tmpVal  = 0UL;
+    uint32_t u32tmpAddr = 0UL;
 
+    /* Calculate enable bit mask */
     u32tmpVal = (1UL << MODULE_IP_EN_Pos(u32ModuleIdx));
-    u32tmpAddr = (uint32_t)&CLK->HCLKEN0;
-    u32tmpAddr += ((MODULE_APBCLK(u32ModuleIdx) * 4UL));
 
+    /* Get clock enable register base address */
+    u32tmpAddr = (uint32_t)&CLK->HCLKEN0;
+    u32tmpAddr += (MODULE_APBCLK(u32ModuleIdx) * 4UL);
+
+    /* Enable module clock */
     *(volatile uint32_t *)u32tmpAddr |= u32tmpVal;
 }
 
 /**
-  * @brief      Disable module clock
-  * @param[in]  u32ModuleIdx is module index. Including :
-  *             - \ref PDMA0_MODULE
-  *             - \ref PDMA1_MODULE
-  *             - \ref PDMA2_MODULE
-  *             - \ref PDMA3_MODULE
-  *             - \ref WH0_MODULE
-  *             - \ref WH1_MODULE
-  *             - \ref HWS_MODULE
-  *             - \ref EBI_MODULE
-  *             - \ref SRAM0_MODULE
-  *             - \ref SRAM1_MODULE
-  *             - \ref ROM_MODULE
-  *             - \ref TRA_MODULE
-  *             - \ref DBG_MODULE
-  *             - \ref CLKO_MODULE
-  *             - \ref GTMR_MODULE
-  *             - \ref GPA_MODULE
-  *             - \ref GPB_MODULE
-  *             - \ref GPC_MODULE
-  *             - \ref GPD_MODULE
-  *             - \ref GPE_MODULE
-  *             - \ref GPF_MODULE
-  *             - \ref GPG_MODULE
-  *             - \ref GPH_MODULE
-  *             - \ref GPI_MODULE
-  *             - \ref GPJ_MODULE
-  *             - \ref GPK_MODULE
-  *             - \ref GPL_MODULE
-  *             - \ref GPM_MODULE
-  *             - \ref GPN_MODULE
-  *             - \ref CA35_MODULE
-  *             - \ref SYSCK0_MODULE
-  *             - \ref SYSCK1_MODULE
-  *             - \ref RTPST_MODULE
-  *             - \ref LVRDB_MODULE
-  *             - \ref DDR0_MODULE
-  *             - \ref DDR6_MODULE
-  *             - \ref CANFD0_MODULE
-  *             - \ref CANFD1_MODULE
-  *             - \ref CANFD2_MODULE
-  *             - \ref CANFD3_MODULE
-  *             - \ref SDH0_MODULE
-  *             - \ref SDH1_MODULE
-  *             - \ref NAND_MODULE
-  *             - \ref USBD_MODULE
-  *             - \ref USBH_MODULE
-  *             - \ref HUSBH0_MODULE
-  *             - \ref HUSBH1_MODULE
-  *             - \ref GFX_MODULE
-  *             - \ref VDEC_MODULE
-  *             - \ref DCU_MODULE
-  *             - \ref DCUP_MODULE
-  *             - \ref GMAC0_MODULE
-  *             - \ref GMAC1_MODULE
-  *             - \ref CCAP0_MODULE
-  *             - \ref CCAP1_MODULE
-  *             - \ref TMR0_MODULE
-  *             - \ref TMR1_MODULE
-  *             - \ref TMR2_MODULE
-  *             - \ref TMR3_MODULE
-  *             - \ref TMR4_MODULE
-  *             - \ref TMR5_MODULE
-  *             - \ref TMR6_MODULE
-  *             - \ref TMR7_MODULE
-  *             - \ref TMR8_MODULE
-  *             - \ref TMR9_MODULE
-  *             - \ref TMR10_MODULE
-  *             - \ref TMR11_MODULE
-  *             - \ref UART0_MODULE
-  *             - \ref UART1_MODULE
-  *             - \ref UART2_MODULE
-  *             - \ref UART3_MODULE
-  *             - \ref UART4_MODULE
-  *             - \ref UART5_MODULE
-  *             - \ref UART6_MODULE
-  *             - \ref UART7_MODULE
-  *             - \ref UART8_MODULE
-  *             - \ref UART9_MODULE
-  *             - \ref UART10_MODULE
-  *             - \ref UART11_MODULE
-  *             - \ref UART12_MODULE
-  *             - \ref UART13_MODULE
-  *             - \ref UART14_MODULE
-  *             - \ref UART15_MODULE
-  *             - \ref UART16_MODULE
-  *             - \ref RTC_MODULE
-  *             - \ref DDRP_MODULE
-  *             - \ref KPI_MODULE
-  *             - \ref I2C0_MODULE
-  *             - \ref I2C1_MODULE
-  *             - \ref I2C2_MODULE
-  *             - \ref I2C3_MODULE
-  *             - \ref I2C4_MODULE
-  *             - \ref I2C5_MODULE
-  *             - \ref QSPI0_MODULE
-  *             - \ref QSPI1_MODULE
-  *             - \ref SC0_MODULE
-  *             - \ref SC1_MODULE
-  *             - \ref WDT0_MODULE
-  *             - \ref WDT1_MODULE
-  *             - \ref WDT2_MODULE
-  *             - \ref WWDT0_MODULE
-  *             - \ref WWDT1_MODULE
-  *             - \ref WWDT2_MODULE
-  *             - \ref EPWM0_MODULE
-  *             - \ref EPWM1_MODULE
-  *             - \ref EPWM2_MODULE
-  *             - \ref I2S0_MODULE
-  *             - \ref I2S1_MODULE
-  *             - \ref SSMCC_MODULE
-  *             - \ref SSPCC_MODULE
-  *             - \ref SPI0_MODULE
-  *             - \ref SPI1_MODULE
-  *             - \ref SPI2_MODULE
-  *             - \ref SPI3_MODULE
-  *             - \ref ECAP0_MODULE
-  *             - \ref ECAP1_MODULE
-  *             - \ref ECAP2_MODULE
-  *             - \ref QEI0_MODULE
-  *             - \ref QEI1_MODULE
-  *             - \ref QEI2_MODULE
-  *             - \ref ADC_MODULE
-  *             - \ref EADC_MODULE
-  * @details    This function is used to disable module clock.
-  */
+ * @brief      Disable module clock
+ *
+ * @param[in]  u32ModuleIdx  Module index.
+ *
+ * @details
+ * This function disables the clock of the specified module by clearing
+ * the corresponding clock enable bit in the HCLKEN or PCLKEN registers.
+ *
+ * Only modules that provide a valid clock enable control bit will be affected.
+ * For modules without an associated clock enable bit, calling this function
+ * has no effect.
+ *
+ * @note
+ * This function only controls the module clock enable state.
+ * It does not modify clock source or clock divider settings.
+ * Clock source and divider configuration will be kept unchanged.
+ */
 void CLK_DisableModuleClock(uint32_t u32ModuleIdx)
 {
-    uint32_t u32tmpVal = 0UL, u32tmpAddr = 0UL;
+    uint32_t u32tmpVal  = 0UL;
+    uint32_t u32tmpAddr = 0UL;
 
+    /* Calculate disable bit mask */
     u32tmpVal = ~(1UL << MODULE_IP_EN_Pos(u32ModuleIdx));
-    u32tmpAddr = (uint32_t)&CLK->HCLKEN0;
-    u32tmpAddr += ((MODULE_APBCLK(u32ModuleIdx) * 4UL));
 
+    /* Get clock enable register base address */
+    u32tmpAddr = (uint32_t)&CLK->HCLKEN0;
+    u32tmpAddr += (MODULE_APBCLK(u32ModuleIdx) * 4UL);
+
+    /* Disable module clock */
     *(volatile uint32_t *)u32tmpAddr &= u32tmpVal;
 }
 
 /**
-  * @brief      This function enable clock divider output module clock,
-  *             enable clock divider output function and set frequency selection.
-  * @param[in]  u32ClkSrc is frequency divider function clock source. Including :
-  *             - \ref CLK_CLKSEL4_CKOSEL_HXT
-  *             - \ref CLK_CLKSEL4_CKOSEL_LXT
-  *             - \ref CLK_CLKSEL4_CKOSEL_LIRC
-  *             - \ref CLK_CLKSEL4_CKOSEL_HIRC
-  *             - \ref CLK_CLKSEL4_CKOSEL_CAPLL_DIV4
-  *             - \ref CLK_CLKSEL4_CKOSEL_SYSPLL
-  *             - \ref CLK_CLKSEL4_CKOSEL_APLL
-  *             - \ref CLK_CLKSEL4_CKOSEL_EPLL_DIV2
-  *             - \ref CLK_CLKSEL4_CKOSEL_VPLL
-  * @param[in]  u32ClkDiv is divider output frequency selection. It could be 0~15.
-  * @param[in]  u32ClkDivBy1En is clock divided by one enabled.
-  * @details    Output selected clock to CKO. The output clock frequency is divided by u32ClkDiv. \n
-  *             The formula is: \n
-  *                 CKO frequency = (Clock source frequency) / 2^(u32ClkDiv + 1) \n
-  *             This function is just used to set CKO clock.
-  *             User must enable I/O for CKO clock output pin by themselves. \n
-  */
+ * @brief      Enable reference clock output (CKO)
+ *
+ * @param[in]  u32ClkSrc  Reference clock output source selection.
+ *                        This parameter selects the clock source for CKO.
+ *
+ * @param[in]  u32ClkDiv  Reference clock output divider setting (N).
+ *                        The valid value depends on the CKO divider width.
+ *
+ * @details
+ * This function configures the reference clock output (CKO) by selecting
+ * the clock source and setting the clock divider.
+ * The reference clock output will be enabled after this function is called.
+ *
+ * The output clock frequency is calculated as:
+ *
+ *     CKO frequency = (CKO clock source frequency) / (u32ClkDiv + 1)
+ *
+ * @note
+ * This function only configures and enables the CKO clock.
+ * The corresponding CKO output pin function must be configured separately
+ * by the user through the GPIO or pin-mux controller.
+ */
 void CLK_EnableCLKO(uint32_t u32ClkSrc, uint32_t u32ClkDiv)
 {
-    /* Select CLKO clock source & enable clock */
+    /* Configure and enable CKO clock */
     CLK_SetModuleClock(CLKO_MODULE, u32ClkSrc, u32ClkDiv);
 }
 
 /**
-  * @brief      Disable clock divider output function
-  * @param      None
-  * @return     None
-  * @details    This function disable clock divider output function.
-  */
+ * @brief      Disable reference clock output (CKO)
+ *
+ * @details
+ * This function disables the reference clock output by clearing the
+ * corresponding clock enable bit for the CKO module.
+ *
+ * Clock source selection and clock divider settings are not modified.
+ *
+ * @note
+ * This function only disables the CKO clock generation.
+ * The CKO output pin configuration is not affected.
+ */
 void CLK_DisableCLKO(void)
 {
-    /* Disable CLKO clock source */
+    /* Disable CKO clock output */
     CLK_DisableModuleClock(CLKO_MODULE);
 }
 
+/**
+ * @brief      Get UPLL output clock frequency
+ *
+ * @return     UPLL clock frequency in Hz.
+ *
+ * @details
+ * This function calculates and returns the UPLL output clock frequency
+ * based on the current UPLL configuration settings.
+ *
+ * The calculation is performed according to the PLL formula:
+ *
+ *     Fout = Fin * (N + X) / (M * P)
+ *
+ * where:
+ *   - Fin is the external crystal clock (HXT), assumed to be 12 MHz
+ *   - N is the integer feedback divider
+ *   - X is the fractional feedback divider
+ *   - M is the input divider
+ *   - P is the output divider
+ *
+ * If the UPLL is powered down or held in reset, this function returns 0.
+ * If the UPLL is in bypass mode, this function returns the HXT frequency.
+ *
+ * @note
+ * This function assumes the external crystal (HXT) frequency is 12 MHz.
+ */
 uint32_t CLK_GetUPLLClockFreq(void)
 {
-	uint32_t u32M, u32N, u32P;
-	uint32_t u32PLLCon;
+    uint32_t u32PLLCon;
+    uint32_t u32M, u32N, u32P;
+    uint32_t u32Frac;
+    uint64_t u64Freq;
 
-	u32PLLCon = CLK->UPLLCON;
-	u32N = ((u32PLLCon & 0x007F) >> 0)  + 1;  // FB_DV
-    u32M = ((u32PLLCon & 0x1F80) >> 7)  + 1;  // IN_DV
-    u32P = ((u32PLLCon & 0xE000) >> 13) + 1;  // OUT_DV
+    u32PLLCon = CLK->UPLLCON;
 
-	return (12 * u32N / (u32M * u32P));    /* 12MHz HXT */
+    /* PLL powered down or in reset */
+    if ((u32PLLCon & CLK_UPLLCON_PD_Msk) || !(u32PLLCon & CLK_UPLLCON_RESETN_Msk))
+    {
+        return 0U;
+    }
+
+    /* PLL bypass mode */
+    if (u32PLLCon & CLK_UPLLCON_BYPASS_Msk)
+    {
+        return 12000000U; /* HXT */
+    }
+
+    u32N    = ((u32PLLCon & CLK_UPLLCON_FB_DV_Msk)   >> CLK_UPLLCON_FB_DV_Pos)   + 1U;
+    u32M    = ((u32PLLCon & CLK_UPLLCON_IN_DV_Msk)   >> CLK_UPLLCON_IN_DV_Pos)   + 1U;
+    u32P    = ((u32PLLCon & CLK_UPLLCON_OUT_DV_Msk)  >> CLK_UPLLCON_OUT_DV_Pos)  + 1U;
+    u32Frac = ((u32PLLCon & CLK_UPLLCON_FRAC_Msk)    >> CLK_UPLLCON_FRAC_Pos);
+
+    /* Fractional part: X = FRAC / 2^12 */
+    u64Freq = 12000000ULL * ((uint64_t)u32N * 4096ULL + u32Frac);
+    u64Freq = u64Freq / (4096ULL * u32M * u32P);
+
+    return (uint32_t)u64Freq;
 }
 
+/**
+ * @brief      Get APLL output clock frequency
+ *
+ * @return     APLL clock frequency in Hz.
+ *
+ * @details
+ * This function calculates and returns the APLL output clock frequency
+ * based on the current APLL configuration settings.
+ *
+ * The calculation follows the PLL formula:
+ *
+ *     Fout = Fin * (N + X) / (M * P)
+ *
+ * where Fin is assumed to be 12 MHz (HXT).
+ *
+ * If the APLL is powered down or held in reset, this function returns 0.
+ * If the APLL is in bypass mode, this function returns the HXT frequency.
+ *
+ * @note
+ * This function assumes the external crystal (HXT) frequency is 12 MHz.
+ */
 uint32_t CLK_GetAPLLClockFreq(void)
 {
-	uint32_t u32M, u32N, u32P;
-	uint32_t u32PLLCon;
+    uint32_t u32PLLCon;
+    uint32_t u32M, u32N, u32P;
+    uint32_t u32Frac;
+    uint64_t u64Freq;
 
-	u32PLLCon = CLK->APLLCON;
-	u32N = ((u32PLLCon & 0x007F) >> 0)  + 1;  // FB_DV
-    u32M = ((u32PLLCon & 0x1F80) >> 7)  + 1;  // IN_DV
-    u32P = ((u32PLLCon & 0xE000) >> 13) + 1;  // OUT_DV
+    u32PLLCon = CLK->APLLCON;
 
-	return (12 * u32N / (u32M * u32P));    /* 12MHz HXT */
+    /* PLL powered down or in reset */
+    if ((u32PLLCon & CLK_APLLCON_PD_Msk) || !(u32PLLCon & CLK_APLLCON_RESETN_Msk))
+    {
+        return 0U;
+    }
+
+    /* PLL bypass mode */
+    if (u32PLLCon & CLK_APLLCON_BYPASS_Msk)
+    {
+        return 12000000U; /* HXT */
+    }
+
+    u32N    = ((u32PLLCon & CLK_APLLCON_FB_DV_Msk)   >> CLK_APLLCON_FB_DV_Pos)   + 1U;
+    u32M    = ((u32PLLCon & CLK_APLLCON_IN_DV_Msk)   >> CLK_APLLCON_IN_DV_Pos)   + 1U;
+    u32P    = ((u32PLLCon & CLK_APLLCON_OUT_DV_Msk)  >> CLK_APLLCON_OUT_DV_Pos)  + 1U;
+    u32Frac = ((u32PLLCon & CLK_APLLCON_FRAC_Msk)    >> CLK_APLLCON_FRAC_Pos);
+
+    u64Freq = 12000000ULL * ((uint64_t)u32N * 4096ULL + u32Frac);
+    u64Freq = u64Freq / (4096ULL * u32M * u32P);
+
+    return (uint32_t)u64Freq;
 }
 
+/**
+ * @brief      Get specified clock frequency
+ *
+ * @param[in]  clk  Clock type to query.
+ *
+ * @return     Clock frequency in Hz.
+ *             Returns 0 if the clock source is disabled or undefined.
+ *
+ * @details
+ * This function returns the current frequency of the specified clock
+ * based on the system clock source selection and divider configuration.
+ *
+ * The following clocks are supported:
+ *   - UPLL
+ *   - APLL
+ *   - SYSTEM (SYS_CLK)
+ *   - HCLK
+ *   - HCLK1
+ *   - PCLK0
+ *   - PCLK1
+ *   - PCLK2
+ *   - CPU
+ *
+ * The returned frequency is calculated according to the current clock
+ * controller register settings.
+ *
+ * @note
+ * This function assumes the external crystal clock (HXT) frequency is
+ * 12 MHz.
+ */
 uint32_t CLK_GetClockFreq(CLOCK_Type clk)
 {
-    uint32_t clkfreq = 0;
-    uint32_t divN, reg;
+    uint32_t clkfreq = 0U;
+    uint32_t reg;
+    uint32_t div;
 
-    reg = ((CLK->DIVCTL0) & CLK_DIVCTL0_SYSTEM_S_Msk) >> CLK_DIVCTL0_SYSTEM_S_Pos;
+    /* Get SYS_CLK source */
+    reg = (CLK->DIVCTL0 & CLK_DIVCTL0_SYSTEM_S_Msk) >> CLK_DIVCTL0_SYSTEM_S_Pos;
+
     switch (reg)
     {
         case 0x0:  /* HXT */
-            clkfreq = 12;
+            clkfreq = 12000000U;
             break;
+
         case 0x2:  /* APLL */
             clkfreq = CLK_GetAPLLClockFreq();
             break;
+
         case 0x3:  /* UPLL */
             clkfreq = CLK_GetUPLLClockFreq();
             break;
+
+        default:   /* Reserved or invalid */
+            return 0U;
     }
 
+    /* Return according to requested clock */
     switch (clk)
     {
-		case CLK_UPLL:
-			clkfreq = CLK_GetUPLLClockFreq();
-            break;
+        case CLK_UPLL:
+            return CLK_GetUPLLClockFreq();
 
-		case CLK_APLL:
-			clkfreq = CLK_GetAPLLClockFreq();
-            break;
+        case CLK_APLL:
+            return CLK_GetAPLLClockFreq();
 
-		case CLK_SYSTEM:
-			break;  // clkfreq
-
-		case CLK_HCLK:
-			clkfreq = clkfreq / 2;
-            break;
-
-        case CLK_HCLK1:
-			clkfreq = clkfreq / 2 / 2;
-            break;
-
-		case CLK_PCLK0:
-        case CLK_PCLK1:
-			clkfreq = clkfreq / 2;
-            break;
-
-		case CLK_PCLK2:
-            clkfreq = clkfreq / 2 / 2;
-            break;
+        case CLK_SYSTEM:
+            return clkfreq;
 
         case CLK_CPU:
-		    reg = ((CLK->DIVCTL0) & CLK_DIVCTL0_CPUDIV2EN_Msk) >> CLK_DIVCTL0_CPUDIV2EN_Pos;
-			divN = reg + 1;
-			clkfreq = clkfreq / divN;
-            break;
+            div = ((CLK->DIVCTL0 & CLK_DIVCTL0_CPUDIV2EN_Msk) >>
+                    CLK_DIVCTL0_CPUDIV2EN_Pos) + 1U;
+            return clkfreq / div;
 
-		default:
-			;
+        case CLK_HCLK:
+            /* HCLK = SYS_CLK */
+            return clkfreq;
+
+        case CLK_HCLK1:
+            /* HCLK1 = HCLK / 2 */
+            return clkfreq / 2U;
+
+        case CLK_PCLK0:
+            /* PCLK0 = HCLK */
+            return clkfreq;
+
+        case CLK_PCLK1:
+            /* PCLK1 = HCLK */
+            return clkfreq;
+
+        case CLK_PCLK2:
+            /* PCLK2 = HCLK / 2 */
+            return clkfreq / 2U;
+
+        default:
+            return 0U;
     }
-
-    return clkfreq;
 }
 
 /**
-  * @brief      Enable clock source
-  * @param[in]  u32ClkMask is clock source mask. Including :
-  *             - \ref CLK_PWRCTL_HXTEN_Msk
-  *             - \ref CLK_PWRCTL_LXTEN_Msk
-  *             - \ref CLK_PWRCTL_HIRCEN_Msk
-  *             - \ref CLK_PWRCTL_LIRCEN_Msk
-  * @return     None
-  * @details    This function enable clock source. \n
-  *             The register write-protection function should be disabled before using this function.
-  */
-void CLK_EnableXtalRC(void)
-{
-    CLK->PMCON |= CLK_PMCON_XTAL_EN_Msk;  // Normal operation mode
-}
-
-/**
-  * @brief      Disable clock source
-  * @details    This function disable clock source. \n
-  *             The register write-protection function should be disabled before using this function.
-  */
-void CLK_DisableXtalRC(void)
-{
-    CLK->PMCON &= ~CLK_PMCON_XTAL_EN_Msk;  // Power-down mode (XTAL_EN is write only bit)
-}
-
+ * @brief      Stop module clock
+ *
+ * @param[in]  req  Clock stop request selection.
+ *
+ * @details
+ * This function requests to stop the clock of the specified CANFD module
+ * by setting the corresponding STOPREQ bit and waits until the hardware
+ * acknowledges that the clock has been stopped.
+ *
+ * The function blocks until the STOPACK status bit is set, indicating that
+ * the module clock has been successfully stopped.
+ *
+ * @note
+ * This function applies only to CANFD modules that support clock stop
+ * request and acknowledge mechanism.
+ * For other modules, clock stop is controlled by clock enable registers.
+ */
 void CLK_StopClock(CLK_Stop req)
 {
+    uint32_t timeout = 1000000U; /* simple timeout count */
 
-	switch(req)
-	{
-		case STR_CANFD0:
-			CLK->STOPREQ |= CLK_STOPREQ_CANFD0STR_Msk;
-			while ((CLK->STOPACK & CLK_STOPACK_CANFD0STA_Msk) != CLK_STOPACK_CANFD0STA_Msk);
-			break;
+    switch (req)
+    {
+        case STR_CANFD0:
+            CLK->STOPREQ |= CLK_STOPREQ_CANFD0STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD0STA_Msk) == 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
 
-		case STR_CANFD1:
-			CLK->STOPREQ |= CLK_STOPREQ_CANFD1STR_Msk;
-			while ((CLK->STOPACK & CLK_STOPACK_CANFD1STA_Msk) != CLK_STOPACK_CANFD1STA_Msk);
-			break;
+        case STR_CANFD1:
+            CLK->STOPREQ |= CLK_STOPREQ_CANFD1STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD1STA_Msk) == 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
 
-		case STR_CANFD2:
-			CLK->STOPREQ |= CLK_STOPREQ_CANFD2STR_Msk;
-			while ((CLK->STOPACK & CLK_STOPACK_CANFD2STA_Msk) != CLK_STOPACK_CANFD2STA_Msk);
-			break;
+        case STR_CANFD2:
+            CLK->STOPREQ |= CLK_STOPREQ_CANFD2STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD2STA_Msk) == 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
 
-		case STR_CANFD3:
-			CLK->STOPREQ |= CLK_STOPREQ_CANFD3STR_Msk;
-			while ((CLK->STOPACK & CLK_STOPACK_CANFD3STA_Msk) != CLK_STOPACK_CANFD3STA_Msk);
-			break;
-	}
+        case STR_CANFD3:
+            CLK->STOPREQ |= CLK_STOPREQ_CANFD3STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD3STA_Msk) == 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
+
+        default:
+            /* Invalid request, do nothing */
+            break;
+    }
 }
 
+/**
+ * @brief      Start module clock
+ *
+ * @param[in]  req  Clock start request selection.
+ *
+ * @details
+ * This function restarts the clock of the specified CANFD module by
+ * clearing the corresponding STOPREQ bit and waits until the hardware
+ * acknowledges that the clock has been resumed.
+ *
+ * The function blocks until the STOPACK status bit is cleared, indicating
+ * that the module clock is running again.
+ *
+ * @note
+ * This function applies only to CANFD modules that support the clock
+ * stop/start request and acknowledge mechanism.
+ * For other modules, clock control is managed by clock enable registers.
+ */
 void CLK_StartClock(CLK_Stop req)
 {
-	switch(req)
-	{
-		case STR_CANFD0:
-			CLK->STOPREQ &= ~CLK_STOPREQ_CANFD0STR_Msk;
-			break;
+    uint32_t timeout = 1000000U; /* simple timeout count */
 
-		case STR_CANFD1:
-			CLK->STOPREQ &= ~CLK_STOPREQ_CANFD1STR_Msk;
-			break;
+    switch (req)
+    {
+        case STR_CANFD0:
+            CLK->STOPREQ &= ~CLK_STOPREQ_CANFD0STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD0STA_Msk) != 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
 
-		case STR_CANFD2:
-			CLK->STOPREQ &= ~CLK_STOPREQ_CANFD2STR_Msk;
-			break;
+        case STR_CANFD1:
+            CLK->STOPREQ &= ~CLK_STOPREQ_CANFD1STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD1STA_Msk) != 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
 
-		case STR_CANFD3:
-			CLK->STOPREQ &= ~CLK_STOPREQ_CANFD3STR_Msk;
-			break;
-	}
+        case STR_CANFD2:
+            CLK->STOPREQ &= ~CLK_STOPREQ_CANFD2STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD2STA_Msk) != 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
+
+        case STR_CANFD3:
+            CLK->STOPREQ &= ~CLK_STOPREQ_CANFD3STR_Msk;
+            while ((CLK->STOPACK & CLK_STOPACK_CANFD3STA_Msk) != 0U)
+            {
+                if (--timeout == 0U)
+                    return;
+            }
+            break;
+
+        default:
+            /* Invalid request, do nothing */
+            break;
+    }
 }
 
 /*@}*/ /* end of group CLK_EXPORTED_FUNCTIONS */

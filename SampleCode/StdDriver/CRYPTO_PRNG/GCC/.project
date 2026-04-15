@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>CRYPTO_AES</name>
+	<name>CRYPTO_PRNG</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -53,11 +53,6 @@
 			<name>User/main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/main.c</locationURI>
-		</link>
-		<link>
-			<name>User/multi_channel_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/multi_channel_test.c</locationURI>
 		</link>
 	</linkedResources>
 	<filteredResources>

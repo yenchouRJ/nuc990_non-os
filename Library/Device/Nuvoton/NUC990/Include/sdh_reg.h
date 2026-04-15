@@ -536,9 +536,6 @@ typedef struct
 /**@}*/ /* end of SDH register group */
 /**@}*/ /* end of REGISTER group */
 
-#define SDH0                 ((SDH_T *)   FMI_BA)
-#define SDH1                 ((SDH_T *)   SDH_BA)
-
 /** @addtogroup Standard_Driver Standard Driver
   @{
 */

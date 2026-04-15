@@ -4139,22 +4139,12 @@ typedef struct
     __IO uint32_t INTSTS;                /*!< [0x0004] Crypto Interrupt Flag                                            */
     __IO uint32_t PRNG_CTL;              /*!< [0x0008] PRNG Control Register                                            */
     __O  uint32_t PRNG_SEED;             /*!< [0x000c] Seed for PRNG                                                    */
-    __I  uint32_t PRNG_KEY0;             /*!< [0x0010] PRNG Generated Key0                                              */
-    __I  uint32_t PRNG_KEY1;             /*!< [0x0014] PRNG Generated Key1                                              */
-    __I  uint32_t PRNG_KEY2;             /*!< [0x0018] PRNG Generated Key2                                              */
-    __I  uint32_t PRNG_KEY3;             /*!< [0x001c] PRNG Generated Key3                                              */
-    __I  uint32_t PRNG_KEY4;             /*!< [0x0020] PRNG Generated Key4                                              */
-    __I  uint32_t PRNG_KEY5;             /*!< [0x0024] PRNG Generated Key5                                              */
-    __I  uint32_t PRNG_KEY6;             /*!< [0x0028] PRNG Generated Key6                                              */
-    __I  uint32_t PRNG_KEY7;             /*!< [0x002c] PRNG Generated Key7                                              */
+    __I  uint32_t PRNG_KEY[8];           /*!< [0x0010] PRNG Generated Key0 ~ Key7                                       */
     __I  uint32_t PRNG_STS;              /*!< [0x0030] PRNG Status Register                                             */
     __I  uint32_t RESERVE0[19];
-    __IO uint32_t AES_GCM_IVCNT0;        /*!< [0x0080] AES GCM IV Byte Count Register 0                                 */
-    __IO uint32_t AES_GCM_IVCNT1;        /*!< [0x0084] AES GCM IV Byte Count Register 1                                 */
-    __IO uint32_t AES_GCM_ACNT0;         /*!< [0x0088] AES GCM A Byte Count Register 0                                  */
-    __IO uint32_t AES_GCM_ACNT1;         /*!< [0x008c] AES GCM A Byte Count Register 1                                  */
-    __IO uint32_t AES_GCM_PCNT0;         /*!< [0x0090] AES GCM P Byte Count Register 0                                  */
-    __IO uint32_t AES_GCM_PCNT1;         /*!< [0x0094] AES GCM P Byte Count Register 1                                  */
+    __IO uint32_t AES_GCM_IVCNT[2];      /*!< [0x0080] AES GCM IV Byte Count Register 0 ~ 1                             */
+    __IO uint32_t AES_GCM_ACNT[2];       /*!< [0x0088] AES GCM A Byte Count Register 0 ~ 1                              */
+    __IO uint32_t AES_GCM_PCNT[2];       /*!< [0x0090] AES GCM P Byte Count Register 0 ~ 1                              */
     __I  uint32_t RESERVE1[2];
     __IO uint32_t AES_FBADDR;            /*!< [0x00a0] AES DMA Feedback Address Register                                */
     __I  uint32_t RESERVE2[23];
@@ -4162,40 +4152,15 @@ typedef struct
     __I  uint32_t AES_STS;               /*!< [0x0104] AES Engine Flag                                                  */
     __IO uint32_t AES_DATIN;             /*!< [0x0108] AES Engine Data Input Port Register                              */
     __I  uint32_t AES_DATOUT;            /*!< [0x010c] AES Engine Data Output Port Register                             */
-    __IO uint32_t AES_KEY0;              /*!< [0x0110] AES Key Word 0 Register                                          */
-    __IO uint32_t AES_KEY1;              /*!< [0x0114] AES Key Word 1 Register                                          */
-    __IO uint32_t AES_KEY2;              /*!< [0x0118] AES Key Word 2 Register                                          */
-    __IO uint32_t AES_KEY3;              /*!< [0x011c] AES Key Word 3 Register                                          */
-    __IO uint32_t AES_KEY4;              /*!< [0x0120] AES Key Word 4 Register                                          */
-    __IO uint32_t AES_KEY5;              /*!< [0x0124] AES Key Word 5 Register                                          */
-    __IO uint32_t AES_KEY6;              /*!< [0x0128] AES Key Word 6 Register                                          */
-    __IO uint32_t AES_KEY7;              /*!< [0x012c] AES Key Word 7 Register                                          */
-    __IO uint32_t AES_IV0;               /*!< [0x0130] AES Initial Vector Word 0 Register                               */
-    __IO uint32_t AES_IV1;               /*!< [0x0134] AES Initial Vector Word 1 Register                               */
-    __IO uint32_t AES_IV2;               /*!< [0x0138] AES Initial Vector Word 2 Register                               */
-    __IO uint32_t AES_IV3;               /*!< [0x013c] AES Initial Vector Word 3 Register                               */
+    __IO uint32_t AES_KEY[8];            /*!< [0x0110] AES Key Word 0 ~ 7 Registers                                     */
+    __IO uint32_t AES_IV[4];             /*!< [0x0130] AES Initial Vector Word 0 ~ 3 Register                           */
     __IO uint32_t AES_SADDR;             /*!< [0x0140] AES DMA Source Address Register                                  */
     __IO uint32_t AES_DADDR;             /*!< [0x0144] AES DMA Destination Address Register                             */
     __IO uint32_t AES_CNT;               /*!< [0x0148] AES Byte Count Register                                          */
     __I  uint32_t RESERVE3[109];
     __IO uint32_t HMAC_CTL;              /*!< [0x0300] SHA/HMAC Control Register                                        */
     __I  uint32_t HMAC_STS;              /*!< [0x0304] SHA/HMAC Status Flag                                             */
-    __I  uint32_t HMAC_DGST0;            /*!< [0x0308] SHA/HMAC Output Digest Data 0                                    */
-    __I  uint32_t HMAC_DGST1;            /*!< [0x030c] SHA/HMAC Output Digest Data 1                                    */
-    __I  uint32_t HMAC_DGST2;            /*!< [0x0310] SHA/HMAC Output Digest Data 2                                    */
-    __I  uint32_t HMAC_DGST3;            /*!< [0x0314] SHA/HMAC Output Digest Data 3                                    */
-    __I  uint32_t HMAC_DGST4;            /*!< [0x0318] SHA/HMAC Output Digest Data 4                                    */
-    __I  uint32_t HMAC_DGST5;            /*!< [0x031c] SHA/HMAC Output Digest Data 5                                    */
-    __I  uint32_t HMAC_DGST6;            /*!< [0x0320] SHA/HMAC Output Digest Data 6                                    */
-    __I  uint32_t HMAC_DGST7;            /*!< [0x0324] SHA/HMAC Output Digest Data 7                                    */
-    __I  uint32_t HMAC_DGST8;            /*!< [0x0328] SHA/HMAC Output Digest Data 8                                    */
-    __I  uint32_t HMAC_DGST9;            /*!< [0x032c] SHA/HMAC Output Digest Data 9                                    */
-    __I  uint32_t HMAC_DGST10;           /*!< [0x0330] SHA/HMAC Output Digest Data 10                                   */
-    __I  uint32_t HMAC_DGST11;           /*!< [0x0334] SHA/HMAC Output Digest Data 11                                   */
-    __I  uint32_t HMAC_DGST12;           /*!< [0x0338] SHA/HMAC Output Digest Data 12                                   */
-    __I  uint32_t HMAC_DGST13;           /*!< [0x033c] SHA/HMAC Output Digest Data 13                                   */
-    __I  uint32_t HMAC_DGST14;           /*!< [0x0340] SHA/HMAC Output Digest Data 14                                   */
-    __I  uint32_t HMAC_DGST15;           /*!< [0x0344] SHA/HMAC Output Digest Data 15                                   */
+    __I  uint32_t HMAC_DGST[16];         /*!< [0x0308] SHA/HMAC Output Digest Data 0 ~ 15                               */
     __IO uint32_t HMAC_KEYCNT;           /*!< [0x0348] SHA/HMAC Key Byte Count Register                                 */
     __IO uint32_t HMAC_SADDR;            /*!< [0x034c] SHA/HMAC DMA Source Address Register                             */
     __IO uint32_t HMAC_DMACNT;           /*!< [0x0350] SHA/HMAC Byte Count Register                                     */
@@ -4204,195 +4169,18 @@ typedef struct
     __I  uint32_t RESERVE4[103];
     __IO uint32_t HMAC_SHA512T;          /*!< [0x04f8] SHA/HMAC SHA512/t Control Register                               */
     __IO uint32_t HMAC_FBADDR;           /*!< [0x04fc] SHA/HMAC DMA Feedback Address Register                           */
-    __I  uint32_t HMAC_SHAKEDGST0;       /*!< [0x0500] SHA/HMAC SHAKE Digest Message 0                                  */
-    __I  uint32_t HMAC_SHAKEDGST1;       /*!< [0x0504] SHA/HMAC SHAKE Digest Message 1                                  */
-    __I  uint32_t HMAC_SHAKEDGST2;       /*!< [0x0508] SHA/HMAC SHAKE Digest Message 2                                  */
-    __I  uint32_t HMAC_SHAKEDGST3;       /*!< [0x050c] SHA/HMAC SHAKE Digest Message 3                                  */
-    __I  uint32_t HMAC_SHAKEDGST4;       /*!< [0x0510] SHA/HMAC SHAKE Digest Message 4                                  */
-    __I  uint32_t HMAC_SHAKEDGST5;       /*!< [0x0514] SHA/HMAC SHAKE Digest Message 5                                  */
-    __I  uint32_t HMAC_SHAKEDGST6;       /*!< [0x0518] SHA/HMAC SHAKE Digest Message 6                                  */
-    __I  uint32_t HMAC_SHAKEDGST7;       /*!< [0x051c] SHA/HMAC SHAKE Digest Message 7                                  */
-    __I  uint32_t HMAC_SHAKEDGST8;       /*!< [0x0520] SHA/HMAC SHAKE Digest Message 8                                  */
-    __I  uint32_t HMAC_SHAKEDGST9;       /*!< [0x0524] SHA/HMAC SHAKE Digest Message 9                                  */
-    __I  uint32_t HMAC_SHAKEDGST10;      /*!< [0x0528] SHA/HMAC SHAKE Digest Message 10                                 */
-    __I  uint32_t HMAC_SHAKEDGST11;      /*!< [0x052c] SHA/HMAC SHAKE Digest Message 11                                 */
-    __I  uint32_t HMAC_SHAKEDGST12;      /*!< [0x0530] SHA/HMAC SHAKE Digest Message 12                                 */
-    __I  uint32_t HMAC_SHAKEDGST13;      /*!< [0x0534] SHA/HMAC SHAKE Digest Message 13                                 */
-    __I  uint32_t HMAC_SHAKEDGST14;      /*!< [0x0538] SHA/HMAC SHAKE Digest Message 14                                 */
-    __I  uint32_t HMAC_SHAKEDGST15;      /*!< [0x053c] SHA/HMAC SHAKE Digest Message 15                                 */
-    __I  uint32_t HMAC_SHAKEDGST16;      /*!< [0x0540] SHA/HMAC SHAKE Digest Message 16                                 */
-    __I  uint32_t HMAC_SHAKEDGST17;      /*!< [0x0544] SHA/HMAC SHAKE Digest Message 17                                 */
-    __I  uint32_t HMAC_SHAKEDGST18;      /*!< [0x0548] SHA/HMAC SHAKE Digest Message 18                                 */
-    __I  uint32_t HMAC_SHAKEDGST19;      /*!< [0x054c] SHA/HMAC SHAKE Digest Message 19                                 */
-    __I  uint32_t HMAC_SHAKEDGST20;      /*!< [0x0550] SHA/HMAC SHAKE Digest Message 20                                 */
-    __I  uint32_t HMAC_SHAKEDGST21;      /*!< [0x0554] SHA/HMAC SHAKE Digest Message 21                                 */
-    __I  uint32_t HMAC_SHAKEDGST22;      /*!< [0x0558] SHA/HMAC SHAKE Digest Message 22                                 */
-    __I  uint32_t HMAC_SHAKEDGST23;      /*!< [0x055c] SHA/HMAC SHAKE Digest Message 23                                 */
-    __I  uint32_t HMAC_SHAKEDGST24;      /*!< [0x0560] SHA/HMAC SHAKE Digest Message 24                                 */
-    __I  uint32_t HMAC_SHAKEDGST25;      /*!< [0x0564] SHA/HMAC SHAKE Digest Message 25                                 */
-    __I  uint32_t HMAC_SHAKEDGST26;      /*!< [0x0568] SHA/HMAC SHAKE Digest Message 26                                 */
-    __I  uint32_t HMAC_SHAKEDGST27;      /*!< [0x056c] SHA/HMAC SHAKE Digest Message 27                                 */
-    __I  uint32_t HMAC_SHAKEDGST28;      /*!< [0x0570] SHA/HMAC SHAKE Digest Message 28                                 */
-    __I  uint32_t HMAC_SHAKEDGST29;      /*!< [0x0574] SHA/HMAC SHAKE Digest Message 29                                 */
-    __I  uint32_t HMAC_SHAKEDGST30;      /*!< [0x0578] SHA/HMAC SHAKE Digest Message 30                                 */
-    __I  uint32_t HMAC_SHAKEDGST31;      /*!< [0x057c] SHA/HMAC SHAKE Digest Message 31                                 */
-    __I  uint32_t HMAC_SHAKEDGST32;      /*!< [0x0580] SHA/HMAC SHAKE Digest Message 32                                 */
-    __I  uint32_t HMAC_SHAKEDGST33;      /*!< [0x0584] SHA/HMAC SHAKE Digest Message 33                                 */
-    __I  uint32_t HMAC_SHAKEDGST34;      /*!< [0x0588] SHA/HMAC SHAKE Digest Message 34                                 */
-    __I  uint32_t HMAC_SHAKEDGST35;      /*!< [0x058c] SHA/HMAC SHAKE Digest Message 35                                 */
-    __I  uint32_t HMAC_SHAKEDGST36;      /*!< [0x0590] SHA/HMAC SHAKE Digest Message 36                                 */
-    __I  uint32_t HMAC_SHAKEDGST37;      /*!< [0x0594] SHA/HMAC SHAKE Digest Message 37                                 */
-    __I  uint32_t HMAC_SHAKEDGST38;      /*!< [0x0598] SHA/HMAC SHAKE Digest Message 38                                 */
-    __I  uint32_t HMAC_SHAKEDGST39;      /*!< [0x059c] SHA/HMAC SHAKE Digest Message 39                                 */
-    __I  uint32_t HMAC_SHAKEDGST40;      /*!< [0x05a0] SHA/HMAC SHAKE Digest Message 40                                 */
-    __I  uint32_t HMAC_SHAKEDGST41;      /*!< [0x05a4] SHA/HMAC SHAKE Digest Message 41                                 */
+    __I  uint32_t HMAC_SHAKEDGST[42];    /*!< [0x0500] SHA/HMAC SHAKE Digest Message 0 ~ 41                             */
     __I  uint32_t RESERVE5[150];
     __IO uint32_t ECC_CTL;               /*!< [0x0800] ECC Control Register                                             */
     __I  uint32_t ECC_STS;               /*!< [0x0804] ECC Status Register                                              */
-    __IO uint32_t ECC_X1_00;             /*!< [0x0808] ECC the X-coordinate Word0 of the First Point                    */
-    __IO uint32_t ECC_X1_01;             /*!< [0x080c] ECC the X-coordinate Word1 of the First Point                    */
-    __IO uint32_t ECC_X1_02;             /*!< [0x0810] ECC the X-coordinate Word2 of the First Point                    */
-    __IO uint32_t ECC_X1_03;             /*!< [0x0814] ECC the X-coordinate Word3 of the First Point                    */
-    __IO uint32_t ECC_X1_04;             /*!< [0x0818] ECC the X-coordinate Word4 of the First Point                    */
-    __IO uint32_t ECC_X1_05;             /*!< [0x081c] ECC the X-coordinate Word5 of the First Point                    */
-    __IO uint32_t ECC_X1_06;             /*!< [0x0820] ECC the X-coordinate Word6 of the First Point                    */
-    __IO uint32_t ECC_X1_07;             /*!< [0x0824] ECC the X-coordinate Word7 of the First Point                    */
-    __IO uint32_t ECC_X1_08;             /*!< [0x0828] ECC the X-coordinate Word8 of the First Point                    */
-    __IO uint32_t ECC_X1_09;             /*!< [0x082c] ECC the X-coordinate Word9 of the First Point                    */
-    __IO uint32_t ECC_X1_10;             /*!< [0x0830] ECC the X-coordinate Word10 of the First Point                   */
-    __IO uint32_t ECC_X1_11;             /*!< [0x0834] ECC the X-coordinate Word11 of the First Point                   */
-    __IO uint32_t ECC_X1_12;             /*!< [0x0838] ECC the X-coordinate Word12 of the First Point                   */
-    __IO uint32_t ECC_X1_13;             /*!< [0x083c] ECC the X-coordinate Word13 of the First Point                   */
-    __IO uint32_t ECC_X1_14;             /*!< [0x0840] ECC the X-coordinate Word14 of the First Point                   */
-    __IO uint32_t ECC_X1_15;             /*!< [0x0844] ECC the X-coordinate Word15 of the First Point                   */
-    __IO uint32_t ECC_X1_16;             /*!< [0x0848] ECC the X-coordinate Word16 of the First Point                   */
-    __IO uint32_t ECC_X1_17;             /*!< [0x084c] ECC the X-coordinate Word17 of the First Point                   */
-    __IO uint32_t ECC_Y1_00;             /*!< [0x0850] ECC the Y-coordinate Word0 of the First Point                    */
-    __IO uint32_t ECC_Y1_01;             /*!< [0x0854] ECC the Y-coordinate Word1 of the First Point                    */
-    __IO uint32_t ECC_Y1_02;             /*!< [0x0858] ECC the Y-coordinate Word2 of the First Point                    */
-    __IO uint32_t ECC_Y1_03;             /*!< [0x085c] ECC the Y-coordinate Word3 of the First Point                    */
-    __IO uint32_t ECC_Y1_04;             /*!< [0x0860] ECC the Y-coordinate Word4 of the First Point                    */
-    __IO uint32_t ECC_Y1_05;             /*!< [0x0864] ECC the Y-coordinate Word5 of the First Point                    */
-    __IO uint32_t ECC_Y1_06;             /*!< [0x0868] ECC the Y-coordinate Word6 of the First Point                    */
-    __IO uint32_t ECC_Y1_07;             /*!< [0x086c] ECC the Y-coordinate Word7 of the First Point                    */
-    __IO uint32_t ECC_Y1_08;             /*!< [0x0870] ECC the Y-coordinate Word8 of the First Point                    */
-    __IO uint32_t ECC_Y1_09;             /*!< [0x0874] ECC the Y-coordinate Word9 of the First Point                    */
-    __IO uint32_t ECC_Y1_10;             /*!< [0x0878] ECC the Y-coordinate Word10 of the First Point                   */
-    __IO uint32_t ECC_Y1_11;             /*!< [0x087c] ECC the Y-coordinate Word11 of the First Point                   */
-    __IO uint32_t ECC_Y1_12;             /*!< [0x0880] ECC the Y-coordinate Word12 of the First Point                   */
-    __IO uint32_t ECC_Y1_13;             /*!< [0x0884] ECC the Y-coordinate Word13 of the First Point                   */
-    __IO uint32_t ECC_Y1_14;             /*!< [0x0888] ECC the Y-coordinate Word14 of the First Point                   */
-    __IO uint32_t ECC_Y1_15;             /*!< [0x088c] ECC the Y-coordinate Word15 of the First Point                   */
-    __IO uint32_t ECC_Y1_16;             /*!< [0x0890] ECC the Y-coordinate Word16 of the First Point                   */
-    __IO uint32_t ECC_Y1_17;             /*!< [0x0894] ECC the Y-coordinate Word17 of the First Point                   */
-    __IO uint32_t ECC_X2_00;             /*!< [0x0898] ECC the X-coordinate Word0 of the Second Point                   */
-    __IO uint32_t ECC_X2_01;             /*!< [0x089c] ECC the X-coordinate Word1 of the Second Point                   */
-    __IO uint32_t ECC_X2_02;             /*!< [0x08a0] ECC the X-coordinate Word2 of the Second Point                   */
-    __IO uint32_t ECC_X2_03;             /*!< [0x08a4] ECC the X-coordinate Word3 of the Second Point                   */
-    __IO uint32_t ECC_X2_04;             /*!< [0x08a8] ECC the X-coordinate Word4 of the Second Point                   */
-    __IO uint32_t ECC_X2_05;             /*!< [0x08ac] ECC the X-coordinate Word5 of the Second Point                   */
-    __IO uint32_t ECC_X2_06;             /*!< [0x08b0] ECC the X-coordinate Word6 of the Second Point                   */
-    __IO uint32_t ECC_X2_07;             /*!< [0x08b4] ECC the X-coordinate Word7 of the Second Point                   */
-    __IO uint32_t ECC_X2_08;             /*!< [0x08b8] ECC the X-coordinate Word8 of the Second Point                   */
-    __IO uint32_t ECC_X2_09;             /*!< [0x08bc] ECC the X-coordinate Word9 of the Second Point                   */
-    __IO uint32_t ECC_X2_10;             /*!< [0x08c0] ECC the X-coordinate Word10 of the Second Point                  */
-    __IO uint32_t ECC_X2_11;             /*!< [0x08c4] ECC the X-coordinate Word11 of the Second Point                  */
-    __IO uint32_t ECC_X2_12;             /*!< [0x08c8] ECC the X-coordinate Word12 of the Second Point                  */
-    __IO uint32_t ECC_X2_13;             /*!< [0x08cc] ECC the X-coordinate Word13 of the Second Point                  */
-    __IO uint32_t ECC_X2_14;             /*!< [0x08d0] ECC the X-coordinate Word14 of the Second Point                  */
-    __IO uint32_t ECC_X2_15;             /*!< [0x08d4] ECC the X-coordinate Word15 of the Second Point                  */
-    __IO uint32_t ECC_X2_16;             /*!< [0x08d8] ECC the X-coordinate Word16 of the Second Point                  */
-    __IO uint32_t ECC_X2_17;             /*!< [0x08dc] ECC the X-coordinate Word17 of the Second Point                  */
-    __IO uint32_t ECC_Y2_00;             /*!< [0x08e0] ECC the Y-coordinate Word0 of the Second Point                   */
-    __IO uint32_t ECC_Y2_01;             /*!< [0x08e4] ECC the Y-coordinate Word1 of the Second Point                   */
-    __IO uint32_t ECC_Y2_02;             /*!< [0x08e8] ECC the Y-coordinate Word2 of the Second Point                   */
-    __IO uint32_t ECC_Y2_03;             /*!< [0x08ec] ECC the Y-coordinate Word3 of the Second Point                   */
-    __IO uint32_t ECC_Y2_04;             /*!< [0x08f0] ECC the Y-coordinate Word4 of the Second Point                   */
-    __IO uint32_t ECC_Y2_05;             /*!< [0x08f4] ECC the Y-coordinate Word5 of the Second Point                   */
-    __IO uint32_t ECC_Y2_06;             /*!< [0x08f8] ECC the Y-coordinate Word6 of the Second Point                   */
-    __IO uint32_t ECC_Y2_07;             /*!< [0x08fc] ECC the Y-coordinate Word7 of the Second Point                   */
-    __IO uint32_t ECC_Y2_08;             /*!< [0x0900] ECC the Y-coordinate Word8 of the Second Point                   */
-    __IO uint32_t ECC_Y2_09;             /*!< [0x0904] ECC the Y-coordinate Word9 of the Second Point                   */
-    __IO uint32_t ECC_Y2_10;             /*!< [0x0908] ECC the Y-coordinate Word10 of the Second Point                  */
-    __IO uint32_t ECC_Y2_11;             /*!< [0x090c] ECC the Y-coordinate Word11 of the Second Point                  */
-    __IO uint32_t ECC_Y2_12;             /*!< [0x0910] ECC the Y-coordinate Word12 of the Second Point                  */
-    __IO uint32_t ECC_Y2_13;             /*!< [0x0914] ECC the Y-coordinate Word13 of the Second Point                  */
-    __IO uint32_t ECC_Y2_14;             /*!< [0x0918] ECC the Y-coordinate Word14 of the Second Point                  */
-    __IO uint32_t ECC_Y2_15;             /*!< [0x091c] ECC the Y-coordinate Word15 of the Second Point                  */
-    __IO uint32_t ECC_Y2_16;             /*!< [0x0920] ECC the Y-coordinate Word16 of the Second Point                  */
-    __IO uint32_t ECC_Y2_17;             /*!< [0x0924] ECC the Y-coordinate Word17 of the Second Point                  */
-    __IO uint32_t ECC_A_00;              /*!< [0x0928] ECC the Parameter CURVEA Word0 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_01;              /*!< [0x092c] ECC the Parameter CURVEA Word1 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_02;              /*!< [0x0930] ECC the Parameter CURVEA Word2 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_03;              /*!< [0x0934] ECC the Parameter CURVEA Word3 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_04;              /*!< [0x0938] ECC the Parameter CURVEA Word4 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_05;              /*!< [0x093c] ECC the Parameter CURVEA Word5 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_06;              /*!< [0x0940] ECC the Parameter CURVEA Word6 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_07;              /*!< [0x0944] ECC the Parameter CURVEA Word7 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_08;              /*!< [0x0948] ECC the Parameter CURVEA Word8 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_09;              /*!< [0x094c] ECC the Parameter CURVEA Word9 of Elliptic Curve                 */
-    __IO uint32_t ECC_A_10;              /*!< [0x0950] ECC the Parameter CURVEA Word10 of Elliptic Curve                */
-    __IO uint32_t ECC_A_11;              /*!< [0x0954] ECC the Parameter CURVEA Word11 of Elliptic Curve                */
-    __IO uint32_t ECC_A_12;              /*!< [0x0958] ECC the Parameter CURVEA Word12 of Elliptic Curve                */
-    __IO uint32_t ECC_A_13;              /*!< [0x095c] ECC the Parameter CURVEA Word13 of Elliptic Curve                */
-    __IO uint32_t ECC_A_14;              /*!< [0x0960] ECC the Parameter CURVEA Word14 of Elliptic Curve                */
-    __IO uint32_t ECC_A_15;              /*!< [0x0964] ECC the Parameter CURVEA Word15 of Elliptic Curve                */
-    __IO uint32_t ECC_A_16;              /*!< [0x0968] ECC the Parameter CURVEA Word16 of Elliptic Curve                */
-    __IO uint32_t ECC_A_17;              /*!< [0x096c] ECC the Parameter CURVEA Word17 of Elliptic Curve                */
-    __IO uint32_t ECC_B_00;              /*!< [0x0970] ECC the Parameter CURVEB Word0 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_01;              /*!< [0x0974] ECC the Parameter CURVEB Word1 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_02;              /*!< [0x0978] ECC the Parameter CURVEB Word2 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_03;              /*!< [0x097c] ECC the Parameter CURVEB Word3 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_04;              /*!< [0x0980] ECC the Parameter CURVEB Word4 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_05;              /*!< [0x0984] ECC the Parameter CURVEB Word5 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_06;              /*!< [0x0988] ECC the Parameter CURVEB Word6 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_07;              /*!< [0x098c] ECC the Parameter CURVEB Word7 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_08;              /*!< [0x0990] ECC the Parameter CURVEB Word8 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_09;              /*!< [0x0994] ECC the Parameter CURVEB Word9 of Elliptic Curve                 */
-    __IO uint32_t ECC_B_10;              /*!< [0x0998] ECC the Parameter CURVEB Word10 of Elliptic Curve                */
-    __IO uint32_t ECC_B_11;              /*!< [0x099c] ECC the Parameter CURVEB Word11 of Elliptic Curve                */
-    __IO uint32_t ECC_B_12;              /*!< [0x09a0] ECC the Parameter CURVEB Word12 of Elliptic Curve                */
-    __IO uint32_t ECC_B_13;              /*!< [0x09a4] ECC the Parameter CURVEB Word13 of Elliptic Curve                */
-    __IO uint32_t ECC_B_14;              /*!< [0x09a8] ECC the Parameter CURVEB Word14 of Elliptic Curve                */
-    __IO uint32_t ECC_B_15;              /*!< [0x09ac] ECC the Parameter CURVEB Word15 of Elliptic Curve                */
-    __IO uint32_t ECC_B_16;              /*!< [0x09b0] ECC the Parameter CURVEB Word16 of Elliptic Curve                */
-    __IO uint32_t ECC_B_17;              /*!< [0x09b4] ECC the Parameter CURVEB Word17 of Elliptic Curve                */
-    __IO uint32_t ECC_N_00;              /*!< [0x09b8] ECC the Parameter CURVEN Word0 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_01;              /*!< [0x09bc] ECC the Parameter CURVEN Word1 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_02;              /*!< [0x09c0] ECC the Parameter CURVEN Word2 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_03;              /*!< [0x09c4] ECC the Parameter CURVEN Word3 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_04;              /*!< [0x09c8] ECC the Parameter CURVEN Word4 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_05;              /*!< [0x09cc] ECC the Parameter CURVEN Word5 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_06;              /*!< [0x09d0] ECC the Parameter CURVEN Word6 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_07;              /*!< [0x09d4] ECC the Parameter CURVEN Word7 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_08;              /*!< [0x09d8] ECC the Parameter CURVEN Word8 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_09;              /*!< [0x09dc] ECC the Parameter CURVEN Word9 of Elliptic Curve                 */
-    __IO uint32_t ECC_N_10;              /*!< [0x09e0] ECC the Parameter CURVEN Word10 of Elliptic Curve                */
-    __IO uint32_t ECC_N_11;              /*!< [0x09e4] ECC the Parameter CURVEN Word11 of Elliptic Curve                */
-    __IO uint32_t ECC_N_12;              /*!< [0x09e8] ECC the Parameter CURVEN Word12 of Elliptic Curve                */
-    __IO uint32_t ECC_N_13;              /*!< [0x09ec] ECC the Parameter CURVEN Word13 of Elliptic Curve                */
-    __IO uint32_t ECC_N_14;              /*!< [0x09f0] ECC the Parameter CURVEN Word14 of Elliptic Curve                */
-    __IO uint32_t ECC_N_15;              /*!< [0x09f4] ECC the Parameter CURVEN Word15 of Elliptic Curve                */
-    __IO uint32_t ECC_N_16;              /*!< [0x09f8] ECC the Parameter CURVEN Word16 of Elliptic Curve                */
-    __IO uint32_t ECC_N_17;              /*!< [0x09fc] ECC the Parameter CURVEN Word17 of Elliptic Curve                */
-    __O  uint32_t ECC_K_00;              /*!< [0x0a00] ECC the Scalar SCALARK Word0 of Point Multiplication             */
-    __O  uint32_t ECC_K_01;              /*!< [0x0a04] ECC the Scalar SCALARK Word1 of Point Multiplication             */
-    __O  uint32_t ECC_K_02;              /*!< [0x0a08] ECC the Scalar SCALARK Word2 of Point Multiplication             */
-    __O  uint32_t ECC_K_03;              /*!< [0x0a0c] ECC the Scalar SCALARK Word3 of Point Multiplication             */
-    __O  uint32_t ECC_K_04;              /*!< [0x0a10] ECC the Scalar SCALARK Word4 of Point Multiplication             */
-    __O  uint32_t ECC_K_05;              /*!< [0x0a14] ECC the Scalar SCALARK Word5 of Point Multiplication             */
-    __O  uint32_t ECC_K_06;              /*!< [0x0a18] ECC the Scalar SCALARK Word6 of Point Multiplication             */
-    __O  uint32_t ECC_K_07;              /*!< [0x0a1c] ECC the Scalar SCALARK Word7 of Point Multiplication             */
-    __O  uint32_t ECC_K_08;              /*!< [0x0a20] ECC the Scalar SCALARK Word8 of Point Multiplication             */
-    __O  uint32_t ECC_K_09;              /*!< [0x0a24] ECC the Scalar SCALARK Word9 of Point Multiplication             */
-    __O  uint32_t ECC_K_10;              /*!< [0x0a28] ECC the Scalar SCALARK Word10 of Point Multiplication            */
-    __O  uint32_t ECC_K_11;              /*!< [0x0a2c] ECC the Scalar SCALARK Word11 of Point Multiplication            */
-    __O  uint32_t ECC_K_12;              /*!< [0x0a30] ECC the Scalar SCALARK Word12 of Point Multiplication            */
-    __O  uint32_t ECC_K_13;              /*!< [0x0a34] ECC the Scalar SCALARK Word13 of Point Multiplication            */
-    __O  uint32_t ECC_K_14;              /*!< [0x0a38] ECC the Scalar SCALARK Word14 of Point Multiplication            */
-    __O  uint32_t ECC_K_15;              /*!< [0x0a3c] ECC the Scalar SCALARK Word15 of Point Multiplication            */
-    __O  uint32_t ECC_K_16;              /*!< [0x0a40] ECC the Scalar SCALARK Word16 of Point Multiplication            */
-    __O  uint32_t ECC_K_17;              /*!< [0x0a44] ECC the Scalar SCALARK Word17 of Point Multiplication            */
+    __IO uint32_t ECC_X1[18];            /*!< [0x0808] ECC the X-coordinate Word 0 ~ 17 of the First Point              */
+    __IO uint32_t ECC_Y1[18];            /*!< [0x0850] ECC the Y-coordinate Word 0 ~ 17 of the First Point              */
+    __IO uint32_t ECC_X2[18];            /*!< [0x0898] ECC the X-coordinate Word 0 ~ 17 of the Second Point             */
+    __IO uint32_t ECC_Y2[18];            /*!< [0x08e0] ECC the Y-coordinate Word 0 ~ 17 of the Second Point             */
+    __IO uint32_t ECC_A[18];             /*!< [0x0928] ECC the Parameter CURVEA Word 0 ~ 17 of Elliptic Curve           */
+    __IO uint32_t ECC_B[18];             /*!< [0x0970] ECC the Parameter CURVEB Word 0 ~ 17 of Elliptic Curve           */
+    __IO uint32_t ECC_N[18];             /*!< [0x09b8] ECC the Parameter CURVEN Word 0 ~ 17 of Elliptic Curve           */
+    __O  uint32_t ECC_K[18];             /*!< [0x0a00] ECC the Scalar SCALARK Word 0 ~ 17 of Point Multiplication       */
     __IO uint32_t ECC_SADDR;             /*!< [0x0a48] ECC DMA Source Address Register                                  */
     __IO uint32_t ECC_DADDR;             /*!< [0x0a4c] ECC DMA Destination Address Register                             */
     __IO uint32_t ECC_STARTREG;          /*!< [0x0a50] ECC Starting Address of Updated Registers                        */
@@ -4406,18 +4194,9 @@ typedef struct
     __I  uint32_t RESERVE8[35];
     __IO uint32_t RSA_CTL;               /*!< [0x0b00] RSA Control Register                                             */
     __I  uint32_t RSA_STS;               /*!< [0x0b04] RSA Status Register                                              */
-    __IO uint32_t RSA_SADDR0;            /*!< [0x0b08] RSA DMA Source Address Register0                                 */
-    __IO uint32_t RSA_SADDR1;            /*!< [0x0b0c] RSA DMA Source Address Register1                                 */
-    __IO uint32_t RSA_SADDR2;            /*!< [0x0b10] RSA DMA Source Address Register2                                 */
-    __IO uint32_t RSA_SADDR3;            /*!< [0x0b14] RSA DMA Source Address Register3                                 */
-    __IO uint32_t RSA_SADDR4;            /*!< [0x0b18] RSA DMA Source Address Register4                                 */
+    __IO uint32_t RSA_SADDR[5];          /*!< [0x0b08] RSA DMA Source Address Register 0 ~ 4                            */
     __IO uint32_t RSA_DADDR;             /*!< [0x0b1c] RSA DMA Destination Address Register                             */
-    __IO uint32_t RSA_MADDR0;            /*!< [0x0b20] RSA DMA Middle Address Register0                                 */
-    __IO uint32_t RSA_MADDR1;            /*!< [0x0b24] RSA DMA Middle Address Register1                                 */
-    __IO uint32_t RSA_MADDR2;            /*!< [0x0b28] RSA DMA Middle Address Register2                                 */
-    __IO uint32_t RSA_MADDR3;            /*!< [0x0b2c] RSA DMA Middle Address Register3                                 */
-    __IO uint32_t RSA_MADDR4;            /*!< [0x0b30] RSA DMA Middle Address Register4                                 */
-    __IO uint32_t RSA_MADDR5;            /*!< [0x0b34] RSA DMA Middle Address Register5                                 */
+    __IO uint32_t RSA_MADDR[6];          /*!< [0x0b20] RSA DMA Middle Address Register 0 ~ 5                            */
     __I  uint32_t RESERVE9[242];
     __O  uint32_t PRNG_KSCTL;            /*!< [0x0f00] PRNG Key Control Register                                        */
     __I  uint32_t RESERVE10[3];

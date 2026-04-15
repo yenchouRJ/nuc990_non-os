@@ -978,10 +978,6 @@ typedef struct
 /**@}*/ /* end of PDMA register group */
 /**@}*/ /* end of REGISTER group */
 
-#define PDMA0                  ((PDMA_T *)   PDMA0_BA)
-#define PDMA1                  ((PDMA_T *)   PDMA1_BA)
-
-
 /** @addtogroup Standard_Driver Standard Driver
   @{
 */
