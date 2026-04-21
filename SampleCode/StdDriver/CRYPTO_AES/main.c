@@ -250,6 +250,8 @@ int AES_cascade_test(int keysz, int opmode)
 
 void SYS_Init()
 {
+    SYS_UnlockReg();
+
     CLK_SetModuleClock(UART0_MODULE, CLK_DIV4_UART0SEL_HXT, CLK_DIV4_UART0(1));
 
     CLK_EnableModuleClock(CRYPTO_MODULE);

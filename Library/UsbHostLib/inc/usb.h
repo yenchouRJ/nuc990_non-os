@@ -10,6 +10,7 @@
 #ifndef _USBH_H_
 #define _USBH_H_
 
+#include "NuMicro.h"
 #include "config.h"
 #include "usbh_lib.h"
 #include "ehci.h"

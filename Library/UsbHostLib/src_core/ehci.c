@@ -15,7 +15,6 @@
 #include "usb.h"
 #include "hub.h"
 
-
 /// @cond HIDDEN_SYMBOLS
 
 static QH_T   *_H_qh;                       /* head of reclamation list                   */
@@ -30,9 +29,7 @@ uint32_t _PFList_mem[FL_SIZE] __attribute__((aligned(4096)));/* Periodic frame l
 
 uint32_t  *_PFList;
 
-
 QH_T  * _Iqh[NUM_IQH];
-
 
 #ifdef ENABLE_ERROR_MSG
 void dump_ehci_regs()
@@ -46,9 +43,10 @@ void dump_ehci_regs()
     USB_debug("    UCALAR   = 0x%x\n", _ehci->UCALAR);
     USB_debug("    UASSTR   = 0x%x\n", _ehci->UASSTR);
     USB_debug("    UCFGR    = 0x%x\n", _ehci->UCFGR);
-    USB_debug("    UPSCR    = 0x%x\n", _ehci->UPSCR[0]);
-    USB_debug("    PHYCTL0  = 0x%x\n", _ehci->USBPCR0);
-    USB_debug("    PHYCTL1  = 0x%x\n", _ehci->USBPCR1);
+    USB_debug("    UPSCR0   = 0x%x\n", _ehci->UPSCR[0]);
+    USB_debug("    UPSCR1   = 0x%x\n", _ehci->UPSCR[1]);
+    USB_debug("    PHYCTL0  = 0x%x\n", _ehci->USBPCR[0]);
+    USB_debug("    PHYCTL1  = 0x%x\n", _ehci->USBPCR[1]);
 }
 
 void dump_ehci_ports()
@@ -297,8 +295,8 @@ static int  ehci_init(void)
 
     delay_us(1000);                              /* dealy 1 ms                            */
 
-    _ehci->UPSCR[0] = HSUSBH_UPSCR_PP_Msk;      /* enable port 1 port power               */
-    _ehci->UPSCR[1] = HSUSBH_UPSCR_PP_Msk;      /* enable port 2 port power               */
+    _ehci->UPSCR[0] = HSUSBH_UPSCR0_PP_Msk;      /* enable port 0 port power              */
+    _ehci->UPSCR[1] = HSUSBH_UPSCR0_PP_Msk;      /* enable port 1 port power              */
 
     init_periodic_frame_list();
 
@@ -312,13 +310,19 @@ static int  ehci_init(void)
 static void ehci_suspend(void)
 {
     if (_ehci->UPSCR[0] & 0x1)
-        _ehci->UPSCR[0] |= HSUSBH_UPSCR_SUSPEND_Msk;
+        _ehci->UPSCR[0] |= HSUSBH_UPSCR0_SUSPEND_Msk;
+
+    if (_ehci->UPSCR[1] & 0x1)
+        _ehci->UPSCR[1] |= HSUSBH_UPSCR1_SUSPEND_Msk;
 }
 
 static void ehci_resume(void)
 {
     if (_ehci->UPSCR[0] & 0x1)
-        _ehci->UPSCR[0] = (HSUSBH->UPSCR[0] & ~HSUSBH_UPSCR_SUSPEND_Msk) | HSUSBH_UPSCR_FPR_Msk;
+        _ehci->UPSCR[0] = (HSUSBH->UPSCR[0] & ~HSUSBH_UPSCR0_SUSPEND_Msk) | HSUSBH_UPSCR0_FPR_Msk;
+
+    if (_ehci->UPSCR[1] & 0x1)
+        _ehci->UPSCR[1] = (HSUSBH->UPSCR[1] & ~HSUSBH_UPSCR1_SUSPEND_Msk) | HSUSBH_UPSCR1_FPR_Msk;
 }
 
 static void ehci_shutdown(void)
@@ -1148,48 +1152,33 @@ static int ehci_rh_port_reset(int port)
 
     for (retry = 0; retry < PORT_RESET_RETRY; retry++)
     {
-        _ehci->UPSCR[port] = (_ehci->UPSCR[port] | HSUSBH_UPSCR_PRST_Msk) & ~HSUSBH_UPSCR_PE_Msk;
+        _ehci->UPSCR[port] = (_ehci->UPSCR[port] | HSUSBH_UPSCR0_PRST_Msk) & ~HSUSBH_UPSCR0_PE_Msk;
 
-#ifdef FOR_EMULATION
-        t0 = get_ticks();
-        while (get_ticks() - t0 < 3) ;           /* wait 50 ms                            */
-
-        _ehci->UPSCR[port] &= ~HSUSBH_UPSCR_PRST_Msk;
-
-        t0 = get_ticks();
-        while (get_ticks() - t0 < 5)
-        {
-            if (!(_ehci->UPSCR[port] & HSUSBH_UPSCR_CCS_Msk) ||
-                    ((_ehci->UPSCR[port] & (HSUSBH_UPSCR_CCS_Msk | HSUSBH_UPSCR_PE_Msk)) == (HSUSBH_UPSCR_CCS_Msk | HSUSBH_UPSCR_PE_Msk)))
-                goto port_reset_done;
-        }
-#else
         t0 = get_ticks();
         while (get_ticks() - t0 < 6) ;           /* wait 50 ms                            */
 
-        _ehci->UPSCR[port] &= ~HSUSBH_UPSCR_PRST_Msk;
+        _ehci->UPSCR[port] &= ~HSUSBH_UPSCR0_PRST_Msk;
 
         t0 = get_ticks();
         while (get_ticks() - t0 < (reset_time/10)+1)
         {
-            if (!(_ehci->UPSCR[port] & HSUSBH_UPSCR_CCS_Msk) ||
-                    ((_ehci->UPSCR[port] & (HSUSBH_UPSCR_CCS_Msk | HSUSBH_UPSCR_PE_Msk)) == (HSUSBH_UPSCR_CCS_Msk | HSUSBH_UPSCR_PE_Msk)))
+            if (!(_ehci->UPSCR[port] & HSUSBH_UPSCR0_CCS_Msk) ||
+                ((_ehci->UPSCR[port] & (HSUSBH_UPSCR0_CCS_Msk | HSUSBH_UPSCR0_PE_Msk)) == (HSUSBH_UPSCR0_CCS_Msk | HSUSBH_UPSCR0_PE_Msk)))
                 goto port_reset_done;
         }
-#endif
         reset_time += PORT_RESET_RETRY_INC_MS;
     }
 
     return USBH_ERR_PORT_RESET;
 
 port_reset_done:
-    if ((_ehci->UPSCR[port] & HSUSBH_UPSCR_CCS_Msk) == 0)   /* check again if device disconnected */
+    if ((_ehci->UPSCR[port] & HSUSBH_UPSCR0_CCS_Msk) == 0) /* check again if device disconnected */
     {
-        _ehci->UPSCR[port] |= HSUSBH_UPSCR_CSC_Msk;         /* clear CSC                          */
+        _ehci->UPSCR[port] |= HSUSBH_UPSCR0_CSC_Msk;       /* clear CSC                          */
         USB_debug("EHCI port %d, status 0x%x - port reset failed!\n", port+1, _ehci->UPSCR[port]);
         return USBH_ERR_DISCONNECTED;
     }
-    _ehci->UPSCR[port] |= HSUSBH_UPSCR_PEC_Msk;            /* clear port enable change status    */
+    _ehci->UPSCR[port] |= HSUSBH_UPSCR0_PEC_Msk;           /* clear port enable change status    */
     return USBH_OK;                                        /* port reset success                 */
 }
 
@@ -1199,13 +1188,11 @@ static int ehci_rh_polling(void)
     int       ret, change = 0;
     int       port;
     int       connect_status;
-#ifndef FOR_EMULATION
     int       t0;
-#endif
 
     for (port = 0; port < EHCI_PORT_CNT; port++)
     {
-        if (!(_ehci->UPSCR[port] & HSUSBH_UPSCR_CSC_Msk))
+        if (!(_ehci->UPSCR[port] & HSUSBH_UPSCR0_CSC_Msk))
             continue;
 
         change = 1;
@@ -1223,27 +1210,25 @@ static int ehci_rh_polling(void)
             disconnect_device(udev);
         }
 
-        connect_status = _ehci->UPSCR[port] & HSUSBH_UPSCR_CCS_Msk;
+        connect_status = _ehci->UPSCR[port] & HSUSBH_UPSCR0_CCS_Msk;
 
-#ifndef FOR_EMULATION
         /*--------------------------------------------------------------------------------*/
         /*  Port de-bounce                                                                */
         /*--------------------------------------------------------------------------------*/
         t0 = get_ticks();
         while (get_ticks() - t0 < HUB_DEBOUNCE_TIME/10)
         {
-            if (connect_status != (_ehci->UPSCR[port] & HSUSBH_UPSCR_CCS_Msk))
+            if (connect_status != (_ehci->UPSCR[port] & HSUSBH_UPSCR0_CCS_Msk))
             {
                 /* reset stable time counting                                             */
                 t0 = get_ticks();
-                connect_status = _ehci->UPSCR[port] & HSUSBH_UPSCR_CCS_Msk;
+                connect_status = _ehci->UPSCR[port] & HSUSBH_UPSCR0_CCS_Msk;
             }
         }
-#endif
 
-        _ehci->UPSCR[port] |= HSUSBH_UPSCR_CSC_Msk;  /* clear connect status change bit   */
+        _ehci->UPSCR[port] |= HSUSBH_UPSCR0_CSC_Msk;  /* clear connect status change bit   */
 
-        if (connect_status == HSUSBH_UPSCR_CCS_Msk)
+        if (connect_status == HSUSBH_UPSCR0_CCS_Msk)
         {
             /*----------------------------------------------------------------------------*/
             /*  A new device connected.                                                   */
@@ -1251,8 +1236,8 @@ static int ehci_rh_polling(void)
             if (ehci_rh_port_reset(port) != USBH_OK)
             {
                 /* port reset failed, maybe an USB 1.1 device */
-                _ehci->UPSCR[port] |= HSUSBH_UPSCR_PO_Msk;     /* change port owner to OHCI     */
-                _ehci->UPSCR[port] |= HSUSBH_UPSCR_CSC_Msk;    /* clear all status change bits  */
+                _ehci->UPSCR[port] |= HSUSBH_UPSCR0_PO_Msk;     /* change port owner to OHCI     */
+                _ehci->UPSCR[port] |= HSUSBH_UPSCR0_CSC_Msk;    /* clear all status change bits  */
                 return 0;
             }
 

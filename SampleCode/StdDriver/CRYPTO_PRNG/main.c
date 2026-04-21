@@ -27,8 +27,6 @@
 
 #define USER_SEED     0x20061108
 
-uint32_t rand_num[18];
-
 static volatile int g_PRNG_done;
 
 void CRYPTO_IRQHandler()
@@ -41,11 +39,13 @@ void CRYPTO_IRQHandler()
 
 void dump_PRNG()
 {
+    uint32_t key[8];
     int   i;
 
     printf("PRNG DATA ==>\n");
+    PRNG_Read(8, key);
     for (i = 0; i < 8; i++)
-        printf("  0x%08x", CRYPTO->PRNG_KEY[i]);
+        printf("  0x%08x", key);
     printf("\n");
 }
 
@@ -59,23 +59,28 @@ void dump_buff_data(uint32_t *buff)
     printf("\n");
 }
 
-void  prng_gen_and_dump(uint32_t keysz, uint32_t wcnt)
+int prng_start_run(uint32_t u32KeySize, uint32_t u32SeedReload, uint32_t u32Seed)
 {
-    int  j;
+    PRNG_Open(u32KeySize, u32SeedReload, u32Seed);
 
-    for (j = 0; j <5; j++)
-    {
-        g_PRNG_done = 0;
-        CRYPTO->PRNG_CTL = (keysz << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
+    g_PRNG_done = 0;
+    PRNG_Start();
+    while (!g_PRNG_done);
+    return 0;
+}
 
-        printf("Start PRNG...\n");
-        while (!g_PRNG_done);
-        dump_PRNG();
-    }
+int prng_cont_run(void)
+{
+    g_PRNG_done = 0;
+    PRNG_Start();
+    while (!g_PRNG_done);
+    return 0;
 }
 
 void SYS_Init()
 {
+    SYS_UnlockReg();
+
     CLK_SetModuleClock(UART0_MODULE, CLK_DIV4_UART0SEL_HXT, CLK_DIV4_UART0(1));
 
     CLK_EnableModuleClock(CRYPTO_MODULE);
@@ -95,6 +100,7 @@ void UART0_Init(void)
 
 int main()
 {
+    uint32_t   new_key[8], rand_num[8];
     int        item, i, j;
 
     SYS_UnlockReg();
@@ -135,40 +141,51 @@ int main()
         {
             case '1':
                 printf("\nPRNG Key size 128 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_128, 4);
+                prng_start_run(PRNG_KEY_SIZE_128, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPRNG Key size 163 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_163, 6);
+                prng_start_run(PRNG_KEY_SIZE_163, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPRNG Key size 192 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_192, 6);
+                prng_start_run(PRNG_KEY_SIZE_192, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPRNG Key size 224 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_224, 7);
+                prng_start_run(PRNG_KEY_SIZE_224, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPRNG Key size 233 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_233, 8);
+                prng_start_run(PRNG_KEY_SIZE_233, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPRNG Key size 255 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_255, 8);
+                prng_start_run(PRNG_KEY_SIZE_255, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPRNG Key size 256 ==>\n");
-                prng_gen_and_dump(PRNG_KEY_SIZE_256, 8);
+                prng_start_run(PRNG_KEY_SIZE_256, PRNG_SEED_CONT, 0);
+                dump_PRNG();
+
                 printf("\nPress any key...\n");
                 break;
 
             case '2':
-                PRNG_ReSeed(PRNG_KEY_SIZE_256, USER_SEED);
-                for (j = 0; j < 8; j++)
-                    rand_num[j] = CRYPTO->PRNG_KEY[j];
+                prng_start_run(PRNG_KEY_SIZE_256, PRNG_SEED_RELOAD, USER_SEED);
+                PRNG_Read(8, rand_num);
 
                 for (i = 1; i < 1000; i++) {
                     printf("Cycle: %d\n", i);
-                    g_PRNG_done = 0;
-                    CRYPTO->PRNG_CTL = (PRNG_KEY_SIZE_256 << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
-
-                    while (!g_PRNG_done);
+                    prng_cont_run();
+                    PRNG_Read(8, new_key);
 
                     for (j = 0; j < 8; j++) {
-                        if (CRYPTO->PRNG_KEY[j] == rand_num[j]) {
+                        if (new_key[j] == rand_num[j]) {
                             printf("Random number not changed!! Test failed!!\n");
                             while (1);
                         }
-                        rand_num[j] = CRYPTO->PRNG_KEY[j];
+                        rand_num[j] = new_key[j];
                     }
                 }
                 printf("\nTest passed. Press any key...\n");
@@ -176,16 +193,18 @@ int main()
                 break;
 
             case '3':
-                PRNG_ReSeed(PRNG_KEY_SIZE_256, USER_SEED);
-                for (j = 0; j < 8; j++)
-                    rand_num[j] = CRYPTO->PRNG_KEY[j];
+                prng_start_run(PRNG_KEY_SIZE_256, PRNG_SEED_RELOAD, USER_SEED);
+                PRNG_Read(8, rand_num);
 
                 for (i = 1; i < 50; i++) {
                     if ((i % 5) == 0) {
                         printf("Test cycle: %d/50\n", i);
                         PRNG_ReSeed(PRNG_KEY_SIZE_256, USER_SEED);
+                        prng_cont_run();
+                        PRNG_Read(8, new_key);
+
                         for (j = 0; j < 8; j++) {
-                            if (CRYPTO->PRNG_KEY[j] != rand_num[j]) {
+                            if (new_key[j] != rand_num[j]) {
                                 // re-seed with the same seed must be identical
                                 printf("\nSeed reload test failed!\n");
                                 dump_PRNG();
@@ -195,9 +214,6 @@ int main()
                         }
                         printf("\nSeed reload test passed.\n");
                     }
-                    g_PRNG_done = 0;
-                    CRYPTO->PRNG_CTL = (PRNG_KEY_SIZE_256 << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
-                    while (!g_PRNG_done);
                 }
                 break;
 
@@ -205,32 +221,30 @@ int main()
                 printf("\nPress any key to do seed differential test and press 'x' to stop test...\n");
 
                 PRNG_ReSeed(PRNG_KEY_SIZE_256, ++item);
-
-                for (j = 0; j < 8; j++)
-                    rand_num[j] = CRYPTO->PRNG_KEY[j];
+                PRNG_Read(8, rand_num);
 
                 for (i = 1; i < 50; i++) {
                     printf("Test cycle: %d/50\n", i);
                     item += USER_SEED;
                     PRNG_ReSeed(PRNG_KEY_SIZE_256, item);
+                    prng_cont_run();
+                    PRNG_Read(8, new_key);
+
                     for (j = 0; j < 8; j++) {
-                        if (CRYPTO->PRNG_KEY[j] == rand_num[j]) {
+                        if (new_key[j] == rand_num[j]) {
                             printf("\nSeed differential test failed!\n");
-                            dump_buff_data((uint32_t *)CRYPTO->PRNG_KEY);
+                            dump_buff_data(new_key);
                             dump_buff_data(rand_num);
                             while (1);
                         }
                     }
-                    for (j = 0; j < 8; j++)
-                        rand_num[j] = CRYPTO->PRNG_KEY[j];
 
-                    g_PRNG_done = 0;
-                    CRYPTO->PRNG_CTL = (PRNG_KEY_SIZE_256 << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
-                    while (!g_PRNG_done);
+                    PRNG_Read(8, rand_num);
+                    prng_cont_run();
                 }
                 printf("\nTest passed.\n");
                 break;
 
-        }  // end of switch
-    }  // end of while (1)
+        }
+    }
 }

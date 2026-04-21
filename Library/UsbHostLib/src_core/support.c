@@ -16,16 +16,13 @@
 
 /// @cond HIDDEN_SYMBOLS
 
-
 #define  USB_MEMORY_POOL_SIZE   (32*1024)
 #define  USB_MEM_BLOCK_SIZE     128
 
 #define  BOUNDARY_WORD          4
 
-
 static uint32_t  _FreeMemorySize;
 uint32_t  _AllocatedMemorySize;
-
 
 #define USB_MEM_ALLOC_MAGIC     0x19685788    /* magic number in leading block */
 

@@ -15,30 +15,9 @@
 
 #include "NuMicro.h"
 
-extern void dump_buff_hex(uint8_t *pucBuff, int nBytes);
-
-int do_compare(uint8_t *expect, uint8_t *output, int cmp_len)
-{
-    uint8_t   *p_exp, *p_out;
-
-    p_exp = (uint8_t *)((uint32_t)expect | NON_CACHE_MASK);
-    p_out = (uint8_t *)((uint32_t)output | NON_CACHE_MASK);
-
-    if (memcmp(p_exp, p_out, cmp_len))
-    {
-        printf("\nMismatch!! - %d\n", cmp_len);
-        printf("Expect data:\n");
-        dump_buff_hex(expect, cmp_len);
-        printf("Compared data:\n");
-        dump_buff_hex(output, cmp_len);
-        return -1;
-    }
-    return 0;
-}
-
-#define CHANNEL_CNT         8               /* channel count        */
-#define TBLK_LEN            64              /* test block length    */
-#define TEST_TEXT_LEN       (TBLK_LEN*32)
+#define CHANNEL_CNT         8
+#define TBLK_LEN            64
+#define TEST_TEXT_LEN       (TBLK_LEN * 32)
 #define TEST_MODE_CNT       8
 
 typedef struct aes_mode_t
@@ -80,11 +59,53 @@ uint32_t g_fdbck[CHANNEL_CNT][24] __attribute__((aligned(32)));
 extern volatile int  g_AES_done;
 extern volatile int  g_PRNG_done;
 
-void random_gen_256()
+extern void dump_buff_hex(uint8_t *pucBuff, int nBytes);
+
+void dump_key_data(uint32_t *key)
+{
+    int   i;
+
+    printf("KEY DATA ==>\n");
+    for (i = 0; i < 8; i++)
+        printf("  0x%08x", key[i]);
+    printf("\n");
+}
+
+int do_compare(uint8_t *expect, uint8_t *output, int cmp_len)
+{
+    uint8_t   *p_exp, *p_out;
+
+    p_exp = (uint8_t *)((uint32_t)expect | NON_CACHE_MASK);
+    p_out = (uint8_t *)((uint32_t)output | NON_CACHE_MASK);
+
+    if (memcmp(p_exp, p_out, cmp_len))
+    {
+        printf("\nMismatch!! - %d\n", cmp_len);
+        printf("Expect data:\n");
+        dump_buff_hex(expect, cmp_len);
+        printf("Compared data:\n");
+        dump_buff_hex(output, cmp_len);
+        return -1;
+    }
+    return 0;
+}
+
+int prng_start_run(uint32_t u32KeySize, uint32_t u32SeedReload, uint32_t u32Seed)
+{
+    PRNG_Open(u32KeySize, u32SeedReload, u32Seed);
+
+    g_PRNG_done = 0;
+    PRNG_Start();
+    while (!g_PRNG_done);
+    return 0;
+}
+
+int prng_cont_run(void)
 {
     g_PRNG_done = 0;
-    CRYPTO->PRNG_CTL = (PRNG_KEY_SIZE_256 << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
+    PRNG_Start();
     while (!g_PRNG_done);
+    return 0;
 }
 
 void  set_AES_control(AES_CTX_T *ctx, int channel)
@@ -153,42 +174,38 @@ void  set_AES_control(AES_CTX_T *ctx, int channel)
     while (!g_AES_done) ;
 }
 
-
 void generate_test_patterns()
 {
-    int         i, j;
-    uint32_t    *prng_data;
+    int       i;
+    uint32_t  *bptr;
+    uint32_t  prng_data[8];
 
-    prng_data = (uint32_t *)((uint32_t)CRYPTO_BASE + 0x10);
+    PRNG_Open(PRNG_KEY_SIZE_256, PRNG_SEED_RELOAD, 0x5a5aa5a5);
 
-    // generate input text
-    for (i = 0; i < TEST_TEXT_LEN; i+=32)
+    bptr = (uint32_t *)((uint32_t)g_in_buff | NON_CACHE_MASK);
+
+    /* generate input text */
+    for (i = 0; i < TEST_TEXT_LEN / 4; i += 8)
     {
-        random_gen_256();
-
-        for (j = 0; j < 8; j++)
-        {
-            // *(uint32_t *)&(g_in_buff[i+j*4]) = prng_data[j];
-            *(uint32_t *)((uint32_t)(&(g_in_buff[i+j*4])) | NON_CACHE_MASK) = prng_data[j];
-        }
+        prng_cont_run();
+        PRNG_Read(8, &bptr[i]);
     }
 
     for (i = 0; i < CHANNEL_CNT; i++)
     {
-        random_gen_256();
-        for (j = 0; j < 8; j++)
-            g_test_ctx[i].key[j] = prng_data[j];
+        prng_cont_run();
+        PRNG_Read(8, g_test_ctx[i].key);
 
-        random_gen_256();
-        for (j = 0; j < 4; j++)
-            g_test_ctx[i].iv[j] = prng_data[j];
+        prng_cont_run();
+        PRNG_Read(4, g_test_ctx[i].iv);
 
-        random_gen_256();
+        prng_cont_run();
+        PRNG_Read(8, prng_data);
 
         g_test_ctx[i].encrypt = prng_data[1] & 0x1;
         g_test_ctx[i].keylen = prng_data[2] % 3;
         g_test_ctx[i].mode_sel = (prng_data[3] & 0xff) % TEST_MODE_CNT;
-        g_test_ctx[i].sm4en = 0; //prng_data[4] & 0x1;
+        g_test_ctx[i].sm4en = 0;
     }
 
     for (i = 0; i < CHANNEL_CNT; i++)
@@ -232,15 +249,15 @@ int AES_multi_channel_test(void)
                 CRYPTO->AES_DADDR = (uint32_t)&g_test_buff[i][data_idx];
                 CRYPTO->AES_CNT   = TBLK_LEN;
                 CRYPTO->AES_FBADDR = (uint32_t)&g_fdbck[i];
-                g_AES_done = 0;
 
+                g_AES_done = 0;
                 if (data_idx == 0)
                     CRYPTO->AES_CTL = ctx->ctrl | CRYPTO_AES_CTL_DMAEN_Msk | CRYPTO_AES_CTL_START_Msk;
-                    else if (data_idx + TBLK_LEN >= TEST_TEXT_LEN)
-                        CRYPTO->AES_CTL = ctx->ctrl | CRYPTO_AES_CTL_FBIN_Msk | CRYPTO_AES_CTL_DMAEN_Msk | CRYPTO_AES_CTL_DMACSCAD_Msk | CRYPTO_AES_CTL_DMALAST_Msk | CRYPTO_AES_CTL_START_Msk;
-                    else
-                        CRYPTO->AES_CTL = ctx->ctrl | CRYPTO_AES_CTL_FBIN_Msk | CRYPTO_AES_CTL_DMAEN_Msk | CRYPTO_AES_CTL_DMACSCAD_Msk | CRYPTO_AES_CTL_START_Msk;
-                    while (!g_AES_done) ;
+                else if (data_idx + TBLK_LEN >= TEST_TEXT_LEN)
+                    CRYPTO->AES_CTL = ctx->ctrl | CRYPTO_AES_CTL_FBIN_Msk | CRYPTO_AES_CTL_DMAEN_Msk | CRYPTO_AES_CTL_DMACSCAD_Msk | CRYPTO_AES_CTL_DMALAST_Msk | CRYPTO_AES_CTL_START_Msk;
+                else
+                    CRYPTO->AES_CTL = ctx->ctrl | CRYPTO_AES_CTL_FBIN_Msk | CRYPTO_AES_CTL_DMAEN_Msk | CRYPTO_AES_CTL_DMACSCAD_Msk | CRYPTO_AES_CTL_START_Msk;
+                while (!g_AES_done) ;
 
                 if (do_compare(&g_out_buff[i][data_idx], &g_test_buff[i][data_idx], TBLK_LEN) != 0)
                 {

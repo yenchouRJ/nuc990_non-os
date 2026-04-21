@@ -53,21 +53,21 @@ void  usbh_core_init()
 
     usbh_hub_init();
 
-    _ehci->USBPCR0 = 0x160;                /* enable PHY 0          */
-    _ehci->USBPCR1 = 0x520;                /* enable PHY 1          */
+    _ehci->USBPCR[0] = 0x160;    /* enable PHY 0 */
+    _ehci->USBPCR[1] = 0x520;    /* enable PHY 1 */
     usbh_memory_init();
 
     _ohci->HcMiscControl |= USBH_HcMiscControl_OCAL_Msk; /* Over-current active low  */
     // _ohci->HcMiscControl &= ~USBH_HcMiscControl_OCAL_Msk; /* Over-current active high  */
 
 #ifdef ENABLE_OHCI
-    sysInstallISR(IRQ_LEVEL_1, IRQ_OHCI, (PVOID)OHCI_IRQHandler);
+    sysInstallISR(IRQ_LEVEL_1, OHCI_IRQn, (PVOID)OHCI_IRQHandler);
     ohci_driver.init();
     ENABLE_OHCI_IRQ();
 #endif
 
 #ifdef ENABLE_EHCI
-    sysInstallISR(IRQ_LEVEL_1, IRQ_EHCI, (PVOID)EHCI_IRQHandler);
+    sysInstallISR(IRQ_LEVEL_1, EHCI_IRQn, (PVOID)EHCI_IRQHandler);
     ehci_driver.init();
     ENABLE_EHCI_IRQ();
 #endif
@@ -125,8 +125,8 @@ void usbh_suspend()
     /* set port suspend if connected */
     for (port = 0; port < OHCI_PORT_CNT; port++)
     {
-        if (_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus_CCS_Msk)
-            _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus_PSS_Msk;    /* set port suspend    */
+        if (_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus0_CCS_Msk)
+            _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus0_PSS_Msk;    /* set port suspend    */
     }
 
     /* enable Device Remote Wakeup */
@@ -145,9 +145,9 @@ void usbh_suspend()
     /* set port suspend if connected */
     for (port = 0; port < EHCI_PORT_CNT; port++)
     {
-        if (_ehci->UPSCR[port] & HSUSBH_UPSCR_PE_Msk)
+        if (_ehci->UPSCR[port] & HSUSBH_UPSCR0_PE_Msk)
         {
-            _ehci->UPSCR[port] |= HSUSBH_UPSCR_SUSPEND_Msk;
+            _ehci->UPSCR[port] |= HSUSBH_UPSCR0_SUSPEND_Msk;
             delay_us(2000);         /* wait 2 ms */
         }
     }
@@ -185,8 +185,8 @@ void usbh_resume(void)
 
     for (port = 0; port < OHCI_PORT_CNT; port++)
     {
-        if (_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus_PSS_Msk)
-            _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus_POCI_Msk;   /* clear suspend status */
+        if (_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus0_PSS_Msk)
+            _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus0_POCI_Msk;   /* clear suspend status */
     }
 
     delay_us(30000);                       /* wait at least 20ms for Host to resume device */
@@ -197,14 +197,13 @@ void usbh_resume(void)
 
     for (port = 0; port < EHCI_PORT_CNT; port++)
     {
-        if (_ehci->UPSCR[port] & HSUSBH_UPSCR_PE_Msk)
+        if (_ehci->UPSCR[port] & HSUSBH_UPSCR0_PE_Msk)
         {
-            _ehci->UPSCR[port] |= HSUSBH_UPSCR_FPR_Msk;
+            _ehci->UPSCR[port] |= HSUSBH_UPSCR0_FPR_Msk;
             delay_us(20000);                         /* keep resume signal for 20 ms */
-            _ehci->UPSCR[port] &= ~HSUSBH_UPSCR_FPR_Msk;
+            _ehci->UPSCR[port] &= ~HSUSBH_UPSCR0_FPR_Msk;
         }
     }
-
     delay_us(1000);
 #endif
 }
@@ -265,9 +264,6 @@ int usbh_ctrl_xfer(UDEV_T *udev, uint8_t bmRequestType, uint8_t bRequest, uint16
 
     *xfer_len = 0;
 
-#ifdef FOR_EMULATION
-    // timeout = 2;
-#endif
     //if (check_device(udev))
     //    return USBH_ERR_INVALID_PARAM;
 

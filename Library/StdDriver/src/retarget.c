@@ -37,22 +37,6 @@ static void flush_uart(void)
     while (!(UART0->FIFOSTS & UART_FIFOSTS_TXEMPTY_Msk));
 }
 
-/**
- * @brief    Check any char input from UART
- *
- * @param    None
- *
- * @retval   1: No any char input
- * @retval   0: Have some char input
- *
- * @details  Check UART RSR RX EMPTY or not to determine if any char input from UART
- */
-
-int kbhit(void)
-{
-    return !((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0);
-}
-
 int recvchar(void)
 {
     while(1)
@@ -212,4 +196,20 @@ void C_SWI_Handler( int swi_num, int *regs )
 
 /// @endcond HIDDEN_SYMBOLS
 #endif
+
+/**
+ * @brief    Check any char input from UART
+ *
+ * @param    None
+ *
+ * @retval   1: No any char input
+ * @retval   0: Have some char input
+ *
+ * @details  Check UART RSR RX EMPTY or not to determine if any char input from UART
+ */
+
+int kbhit(void)
+{
+    return !((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0);
+}
 

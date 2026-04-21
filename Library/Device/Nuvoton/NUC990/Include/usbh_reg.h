@@ -643,8 +643,7 @@ typedef struct
     __IO uint32_t HcRhDescriptorA;       /*!< [0x0048] Host Controller Root Hub Descriptor A Register                   */
     __IO uint32_t HcRhDescriptorB;       /*!< [0x004c] Host Controller Root Hub Descriptor B Register                   */
     __IO uint32_t HcRhStatus;            /*!< [0x0050] Host Controller Root Hub Status Register                         */
-    __IO uint32_t HcRhPortStatus0;       /*!< [0x0054] Host Controller Root Hub Port Status [0]                         */
-    __IO uint32_t HcRhPortStatus1;       /*!< [0x0058] Host Controller Root Hub Port Status [1]                         */
+    __IO uint32_t HcRhPortStatus[2];     /*!< [0x0054] Host Controller Root Hub Port Status 0 ~ 1                       */
     __I  uint32_t RESERVE0[105];
     __IO uint32_t HcPhyControl;          /*!< [0x0200] Host Controller PHY Control Register                             */
     __IO uint32_t HcMiscControl;         /*!< [0x0204] Host Controller Miscellaneous Control Register                   */

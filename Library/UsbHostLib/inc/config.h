@@ -21,12 +21,12 @@
 #define HCLK_MHZ               300          /* used for loop-delay. must be larger than
                                                true HCLK clock MHz                        */
 
-#define ENABLE_OHCI_IRQ()      sysEnableInterrupt(IRQ_OHCI)
-#define DISABLE_OHCI_IRQ()     sysDisableInterrupt(IRQ_OHCI)
-#define IS_OHCI_IRQ_ENABLED()  (AIC->IE1 & 0x800000)
-#define ENABLE_EHCI_IRQ()      sysEnableInterrupt(IRQ_EHCI)
-#define DISABLE_EHCI_IRQ()     sysDisableInterrupt(IRQ_EHCI)
-#define IS_EHCI_IRQ_ENABLED()  (AIC->IE1 & 0x400000)
+#define ENABLE_OHCI_IRQ()      sysEnableInterrupt(OHCI_IRQn)
+#define DISABLE_OHCI_IRQ()     sysDisableInterrupt(OHCI_IRQn)
+#define IS_OHCI_IRQ_ENABLED()  (AIC->IE[1] & 0x800000)
+#define ENABLE_EHCI_IRQ()      sysEnableInterrupt(EHCI_IRQn)
+#define DISABLE_EHCI_IRQ()     sysDisableInterrupt(EHCI_IRQn)
+#define IS_EHCI_IRQ_ENABLED()  (AIC->IE[1] & 0x400000)
 
 #define ENABLE_OHCI                     /* Enable OHCI host controller                    */
 #define ENABLE_EHCI                     /* Enable EHCI host controller                    */

@@ -2044,7 +2044,7 @@ typedef enum CLKn
 #define SET_UART9_nRTS_PE5()       SYS->GPE_MFPL = ((SYS->GPE_MFPL & ~SYS_GPE_MFPL_PE5MFP_Msk) | SYS_GPE_MFPL_PE5MFP_UART9_nRTS) /*!< Set PE5 function to UART9_nRTS      */
 #define SET_UART9_nRTS_PH6()       SYS->GPH_MFPL = ((SYS->GPH_MFPL & ~SYS_GPH_MFPL_PH6MFP_Msk) | SYS_GPH_MFPL_PH6MFP_UART9_nRTS) /*!< Set PH6 function to UART9_nRTS      */
 
-/* USB */
+/* USBH */
 #define SET_USB_OVC_PE10()         SYS->GPE_MFPH = ((SYS->GPE_MFPH & ~SYS_GPE_MFPH_PE10MFP_Msk) | SYS_GPE_MFPH_PE10MFP_USB_OVC) /*!< Set PE10 function to USB_OVC        */
 
 /* USB0 */

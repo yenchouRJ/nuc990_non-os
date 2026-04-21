@@ -79,7 +79,11 @@ void PRNG_Open(uint32_t u32KeySize, uint32_t u32SeedReload, uint32_t u32Seed)
         CRYPTO->PRNG_SEED = u32Seed;
 
     CRYPTO->PRNG_CTL =  (u32KeySize << CRYPTO_PRNG_CTL_KEYSZ_Pos) |
-                      (u32SeedReload << CRYPTO_PRNG_CTL_SEEDRLD_Pos);
+                        (u32SeedReload << CRYPTO_PRNG_CTL_SEEDRLD_Pos) |
+                        CRYPTO_PRNG_CTL_START_Msk;
+
+    while ((CRYPTO->PRNG_CTL & CRYPTO_PRNG_CTL_START_Msk) ||
+           (CRYPTO->PRNG_STS & CRYPTO_PRNG_STS_BUSY_Msk));
 }
 
 /**
@@ -103,8 +107,12 @@ void PRNG_Open(uint32_t u32KeySize, uint32_t u32SeedReload, uint32_t u32Seed)
 void PRNG_ReSeed(uint32_t u32KeySize, uint32_t u32Seed)
 {
     CRYPTO->PRNG_SEED = u32Seed;
-    CRYPTO->PRNG_CTL = CRYPTO_PRNG_CTL_SEEDRLD_Msk | (u32KeySize << CRYPTO_PRNG_CTL_KEYSZ_Pos) | CRYPTO_PRNG_CTL_START_Msk;
-    while (CRYPTO->PRNG_STS & CRYPTO_PRNG_STS_BUSY_Msk);
+    CRYPTO->PRNG_CTL = CRYPTO_PRNG_CTL_SEEDRLD_Msk |
+                       (u32KeySize << CRYPTO_PRNG_CTL_KEYSZ_Pos) |
+                       CRYPTO_PRNG_CTL_START_Msk;
+
+    while ((CRYPTO->PRNG_CTL & CRYPTO_PRNG_CTL_START_Msk) ||
+           (CRYPTO->PRNG_STS & CRYPTO_PRNG_STS_BUSY_Msk));
 }
 
 /**
@@ -113,7 +121,8 @@ void PRNG_ReSeed(uint32_t u32KeySize, uint32_t u32Seed)
   */
 void PRNG_Start(void)
 {
-    CRYPTO->PRNG_CTL |= CRYPTO_PRNG_CTL_START_Msk;
+    CRYPTO->PRNG_CTL = (CRYPTO->PRNG_CTL & ~CRYPTO_PRNG_CTL_SEEDRLD_Msk) |
+                        CRYPTO_PRNG_CTL_START_Msk;
 }
 
 /**
@@ -279,6 +288,35 @@ int AES_Start(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr)
     return 0;
 }
 
+/**
+  * @brief  Stop AES encrypt/decrypt operation
+  *
+  * This function requests the AES engine to stop the current
+  * encrypt/decrypt operation. It will wait until the AES engine
+  * becomes idle to ensure that DMA and internal state machines
+  * are fully stopped.
+  *
+  * @retval     0    Successful
+  * @retval     -1   Timeout or AES stop fail
+  */
+int AES_Stop(void)
+{
+    uint32_t timeout = 0xFFFFFF;
+
+    /* Request AES engine to stop */
+    CRYPTO->AES_CTL |= CRYPTO_AES_CTL_STOP_Msk;
+
+    /* Wait until AES engine is no longer busy */
+    while (CRYPTO->AES_STS & CRYPTO_AES_STS_BUSY_Msk)
+    {
+        if (--timeout == 0)
+        {
+            /* AES engine failed to stop */
+            return -1;
+        }
+    }
+    return 0;
+}
 /**
   * @brief  Start AES encrypt/decrypt
   * @param[in]  u32DMAMode   AES DMA control, including:

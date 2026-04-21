@@ -204,7 +204,7 @@ static int  ohci_init(void)
 #ifdef OHCI_PER_PORT_POWER
     _ohci->HcRhDescriptorB = 0x60000;
     for (i = 0; i < OHCI_PORT_CNT; i++)
-        _ohci->HcRhPortStatus[i] = USBH_HcRhPortStatus_PPS_Msk;
+        _ohci->HcRhPortStatus[i] = USBH_HcRhPortStatus0_PPS_Msk;
 #else
     _ohci->HcRhDescriptorA = (USBH->HcRhDescriptorA | (1<<9)) & ~USBH_HcRhDescriptorA_PSM_Msk;
     _ohci->HcRhStatus = USBH_HcRhStatus_LPSC_Msk;
@@ -834,7 +834,7 @@ static int ohci_rh_port_reset(int port)
 
     for (retry = 0; retry < PORT_RESET_RETRY; retry++)
     {
-        _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus_PRS_Msk;
+        _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus0_PRS_Msk;
 
         t0 = get_ticks();
         while (get_ticks() - t0 < (reset_time/10)+1)
@@ -842,8 +842,8 @@ static int ohci_rh_port_reset(int port)
             /*
              *  If device is disconnected or port enabled, we can stop port reset.
              */
-            if (((_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus_CCS_Msk) == 0) ||
-                    ((_ohci->HcRhPortStatus[port] & (USBH_HcRhPortStatus_PES_Msk | USBH_HcRhPortStatus_CCS_Msk)) == (USBH_HcRhPortStatus_PES_Msk | USBH_HcRhPortStatus_CCS_Msk)))
+            if (((_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus0_CCS_Msk) == 0) ||
+                    ((_ohci->HcRhPortStatus[port] & (USBH_HcRhPortStatus0_PES_Msk | USBH_HcRhPortStatus0_CCS_Msk)) == (USBH_HcRhPortStatus0_PES_Msk | USBH_HcRhPortStatus0_CCS_Msk)))
                 goto port_reset_done;
         }
         reset_time += PORT_RESET_RETRY_INC_MS;
@@ -853,9 +853,9 @@ static int ohci_rh_port_reset(int port)
     return USBH_ERR_PORT_RESET;
 
 port_reset_done:
-    if ((_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus_CCS_Msk) == 0)   /* check again if device disconnected */
+    if ((_ohci->HcRhPortStatus[port] & USBH_HcRhPortStatus0_CCS_Msk) == 0)   /* check again if device disconnected */
     {
-        _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus_CSC_Msk;         /* clear CSC */
+        _ohci->HcRhPortStatus[port] = USBH_HcRhPortStatus0_CSC_Msk;         /* clear CSC */
         return USBH_ERR_DISCONNECTED;
     }
     return USBH_OK;                                                        /* port reset success */
@@ -870,19 +870,19 @@ static int ohci_rh_polling(void)
     for (i = 0; i < OHCI_PORT_CNT; i++)
     {
         /* clear unwanted port change status */
-        _ohci->HcRhPortStatus[i] = USBH_HcRhPortStatus_OCIC_Msk | USBH_HcRhPortStatus_PRSC_Msk |
-                                   USBH_HcRhPortStatus_PSSC_Msk | USBH_HcRhPortStatus_PESC_Msk;
+        _ohci->HcRhPortStatus[i] = USBH_HcRhPortStatus0_OCIC_Msk | USBH_HcRhPortStatus0_PRSC_Msk |
+                                   USBH_HcRhPortStatus0_PSSC_Msk | USBH_HcRhPortStatus0_PESC_Msk;
 
-        if ((_ohci->HcRhPortStatus[i] & USBH_HcRhPortStatus_CSC_Msk) == 0)
+        if ((_ohci->HcRhPortStatus[i] & USBH_HcRhPortStatus0_CSC_Msk) == 0)
             continue;
         printf("OHCI port%d status change: 0x%x\n", i+1, _ohci->HcRhPortStatus[i]);
 
         /*--------------------------------------------------------------------------------*/
         /*  connect status change                                                         */
         /*--------------------------------------------------------------------------------*/
-        _ohci->HcRhPortStatus[i] = USBH_HcRhPortStatus_CSC_Msk;     /* clear CSC          */
+        _ohci->HcRhPortStatus[i] = USBH_HcRhPortStatus0_CSC_Msk;     /* clear CSC          */
 
-        if (_ohci->HcRhPortStatus[i] & USBH_HcRhPortStatus_CCS_Msk)
+        if (_ohci->HcRhPortStatus[i] & USBH_HcRhPortStatus0_CCS_Msk)
         {
             /*----------------------------------------------------------------------------*/
             /*  First of all, check if there's any previously connected device.           */
@@ -909,7 +909,7 @@ static int ohci_rh_polling(void)
 
             udev->parent = NULL;
             udev->port_num = i+1;
-            if (_ohci->HcRhPortStatus[i] & USBH_HcRhPortStatus_LSDA_Msk)
+            if (_ohci->HcRhPortStatus[i] & USBH_HcRhPortStatus0_LSDA_Msk)
                 udev->speed = SPEED_LOW;
             else
                 udev->speed = SPEED_FULL;

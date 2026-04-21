@@ -606,11 +606,9 @@ typedef struct
     __IO uint32_t UASSTR;                /*!< [0x003c] USB Asynchronous Schedule Sleep Timer Register                   */
     __I  uint32_t RESERVE2[8];
     __IO uint32_t UCFGR;                 /*!< [0x0060] USB Configure Flag Register                                      */
-    __IO uint32_t UPSCR0;                /*!< [0x0064] USB Port 0 Status and Control Register                           */
-    __IO uint32_t UPSCR1;                /*!< [0x0068] USB Port 1 Status and Control Register                           */
+    __IO uint32_t UPSCR[2];              /*!< [0x0064] USB Port 0 ~ 1 Status and Control Register                       */
     __I  uint32_t RESERVE3[22];
-    __IO uint32_t USBPCR0;               /*!< [0x00c4] USB PHY 0 Control Register                                       */
-    __IO uint32_t USBPCR1;               /*!< [0x00c8] USB PHY 1 Control Register                                       */
+    __IO uint32_t USBPCR[2];             /*!< [0x00c4] USB PHY 0 ~ 1 Control Register                                   */
 
 } HSUSBH_T;
 
@@ -738,37 +736,37 @@ typedef struct
 
 #define HSUSBH_UPSCR0_CCS_Pos            (0)                                               /*!< HSUSBH_T::UPSCR0: CCS Position         */
 #define HSUSBH_UPSCR0_CCS_Msk            (0x1ul << HSUSBH_UPSCR0_CCS_Pos)                  /*!< HSUSBH_T::UPSCR0: CCS Mask             */
-
+                                        
 #define HSUSBH_UPSCR0_CSC_Pos            (1)                                               /*!< HSUSBH_T::UPSCR0: CSC Position         */
 #define HSUSBH_UPSCR0_CSC_Msk            (0x1ul << HSUSBH_UPSCR0_CSC_Pos)                  /*!< HSUSBH_T::UPSCR0: CSC Mask             */
-
+                                        
 #define HSUSBH_UPSCR0_PE_Pos             (2)                                               /*!< HSUSBH_T::UPSCR0: PE Position          */
 #define HSUSBH_UPSCR0_PE_Msk             (0x1ul << HSUSBH_UPSCR0_PE_Pos)                   /*!< HSUSBH_T::UPSCR0: PE Mask              */
-
+                                        
 #define HSUSBH_UPSCR0_PEC_Pos            (3)                                               /*!< HSUSBH_T::UPSCR0: PEC Position         */
 #define HSUSBH_UPSCR0_PEC_Msk            (0x1ul << HSUSBH_UPSCR0_PEC_Pos)                  /*!< HSUSBH_T::UPSCR0: PEC Mask             */
-
+                                        
 #define HSUSBH_UPSCR0_OCA_Pos            (4)                                               /*!< HSUSBH_T::UPSCR0: OCA Position         */
 #define HSUSBH_UPSCR0_OCA_Msk            (0x1ul << HSUSBH_UPSCR0_OCA_Pos)                  /*!< HSUSBH_T::UPSCR0: OCA Mask             */
-
+                                        
 #define HSUSBH_UPSCR0_OCC_Pos            (5)                                               /*!< HSUSBH_T::UPSCR0: OCC Position         */
 #define HSUSBH_UPSCR0_OCC_Msk            (0x1ul << HSUSBH_UPSCR0_OCC_Pos)                  /*!< HSUSBH_T::UPSCR0: OCC Mask             */
-
+                                        
 #define HSUSBH_UPSCR0_FPR_Pos            (6)                                               /*!< HSUSBH_T::UPSCR0: FPR Position         */
 #define HSUSBH_UPSCR0_FPR_Msk            (0x1ul << HSUSBH_UPSCR0_FPR_Pos)                  /*!< HSUSBH_T::UPSCR0: FPR Mask             */
-
+                                        
 #define HSUSBH_UPSCR0_SUSPEND_Pos        (7)                                               /*!< HSUSBH_T::UPSCR0: SUSPEND Position     */
 #define HSUSBH_UPSCR0_SUSPEND_Msk        (0x1ul << HSUSBH_UPSCR0_SUSPEND_Pos)              /*!< HSUSBH_T::UPSCR0: SUSPEND Mask         */
-
+                                        
 #define HSUSBH_UPSCR0_PRST_Pos           (8)                                               /*!< HSUSBH_T::UPSCR0: PRST Position        */
 #define HSUSBH_UPSCR0_PRST_Msk           (0x1ul << HSUSBH_UPSCR0_PRST_Pos)                 /*!< HSUSBH_T::UPSCR0: PRST Mask            */
-
+                                        
 #define HSUSBH_UPSCR0_LSTS_Pos           (10)                                              /*!< HSUSBH_T::UPSCR0: LSTS Position        */
 #define HSUSBH_UPSCR0_LSTS_Msk           (0x3ul << HSUSBH_UPSCR0_LSTS_Pos)                 /*!< HSUSBH_T::UPSCR0: LSTS Mask            */
-
+                                        
 #define HSUSBH_UPSCR0_PP_Pos             (12)                                              /*!< HSUSBH_T::UPSCR0: PP Position          */
 #define HSUSBH_UPSCR0_PP_Msk             (0x1ul << HSUSBH_UPSCR0_PP_Pos)                   /*!< HSUSBH_T::UPSCR0: PP Mask              */
-
+                                        
 #define HSUSBH_UPSCR0_PO_Pos             (13)                                              /*!< HSUSBH_T::UPSCR0: PO Position          */
 #define HSUSBH_UPSCR0_PO_Msk             (0x1ul << HSUSBH_UPSCR0_PO_Pos)                   /*!< HSUSBH_T::UPSCR0: PO Mask              */
 

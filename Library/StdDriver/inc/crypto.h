@@ -301,6 +301,7 @@ void PRNG_Read(uint32_t wcnt, uint32_t u32RandKey[]);
 
 int AES_Open(uint32_t u32EncDec, uint32_t u32OpMode, uint32_t u32KeySize, uint32_t u32SwapType);
 int AES_Start(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr);
+int AES_Stop(void);
 int AES_Start_KS(uint32_t u32DMAMode, uint32_t u32FBmode, uint32_t u32FBAddr, int ksel, int knum);
 int AES_SetKey(uint32_t au32Keys[], uint32_t u32KeySize);
 int AES_SetInitVect(uint32_t au32IV[]);
