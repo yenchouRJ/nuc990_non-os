@@ -1,13 +1,33 @@
 /**************************************************************************//**
  * @file     main.c
  * @version  V1.00
- * $Revision: 2 $
- * $Date: 15/05/18 3:59p $
- * @brief    This sample shows how to access USB mass stroage disk.
+ *
+ * @brief
+ * This sample program demonstrates how to use the NUC990 USB Host controller
+ * to access USB Mass Storage Class (MSC) devices (such as USB flash drives),
+ * and provides a simple command-line monitor to operate a FAT file system
+ * via the FatFs module.
+ *
+ * Major features include:
+ * - USB Host initialization (EHCI/OHCI)
+ * - USB Mass Storage device enumeration
+ * - Disk sector read/write access
+ * - FAT12/16/32 file system support using FatFs
+ * - File and directory operations (open, read, write, copy, delete, rename)
+ * - File system information display
+ * - Buffer dump and edit utilities for debugging
+ *
+ * The console interface is implemented through UART0 and allows users to
+ * interactively issue commands to test USB storage and file system behavior.
  *
  * @note
+ * - USB drive numbers start from logical drive 3 (e.g. "3:", "4:", ...)
+ * - Cache must be properly configured for USB DMA buffers.
+ * - This is a reference sample for evaluation and development purposes.
+ *
+ * @copyright
  * Copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
-*****************************************************************************/
+ *****************************************************************************/
 #include <stdio.h>
 #include <string.h>
 
@@ -34,7 +54,7 @@ BYTE *Buff, *Buff2;
 
 volatile uint32_t  g_ticks;
 
-void ETMR0_IRQHandler(void)
+void TIMER0_IRQHandler(void)
 {
     g_ticks++;
     TIMER_ClearIntFlag(TIMER0);
@@ -50,7 +70,7 @@ void Start_TIMER0(void)
 {
     g_ticks = 0;
 
-    sysInstallISR(IRQ_LEVEL_1, TIMER0_IRQn, (PVOID)ETMR0_IRQHandler);
+    sysInstallISR(IRQ_LEVEL_1, TIMER0_IRQn, (PVOID)TIMER0_IRQHandler);
     sysSetLocalInterrupt(ENABLE_IRQ);
     sysEnableInterrupt(TIMER0_IRQn);
 
@@ -358,14 +378,14 @@ int32_t main(void)
 
     UART0_Init();
 
+    Start_TIMER0();
+
     printf("\n\n");
     printf("+-----------------------------------------------+\n");
     printf("|                                               |\n");
     printf("|     USB Host Mass Storage sample program      |\n");
     printf("|                                               |\n");
     printf("+-----------------------------------------------+\n");
-
-    Start_TIMER0();
 
     Buff = nc_ptr(&Buff_Pool[0]);
     Buff2 = nc_ptr(&Buff_Pool[BUFF_SIZE]);

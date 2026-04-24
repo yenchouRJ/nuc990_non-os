@@ -94,9 +94,4 @@ typedef struct usbhid_dev
 }
 #endif
 
-#endif  /* _USBH_HID_H_ */
-
-/*** (C) COPYRIGHT 2024 Nuvoton Technology Corp. ***/
-
-
-
+#endif

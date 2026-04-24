@@ -19,44 +19,9 @@
 
 /// @cond HIDDEN_SYMBOLS
 
-int sendchar(int ch)
-{
-    while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
-    UART0->DAT = ch;
-
-    if (ch == '\n')
-    {
-        while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
-        UART0->DAT = '\r';
-    }
-    return (ch);
-}
-
 static void flush_uart(void)
 {
     while (!(UART0->FIFOSTS & UART_FIFOSTS_TXEMPTY_Msk));
-}
-
-int recvchar(void)
-{
-    while(1)
-    {
-        if ((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0)
-        {
-            return UART0->DAT;
-        }
-    }
-}
-
-int sysGetChar(void)
-{
-    while(1)
-    {
-        if ((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0)
-        {
-            return UART0->DAT;
-        }
-    }
 }
 
 struct __FILE
@@ -196,6 +161,35 @@ void C_SWI_Handler( int swi_num, int *regs )
 
 /// @endcond HIDDEN_SYMBOLS
 #endif
+
+int sendchar(int ch)
+{
+    while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
+    UART0->DAT = ch;
+
+    if (ch == '\n')
+    {
+        while (UART0->FIFOSTS & UART_FIFOSTS_TXFULL_Msk);
+        UART0->DAT = '\r';
+    }
+    return (ch);
+}
+
+int recvchar(void)
+{
+    while(1)
+    {
+        if ((UART0->FIFOSTS & UART_FIFOSTS_RXEMPTY_Msk) == 0)
+        {
+            return UART0->DAT;
+        }
+    }
+}
+
+int sysGetChar(void)
+{
+    return recvchar();
+}
 
 /**
  * @brief    Check any char input from UART
