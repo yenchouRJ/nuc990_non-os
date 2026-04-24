@@ -35,6 +35,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>FatFS</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>UsbHostLib</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -55,14 +60,29 @@
 			<locationURI>PARENT-4-PROJECT_LOC/Library/StdDriver/src</locationURI>
 		</link>
 		<link>
+			<name>FatFS/source</name>
+			<type>2</type>
+			<locationURI>PARENT-4-PROJECT_LOC/ThirdParty/FatFs/source</locationURI>
+		</link>
+		<link>
 			<name>UsbHostLib/src_core</name>
 			<type>2</type>
 			<locationURI>PARENT-4-PROJECT_LOC/Library/UsbHostLib/src_core</locationURI>
 		</link>
 		<link>
-			<name>UsbHostLib/src_hid</name>
+			<name>UsbHostLib/src_msc</name>
 			<type>2</type>
-			<locationURI>PARENT-4-PROJECT_LOC/Library/UsbHostLib/src_hid</locationURI>
+			<locationURI>PARENT-4-PROJECT_LOC/Library/UsbHostLib/src_msc</locationURI>
+		</link>
+		<link>
+			<name>UsbHostLib/src_uvc</name>
+			<type>2</type>
+			<locationURI>PARENT-4-PROJECT_LOC/Library/UsbHostLib/src_uvc</locationURI>
+		</link>
+		<link>
+			<name>User/diskio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/diskio.c</locationURI>
 		</link>
 		<link>
 			<name>User/main.c</name>
@@ -213,6 +233,24 @@
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-timer.c</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1777019199060</id>
+			<name>FatFS/source</name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-ff.c</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1777019199071</id>
+			<name>FatFS/source</name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-ffunicode.c</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>
