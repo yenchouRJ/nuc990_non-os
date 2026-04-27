@@ -4,6 +4,7 @@ lst/
 
 #For GCC
 .settings/
+Release/
 
 #For OSX
 .DS_Store

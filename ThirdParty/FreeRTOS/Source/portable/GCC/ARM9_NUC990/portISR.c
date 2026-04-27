@@ -87,8 +87,7 @@
 #include "task.h"
 
 /* Nuvoton includes. */
-#include "nuc980.h"
-#include "sys.h"
+#include "NuMicro.h"
 
 
 /* Constants required to handle critical sections. */

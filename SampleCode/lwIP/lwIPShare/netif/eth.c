@@ -119,15 +119,15 @@ static void init_tx_desc(eth_intf_t *intf)
     u32_t i;
 
     intf->cur_tx_desc_ptr = intf->fin_tx_desc_ptr =
-        (struct eth_descriptor *)((UINT)(&intf->tx_desc[0]) | 0x80000000);
+        (struct eth_descriptor *)((UINT)(&intf->tx_desc[0]) | NON_CACHE_MASK);
 
     for (i = 0; i < TX_DESCRIPTOR_NUM; i++) {
         intf->tx_desc[i].status1 = TXFD_PADEN | TXFD_CRCAPP | TXFD_INTEN;
-        intf->tx_desc[i].buf     = (unsigned char *)((UINT)(&intf->tx_buf[i][0]) | 0x80000000);
+        intf->tx_desc[i].buf     = (unsigned char *)((UINT)(&intf->tx_buf[i][0]) | NON_CACHE_MASK);
         intf->tx_desc[i].status2 = 0;
-        intf->tx_desc[i].next    = (struct eth_descriptor *)((UINT)(&intf->tx_desc[(i + 1) % TX_DESCRIPTOR_NUM]) | 0x80000000);
+        intf->tx_desc[i].next    = (struct eth_descriptor *)((UINT)(&intf->tx_desc[(i + 1) % TX_DESCRIPTOR_NUM]) | NON_CACHE_MASK);
     }
-    intf->emac->TXDLSA = (unsigned int)&intf->tx_desc[0] | 0x80000000;
+    intf->emac->TXDLSA = (unsigned int)&intf->tx_desc[0] | NON_CACHE_MASK;
 }
 
 static void init_rx_desc(eth_intf_t *intf)
@@ -135,15 +135,15 @@ static void init_rx_desc(eth_intf_t *intf)
     u32_t i;
 
     intf->cur_rx_desc_ptr =
-        (struct eth_descriptor *)((UINT)(&intf->rx_desc[0]) | 0x80000000);
+        (struct eth_descriptor *)((UINT)(&intf->rx_desc[0]) | NON_CACHE_MASK);
 
     for (i = 0; i < RX_DESCRIPTOR_NUM; i++) {
         intf->rx_desc[i].status1 = OWNERSHIP_EMAC;
-        intf->rx_desc[i].buf     = (unsigned char *)((UINT)(&intf->rx_buf[i][0]) | 0x80000000);
+        intf->rx_desc[i].buf     = (unsigned char *)((UINT)(&intf->rx_buf[i][0]) | NON_CACHE_MASK);
         intf->rx_desc[i].status2 = 0;
-        intf->rx_desc[i].next    = (struct eth_descriptor *)((UINT)(&intf->rx_desc[(i + 1) % RX_DESCRIPTOR_NUM]) | 0x80000000);
+        intf->rx_desc[i].next    = (struct eth_descriptor *)((UINT)(&intf->rx_desc[(i + 1) % RX_DESCRIPTOR_NUM]) | NON_CACHE_MASK);
     }
-    intf->emac->RXDLSA = (unsigned int)&intf->rx_desc[0] | 0x80000000;
+    intf->emac->RXDLSA = (unsigned int)&intf->rx_desc[0] | NON_CACHE_MASK;
 }
 
 /* ------------------------------------------------------------------ */
