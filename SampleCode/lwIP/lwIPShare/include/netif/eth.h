@@ -112,9 +112,11 @@ struct eth_descriptor
 
 
 extern void ETH0_init(u8_t *mac_addr);
+extern void ETH0_halt(void);
 extern u8_t *ETH0_get_tx_buf(void);
 extern void ETH0_trigger_tx(u16_t length, struct pbuf *p);
 extern void ETH1_init(u8_t *mac_addr);
+extern void ETH1_halt(void);
 extern u8_t *ETH1_get_tx_buf(void);
 extern void ETH1_trigger_tx(u16_t length, struct pbuf *p);
 
