@@ -41,7 +41,7 @@
 REG_AIC_IRQNUM	EQU	0xB0042120
 REG_AIC_IRQRST	EQU	0xB0042170
 REG_ETMR5_ISR	EQU	0xB0052108
-IRQ_TIMER5		EQU	0x00000017
+TIMER5_IRQn		EQU	0x00000017
 
 	ARM
 	AREA	PORT_ASM, CODE, READONLY
@@ -106,7 +106,7 @@ vPreemptiveTick
 
 	LDR R0, =REG_AIC_IRQNUM				;
 	LDR R0, [R0]
-	CMP R0, #IRQ_TIMER5					; Check the interrupt is from Timer 5 or not.
+	CMP R0, #TIMER5_IRQn				; Check the interrupt is from Timer 5 or not.
 	BEQ SkipIrqHandler
 
 	LDR R1, =systemIrqHandler			; Call to real interrupt handler of non-OS.    

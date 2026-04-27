@@ -174,10 +174,6 @@ UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove )
 item. */
 List_t * const pxList = ( List_t * ) pxItemToRemove->pvContainer;
 
-//printf("pxList - %x\n", (int)pxList);
-//printf("pxItemToRemove = 0x%x\n", (int)pxItemToRemove);
-//printf("pxItemToRemove->pxNext = 0x%x\n", (int)pxItemToRemove->pxNext);
-//printf("pxItemToRemove->pxNext->pxPrevious = 0x%x\n", (int)pxItemToRemove->pxNext->pxPrevious);
 	pxItemToRemove->pxNext->pxPrevious = pxItemToRemove->pxPrevious;
 	pxItemToRemove->pxPrevious->pxNext = pxItemToRemove->pxNext;
 
@@ -196,8 +192,6 @@ List_t * const pxList = ( List_t * ) pxItemToRemove->pvContainer;
 
 	pxItemToRemove->pvContainer = NULL;
 	( pxList->uxNumberOfItems )--;
-
-//printf(" pxList->uxNumberOfItems - %d\n",  pxList->uxNumberOfItems);
 
 	return pxList->uxNumberOfItems;
 }

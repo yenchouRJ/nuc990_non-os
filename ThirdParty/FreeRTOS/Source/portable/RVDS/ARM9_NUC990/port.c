@@ -36,13 +36,12 @@
 
 /* Nuvoton includes. */
 #include "NuMicro.h"
-#include "sys.h"
 
 /* Constants required to setup the initial task context. */
-#define portINITIAL_SPSR			( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
-#define portTHUMB_MODE_BIT			( ( StackType_t ) 0x20 )
+#define portINITIAL_SPSR				( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
+#define portTHUMB_MODE_BIT				( ( StackType_t ) 0x20 )
 #define portINSTRUCTION_SIZE			( ( StackType_t ) 4 )
-#define portNO_CRITICAL_SECTION_NESTING		( ( StackType_t ) 0 )
+#define portNO_CRITICAL_SECTION_NESTING	( ( StackType_t ) 0 )
 
 /*-----------------------------------------------------------*/
 
@@ -173,7 +172,7 @@ void systemIrqHandler(UINT32 irq)
 	if (irq != 0)
 		(*IrqHandlerTable[irq])();
 
-	outpw(REG_AIC_IRQRST, 1);
+	AIC->IRQRST = 1;
 }
 
 
@@ -183,13 +182,13 @@ void systemIrqHandler(UINT32 irq)
 	 * The cooperative scheduler requires a normal IRQ service routine to 
 	 * simply increment the system tick. 
 	 */
-	void vNonPreemptiveTick( void );
-	void vNonPreemptiveTick( void )
+	void vNonPreemptiveTick( void ) __irq;
+	void vNonPreemptiveTick( void ) __irq
 	{
 		UINT32 num;
 
-		num = inpw(REG_AIC_IRQNUM);
-		if(num != IRQ_TIMER5) 
+		num = AIC->IRQ;
+		if(num != TIMER5_IRQn) 
 		{
 			if (num != 0)
 				(*IrqHandlerTable[num])();
@@ -198,9 +197,9 @@ void systemIrqHandler(UINT32 irq)
 		{
 			xTaskIncrementTick();
 			// clear timer interrupt
-			outpw(REG_TIMER5_INTSTS, 1);
+			TIMER5->INTSTS = TIMER_INTSTS_TIF_Msk;
 		}
-		outpw(REG_AIC_EOIS, 1);
+		AIC->IRQRST = 1;
 	}
 
  #else
@@ -220,21 +219,20 @@ void systemIrqHandler(UINT32 irq)
 
 static void prvSetupTimerInterrupt( void )
 {
-uint32_t ulCompareMatch;
+	uint32_t ulCompareMatch;
 
 	// enable timer5 clock
-	outpw(REG_CLK_PCLKEN0, inpw(REG_CLK_PCLKEN0) | CLK_PCLKEN0_TMR5CKEN_Msk);
-
+	CLK->PCLKEN0 |= CLK_PCLKEN0_TMR5CKEN_Msk;
 	/* Calculate the match value required for our wanted tick rate. */
 	ulCompareMatch = 1000000 / configTICK_RATE_HZ;
 
 	/* Protect against divide by zero.  Using an if() statement still results
 	in a warning - hence the #if. */
-	//#if portPRESCALE_VALUE != 0
-	//{
-	//	ulCompareMatch /= ( portPRESCALE_VALUE + 1 );
-	//}
-	//#endif
+	#if portPRESCALE_VALUE != 0
+	{
+		ulCompareMatch /= ( portPRESCALE_VALUE + 1 );
+	}
+	#endif
 
 	/* The ISR installed depends on whether the preemptive or cooperative
 	scheduler is being used. */
@@ -247,16 +245,13 @@ uint32_t ulCompareMatch;
 		sysInstallIrqHandler(vNonPreemptiveTick);
 	}
 	#endif
-
-	_sys_bIsAICInitial = TRUE; /* prevent sysInstallISR() from re-install IRQ handler */
-
-	CLK->PCLKEN0 |= CLK_PCLKEN0_AICCKEN_Msk;
+	_sys_bIsAICInitial = TRUE;
 
 	// set up timer and enable timer 5 interrupt
-	outpw(REG_TIMER5_CMP, ulCompareMatch);
-	outpw(REG_TIMER5_CTL, TIMER_CTL_CNTEN_Msk | TIMER_CTL_INTEN_Msk |
-	      (0x1 << TIMER_CTL_OPMODE_Pos)) | 11;  /* count 1000000 per second */
-	sysEnableInterrupt(IRQ_TIMER5);
+	TIMER5->CMP = ulCompareMatch;
+	TIMER5->CTL = TIMER_CTL_CNTEN_Msk | TIMER_CTL_INTEN_Msk |
+	      (0x1 << TIMER_CTL_OPMODE_Pos) | 11;  /* count 1000000 per second */
+	sysEnableInterrupt(TIMER5_IRQn);
 }
 /*-----------------------------------------------------------*/
 

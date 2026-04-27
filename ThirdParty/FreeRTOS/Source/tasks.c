@@ -739,7 +739,6 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 	TCB_t *pxNewTCB;
 	BaseType_t xReturn;
 
-// printf("%s - %d\n", __func__, usStackDepth);
 		/* If the stack grows down then allocate the stack then the TCB so the stack
 		does not grow into the TCB.  Likewise if the stack grows up then allocate
 		the TCB then the stack. */
@@ -769,10 +768,9 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 		{
 		StackType_t *pxStack;
 
-// printf("%s %d - %d\n", __func__, __LINE__, usStackDepth);
 			/* Allocate space for the stack used by the task being created. */
 			pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
-//printf("%s - 0x%x\n", __func__, (int)pxStack);
+
 			if( pxStack != NULL )
 			{
 				/* Allocate space for the TCB. */
@@ -1940,7 +1938,6 @@ BaseType_t xReturn;
 								( void * ) NULL,
 								( tskIDLE_PRIORITY | portPRIVILEGE_BIT ),
 								&xIdleTaskHandle ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
-//		printf("%s - %d\n", __func__, xReturn);
 	}
 	#endif /* configSUPPORT_STATIC_ALLOCATION */
 
@@ -2599,7 +2596,6 @@ BaseType_t xSwitchRequired = pdFALSE;
 	Increments the tick then checks to see if the new tick value will cause any
 	tasks to be unblocked. */
 	traceTASK_INCREMENT_TICK( xTickCount );
-
 	if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
 	{
 		/* Minor optimisation.  The tick count cannot change in this

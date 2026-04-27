@@ -400,7 +400,6 @@ BaseType_t xDefinedRegions = 0;
 size_t xAddress;
 const HeapRegion_t *pxHeapRegion;
 
-printf("\n\n\n GGYY!!! \n\n\n\n");
 	/* Can only call once! */
 	configASSERT( pxEnd == NULL );
 
