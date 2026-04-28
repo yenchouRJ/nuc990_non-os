@@ -54,10 +54,10 @@
 #endif
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls_config.h"
+#include "mbedtls/mbedtls_config.h"
 #else
-//#include MBEDTLS_CONFIG_FILE
-#include "mbedtls_config.h"
+#include MBEDTLS_CONFIG_FILE
+//#include "mbedtls_config.h"
 #endif
 
 #if defined(MBEDTLS_CONFIG_VERSION) && ( \
