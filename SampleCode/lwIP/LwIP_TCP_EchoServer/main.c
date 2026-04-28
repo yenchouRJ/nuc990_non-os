@@ -143,6 +143,8 @@ static void prvSetupHardware( void )
     sysFlushCache(I_D_CACHE);
     sysEnableCache(CACHE_WRITE_BACK);
 
+    CLK_SetModuleClock(UART0_MODULE, CLK_DIV4_UART0SEL_HXT, CLK_DIV4_UART0(1));
+
     sysResetModule(UART0_RST);
     UART_Open(UART0, 115200);
     UART0->BAUD = 0x3000000E;  /* for palladium */

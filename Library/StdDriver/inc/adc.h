@@ -45,6 +45,31 @@ extern "C"
 #define ADC_INPUT_MODE_4WIRE_TOUCH  1   /*!< ADC works in 4-wire touch screen mode \hideinitializer */
 #define ADC_INPUT_MODE_5WIRE_TOUCH  2   /*!< ADC works in 5-wire touch screen mode \hideinitializer */
 
+/*---------------------------------------------------------------*/
+/* ADC ioctl command enumeration (callback-based legacy API)     */
+/*---------------------------------------------------------------*/
+typedef INT32 (*ADC_CALLBACK)(UINT32 status, UINT32 userData);
+
+typedef enum
+{
+    START_MST,              /*!< Menu Start Conversion (interrupt, blocking)        */
+    START_MST_POLLING,      /*!< Menu Start Conversion (polling, blocking)          */
+    VBPOWER_ON,             /*!< Not supported on NUC990                            */
+    VBPOWER_OFF,            /*!< Not supported on NUC990                            */
+    NAC_ON,                 /*!< Enable Normal AD Conversion                        */
+    NAC_OFF,                /*!< Disable Normal AD Conversion                       */
+    PEPOWER_ON,             /*!< Enable Pen Down Detection Power                    */
+    PEPOWER_OFF,            /*!< Disable Pen Down Detection Power                   */
+    PEDEF_ON,               /*!< Enable Pen Down Event callback                     */
+    PEDEF_OFF,              /*!< Disable Pen Down Event callback                    */
+    T_ON,                   /*!< Enable Touch XY Detection                          */
+    T_OFF,                  /*!< Disable Touch XY Detection                         */
+    Z_ON,                   /*!< Enable Pressure Measure                            */
+    Z_OFF,                  /*!< Disable Pressure Measure                           */
+} ADC_CMD;
+
+#define ADC_ERR_CMD     (-1)    /*!< Invalid ioctl command */
+
 /*! @}*/ /* end of group ADC_EXPORTED_CONSTANTS */
 
 /** @addtogroup ADC_EXPORTED_FUNCTIONS ADC Exported Functions
@@ -191,6 +216,17 @@ void ADC_Open(ADC_T *adc,
 void ADC_Close(ADC_T *adc);
 void ADC_EnableInt(ADC_T *adc, uint32_t u32Mask);
 void ADC_DisableInt(ADC_T *adc, uint32_t u32Mask);
+
+/*---------------------------------------------------------------*/
+/* Callback-based legacy API                                     */
+/*---------------------------------------------------------------*/
+INT  adcOpen(void);
+INT  adcOpen2(uint32_t freqKhz);
+int  adcClose(void);
+INT  adcIoctl(ADC_CMD cmd, INT32 arg1, INT32 arg2);
+INT  adcChangeChannel(int channel);
+INT  adcReadXY(INT16 *bufX, INT16 *bufY, int dataCnt);
+int  adcReadZ(short *bufZ1, short *bufZ2, int dataCnt);
 
 /*! @}*/ /* end of group ADC_EXPORTED_FUNCTIONS */
 
