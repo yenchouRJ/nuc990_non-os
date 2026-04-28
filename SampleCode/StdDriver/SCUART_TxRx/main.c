@@ -3,7 +3,7 @@
  * @brief    Demonstrate smartcard UART mode
  *
  * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
-*****************************************************************************/
+ *****************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
 #include "scuart.h"
@@ -31,15 +31,15 @@ void SC0_IRQHandler(void)
 
 void UART_Init()
 {
-    /* enable UART0 clock */
-    outpw(REG_CLK_PCLKEN0, inpw(REG_CLK_PCLKEN0) | 0x10000);
+    CLK_SetModuleClock(UART0_MODULE, CLK_DIV4_UART0SEL_HXT, CLK_DIV4_UART0(1));
+
+    sysResetModule(UART0_RST);
+    UART_Open(UART0, 115200);
+    // UART0->BAUD = 0x3000000E;  /* for palladium */
 
     /* GPF11, GPF12 */
-    outpw(REG_SYS_GPF_MFPH, (inpw(REG_SYS_GPF_MFPH) & 0xfff00fff) | 0x11000);   // UART0 multi-function
-
-    /* UART0 line configuration for (115200,n,8,1) */
-    outpw(REG_UART0_LCR, inpw(REG_UART0_LCR) | 0x07);
-    outpw(REG_UART0_BAUD, 0x30000066); /* 12MHz reference clock input, 115200 */
+    SET_UART0_RXD_PF11();
+    SET_UART0_TXD_PF12();
 }
 
 int main(void)
@@ -50,9 +50,12 @@ int main(void)
     sysEnableCache(CACHE_WRITE_BACK);
     UART_Init();
 
-    outpw(REG_CLK_PCLKEN1, inpw(REG_CLK_PCLKEN1) | (1 << 12)); // Enable SC0 engine clock
-    outpw(REG_SYS_GPC_MFPH, (inpw(REG_SYS_GPC_MFPH) & ~(0xFF0000)) | 0x440000); // Enable SCUART Tx/Rx pin
+    // Enable SC0 engine clock
+    CLK->PCLKEN1 |= CLK_PCLKEN1_SMC0CKEN_Msk;
 
+    // Enable SCUART Tx/Rx pin (PC12=SC0_CLK, PC13=SC0_DAT)
+    SET_SC0_CLK_PC12();
+    SET_SC0_DAT_PC13();
 
     printf("This sample code demos smartcard interface UART mode\n");
     printf("Please connect SC0 CLK pin(PC.12) with SC0 I/O pin(PC.13)\n");
@@ -64,15 +67,12 @@ int main(void)
     // Enable receive interrupt
     SCUART_ENABLE_INT(0, SC_INTEN_RDAIEN_Msk);
 
-    sysInstallISR(IRQ_LEVEL_1, IRQ_SMC0, (PVOID)SC0_IRQHandler);
+    sysInstallISR(IRQ_LEVEL_1, SMC0_IRQn, (PVOID)SC0_IRQHandler);
     sysSetLocalInterrupt(ENABLE_IRQ);
-    sysEnableInterrupt(IRQ_SMC0);
+    sysEnableInterrupt(SMC0_IRQn);
 
 
     SCUART_Write(0, au8TxBuf, sizeof(au8TxBuf));
 
     while(1);
 }
-
-
-

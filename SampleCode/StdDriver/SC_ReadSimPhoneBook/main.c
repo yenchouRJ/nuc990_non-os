@@ -8,7 +8,7 @@
 #include "NuMicro.h"
 #include "sc.h"
 #include "sclib.h"
-#include "gpio.h"
+// #include "gpio.h"
 
 /* The definition of commands used in this sample code and directory structures could
    be found in GSM 11.11 which is free for download from Internet. */
@@ -210,19 +210,25 @@ int main(void)
     sysEnableCache(CACHE_WRITE_BACK);
     UART_Init();
 
-    // enable smartcard 1 clock and multi function pin
-    outpw(REG_CLK_PCLKEN1, inpw(REG_CLK_PCLKEN1) | 0x00002000);
-    outpw(REG_CLK_DIVCTL6, inpw(REG_CLK_DIVCTL6) | 0x20000000);
+    // Enable smartcard 1 clock
+    CLK->PCLKEN1 |= CLK_PCLKEN1_SMC1CKEN_Msk;
+    // Set SC1 clock divider (divide by 3: value 2 in field means /3)
+    CLK->DIVCTL6 = (CLK->DIVCTL6 & ~CLK_DIVCTL6_SMC1_N_Msk) | (0x2ul << CLK_DIVCTL6_SMC1_N_Pos);
 
-    // Select port F for smartcard interface
-    outpw(REG_SYS_GPF_MFPL, (inpw(REG_SYS_GPF_MFPL) & ~(0xFFFFF)) | 0x44444);
+    // Select port F for smartcard 1 interface (PF0=RST, PF1=CLK, PF2=DAT, PF3=PWR, PF4=nCD)
+    SET_SC1_RST_PF0();
+    SET_SC1_CLK_PF1();
+    SET_SC1_DAT_PF2();
+    SET_SC1_PWR_PF3();
+    SET_SC1_nCD_PF4();
+
     printf("\nThis sample code reads phone book from SIM card\n");
 
     // Open smartcard interface 1. CD pin state ignore and PWR pin high raise VCC pin to card
     SC_Open(1, SC_PIN_STATE_IGNORE, SC_PIN_STATE_HIGH);
-    sysInstallISR(IRQ_LEVEL_1, IRQ_SMC1, (PVOID)SC1_IRQHandler);
+    sysInstallISR(IRQ_LEVEL_1, SMC1_IRQn, (PVOID)SC1_IRQHandler);
     sysSetLocalInterrupt(ENABLE_IRQ);
-    sysEnableInterrupt(IRQ_SMC1);
+    sysEnableInterrupt(SMC1_IRQn);
 
     // Ignore CD pin for SIM card
     //while(SC_IsCardInserted(1) == FALSE);
@@ -323,5 +329,3 @@ int main(void)
 exit:
     while(1);
 }
-
-

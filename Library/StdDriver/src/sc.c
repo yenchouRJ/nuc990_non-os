@@ -1,6 +1,6 @@
 /**************************************************************************//**
  * @file     sc.c
- * @brief    NUC980 series Smartcard(SC) driver source file
+ * @brief    NUC990 series Smartcard(SC) driver source file
  *
  * SPDX-License-Identifier: Apache-2.0
  * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
@@ -12,6 +12,16 @@
 static uint32_t u32CardStateIgnore[SC_INTERFACE_NUM] = {0, 0};
 
 /// @endcond HIDDEN_SYMBOLS
+
+/**
+  * @brief  Get SC_T pointer from interface number
+  * @param[in] sc Smartcard module number (0 or 1)
+  * @return Pointer to SC_T register base
+  */
+static SC_T *SC_GetBase(UINT sc)
+{
+    return (sc == 0) ? SC0 : SC1;
+}
 
 /** @addtogroup Standard_Driver Standard Driver
   @{
@@ -35,23 +45,13 @@ static uint32_t u32CardStateIgnore[SC_INTERFACE_NUM] = {0, 0};
   */
 UINT SC_IsCardInserted(UINT sc)
 {
-    uint32_t cond1;
-    uint32_t cond2;
+    SC_T *pSC = SC_GetBase(sc);
+    uint32_t cond1, cond2;
 
-    if(sc == 0)
-    {
-        cond1 = (inpw(REG_SC0_STATUS) & 0x2000) >> 13;
-        cond2 = (inpw(REG_SC0_CTL) & 0x4000000) >> 26;
-    }
-    else
-    {
-        cond1 = (inpw(REG_SC1_STATUS) & 0x2000) >> 13;
-        cond2 = (inpw(REG_SC1_CTL) & 0x4000000) >> 26;
-    }
+    cond1 = (pSC->STATUS & SC_STATUS_CDPINSTS_Msk) >> SC_STATUS_CDPINSTS_Pos;
+    cond2 = (pSC->CTL & SC_CTL_CDLV_Msk) >> SC_CTL_CDLV_Pos;
 
-    if(sc == 0 && u32CardStateIgnore[0] == 1)
-        return TRUE;
-    else if(sc == 1 && u32CardStateIgnore[1] == 1)
+    if(u32CardStateIgnore[sc] == 1)
         return TRUE;
     else if(cond1 != cond2)
         return FALSE;
@@ -67,10 +67,8 @@ UINT SC_IsCardInserted(UINT sc)
   */
 void SC_ClearFIFO(UINT sc)
 {
-    if(sc == 0)
-        outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) | 0x3);
-    else
-        outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) | 0x3);
+    SC_T *pSC = SC_GetBase(sc);
+    pSC->ALTCTL |= (SC_ALTCTL_TXRST_Msk | SC_ALTCTL_RXRST_Msk);
 }
 
 /**
@@ -81,20 +79,11 @@ void SC_ClearFIFO(UINT sc)
   */
 void SC_Close(UINT sc)
 {
-    if(sc == 0)
-    {
-        outpw(REG_SC0_INTEN, 0);
-        outpw(REG_SC0_PINCTL, 0);
-        outpw(REG_SC0_ALTCTL, 0);
-        outpw(REG_SC0_CTL, 0);
-    }
-    else
-    {
-        outpw(REG_SC1_INTEN, 0);
-        outpw(REG_SC1_PINCTL, 0);
-        outpw(REG_SC1_ALTCTL, 0);
-        outpw(REG_SC1_CTL, 0);
-    }
+    SC_T *pSC = SC_GetBase(sc);
+    pSC->INTEN = 0;
+    pSC->PINCTL = 0;
+    pSC->ALTCTL = 0;
+    pSC->CTL = 0;
 }
 
 /**
@@ -112,6 +101,7 @@ void SC_Close(UINT sc)
   */
 void SC_Open(UINT sc, UINT u32CD, UINT u32PWR)
 {
+    SC_T *pSC = SC_GetBase(sc);
     uint32_t u32Reg = 0;
 
     if(u32CD != SC_PIN_STATE_IGNORE)
@@ -123,20 +113,11 @@ void SC_Open(UINT sc, UINT u32CD, UINT u32PWR)
     {
         u32CardStateIgnore[sc] = 1;
     }
-    if(sc == 0)
-    {
-        while(inpw(REG_SC0_PINCTL) & SC_PINCTL_SYNC_Msk);
-        outpw(REG_SC0_PINCTL, u32PWR ? 0 : SC_PINCTL_PWRINV_Msk);
-        while(inpw(REG_SC0_CTL) & SC_CTL_SYNC_Msk);
-        outpw(REG_SC0_CTL, SC_CTL_SCEN_Msk | u32Reg);
-    }
-    else
-    {
-        while(inpw(REG_SC1_PINCTL) & SC_PINCTL_SYNC_Msk);
-        outpw(REG_SC1_PINCTL, u32PWR ? 0 : SC_PINCTL_PWRINV_Msk);
-        while(inpw(REG_SC1_CTL) & SC_CTL_SYNC_Msk);
-        outpw(REG_SC1_CTL, SC_CTL_SCEN_Msk | u32Reg);
-    }
+
+    while(pSC->PINCTL & SC_PINCTL_SYNC_Msk);
+    pSC->PINCTL = u32PWR ? 0 : SC_PINCTL_PWRINV_Msk;
+    while(pSC->CTL & SC_CTL_SYNC_Msk);
+    pSC->CTL = SC_CTL_SCEN_Msk | u32Reg;
 }
 
 /**
@@ -147,72 +128,39 @@ void SC_Open(UINT sc, UINT u32CD, UINT u32PWR)
   */
 void SC_ResetReader(UINT sc)
 {
-    if(sc == 0)
-    {
-        // Reset FIFO, enable auto de-activation while card removal
-        outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) | SC_ALTCTL_TXRST_Msk | SC_ALTCTL_RXRST_Msk | SC_ALTCTL_ADACEN_Msk);
-        // Set Rx trigger level to 1 character, longest card detect debounce period, disable error retry (EMV ATR does not use error retry)
-        while(inpw(REG_SC0_CTL) & SC_CTL_SYNC_Msk);
-        // Enable auto convention, and all three smartcard internal timers
-        outpw(REG_SC0_CTL, (inpw(REG_SC0_CTL) & ~(SC_CTL_RXTRGLV_Msk | SC_CTL_CDDBSEL_Msk | SC_CTL_TXRTY_Msk | SC_CTL_TXRTYEN_Msk | SC_CTL_RXRTY_Msk | SC_CTL_RXRTYEN_Msk)) | SC_CTL_AUTOCEN_Msk | SC_CTL_TMRSEL_Msk);
+    SC_T *pSC = SC_GetBase(sc);
 
-        // Disable Rx timeout
-        outpw(REG_SC0_RXTOUT, 0);
-        // 372 clocks per ETU by default
-        outpw(REG_SC0_ETUCTL, 371);
+    // Reset FIFO, enable auto de-activation while card removal
+    pSC->ALTCTL |= (SC_ALTCTL_TXRST_Msk | SC_ALTCTL_RXRST_Msk | SC_ALTCTL_ADACEN_Msk);
+    // Set Rx trigger level to 1 character, longest card detect debounce period, disable error retry (EMV ATR does not use error retry)
+    while(pSC->CTL & SC_CTL_SYNC_Msk);
+    // Enable auto convention, and all three smartcard internal timers
+    pSC->CTL = (pSC->CTL & ~(SC_CTL_RXTRGLV_Msk | SC_CTL_CDDBSEL_Msk | SC_CTL_TXRTY_Msk | SC_CTL_TXRTYEN_Msk | SC_CTL_RXRTY_Msk | SC_CTL_RXRTYEN_Msk)) | SC_CTL_AUTOCEN_Msk | SC_CTL_TMRSEL_Msk;
 
-        /* Enable necessary interrupt for smartcard operation */
-        if(u32CardStateIgnore[0]) // Do not enable card detect interrupt if card present state ignore
-            outpw(REG_SC0_INTEN, SC_INTEN_RDAIEN_Msk |
-                  SC_INTEN_TERRIEN_Msk |
-                  SC_INTEN_TMR0IEN_Msk |
-                  SC_INTEN_TMR1IEN_Msk |
-                  SC_INTEN_TMR2IEN_Msk |
-                  SC_INTEN_BGTIEN_Msk |
-                  SC_INTEN_ACERRIEN_Msk);
-        else
-            outpw(REG_SC0_INTEN, SC_INTEN_RDAIEN_Msk |
-                  SC_INTEN_TERRIEN_Msk |
-                  SC_INTEN_TMR0IEN_Msk |
-                  SC_INTEN_TMR1IEN_Msk |
-                  SC_INTEN_TMR2IEN_Msk |
-                  SC_INTEN_BGTIEN_Msk |
-                  SC_INTEN_ACERRIEN_Msk |
-                  SC_INTEN_CDIEN_Msk);
-    }
+    // Disable Rx timeout
+    pSC->RXTOUT = 0;
+    // 372 clocks per ETU by default
+    pSC->ETUCTL = 371;
+
+    /* Enable necessary interrupt for smartcard operation */
+    if(u32CardStateIgnore[sc]) // Do not enable card detect interrupt if card present state ignore
+        pSC->INTEN = SC_INTEN_RDAIEN_Msk |
+                     SC_INTEN_TERRIEN_Msk |
+                     SC_INTEN_TMR0IEN_Msk |
+                     SC_INTEN_TMR1IEN_Msk |
+                     SC_INTEN_TMR2IEN_Msk |
+                     SC_INTEN_BGTIEN_Msk |
+                     SC_INTEN_ACERRIEN_Msk;
     else
-    {
-        // Reset FIFO, enable auto de-activation while card removal
-        outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) | SC_ALTCTL_TXRST_Msk | SC_ALTCTL_RXRST_Msk | SC_ALTCTL_ADACEN_Msk);
-        // Set Rx trigger level to 1 character, longest card detect debounce period, disable error retry (EMV ATR does not use error retry)
-        while(inpw(REG_SC1_CTL) & SC_CTL_SYNC_Msk);
-        // Enable auto convention, and all three smartcard internal timers
-        outpw(REG_SC1_CTL, (inpw(REG_SC1_CTL) & ~(SC_CTL_RXTRGLV_Msk | SC_CTL_CDDBSEL_Msk | SC_CTL_TXRTY_Msk | SC_CTL_RXRTY_Msk)) | SC_CTL_AUTOCEN_Msk | SC_CTL_TMRSEL_Msk);
+        pSC->INTEN = SC_INTEN_RDAIEN_Msk |
+                     SC_INTEN_TERRIEN_Msk |
+                     SC_INTEN_TMR0IEN_Msk |
+                     SC_INTEN_TMR1IEN_Msk |
+                     SC_INTEN_TMR2IEN_Msk |
+                     SC_INTEN_BGTIEN_Msk |
+                     SC_INTEN_ACERRIEN_Msk |
+                     SC_INTEN_CDIEN_Msk;
 
-        // Disable Rx timeout
-        outpw(REG_SC1_RXTOUT, 0);
-        // 372 clocks per ETU by default
-        outpw(REG_SC1_ETUCTL, 371);
-
-        /* Enable necessary interrupt for smartcard operation */
-        if(u32CardStateIgnore[1]) // Do not enable card detect interrupt if card present state ignore
-            outpw(REG_SC1_INTEN, SC_INTEN_RDAIEN_Msk |
-                  SC_INTEN_TERRIEN_Msk |
-                  SC_INTEN_TMR0IEN_Msk |
-                  SC_INTEN_TMR1IEN_Msk |
-                  SC_INTEN_TMR2IEN_Msk |
-                  SC_INTEN_BGTIEN_Msk |
-                  SC_INTEN_ACERRIEN_Msk);
-        else
-            outpw(REG_SC1_INTEN, SC_INTEN_RDAIEN_Msk |
-                  SC_INTEN_TERRIEN_Msk |
-                  SC_INTEN_TMR0IEN_Msk |
-                  SC_INTEN_TMR1IEN_Msk |
-                  SC_INTEN_TMR2IEN_Msk |
-                  SC_INTEN_BGTIEN_Msk |
-                  SC_INTEN_ACERRIEN_Msk |
-                  SC_INTEN_CDIEN_Msk);
-    }
     return;
 }
 
@@ -225,10 +173,8 @@ void SC_ResetReader(UINT sc)
   */
 void SC_SetBlockGuardTime(UINT sc, UINT u32BGT)
 {
-    if(sc == 0)
-        outpw(REG_SC0_CTL, (inpw(REG_SC0_CTL) & ~0x1F00) | ((u32BGT - 1) << 8));
-    else
-        outpw(REG_SC1_CTL, (inpw(REG_SC1_CTL) & ~0x1F00) | ((u32BGT - 1) << 8));
+    SC_T *pSC = SC_GetBase(sc);
+    pSC->CTL = (pSC->CTL & ~SC_CTL_BGT_Msk) | (((u32BGT) - 1) << SC_CTL_BGT_Pos);
 }
 
 /**
@@ -240,16 +186,9 @@ void SC_SetBlockGuardTime(UINT sc, UINT u32BGT)
   */
 void SC_SetCharGuardTime(UINT sc, UINT u32CGT)
 {
-    if(sc == 0)
-    {
-        u32CGT -= inpw(REG_SC0_CTL) & SC_CTL_NSB_Msk ? 11 : 12;
-        outpw(REG_SC0_EGT, u32CGT);
-    }
-    else
-    {
-        u32CGT -= inpw(REG_SC1_CTL) & SC_CTL_NSB_Msk ? 11 : 12;
-        outpw(REG_SC1_EGT, u32CGT);
-    }
+    SC_T *pSC = SC_GetBase(sc);
+    u32CGT -= (pSC->CTL & SC_CTL_NSB_Msk) ? 11 : 12;
+    pSC->EGT = u32CGT;
 }
 
 /**
@@ -261,10 +200,8 @@ void SC_SetCharGuardTime(UINT sc, UINT u32CGT)
   */
 void SC_StopAllTimer(UINT sc)
 {
-    if(sc == 0)
-        outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) & ~(SC_ALTCTL_CNTEN0_Msk | SC_ALTCTL_CNTEN1_Msk | SC_ALTCTL_CNTEN2_Msk));
-    else
-        outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) & ~(SC_ALTCTL_CNTEN0_Msk | SC_ALTCTL_CNTEN1_Msk | SC_ALTCTL_CNTEN2_Msk));
+    SC_T *pSC = SC_GetBase(sc);
+    pSC->ALTCTL &= ~(SC_ALTCTL_CNTEN0_Msk | SC_ALTCTL_CNTEN1_Msk | SC_ALTCTL_CNTEN2_Msk);
 }
 
 /**
@@ -291,44 +228,23 @@ void SC_StopAllTimer(UINT sc)
   */
 void SC_StartTimer(UINT sc, UINT u32TimerNum, UINT u32Mode, UINT u32ETUCount)
 {
-    uint32_t reg = u32Mode | (0xFFFFFF & (u32ETUCount - 1));
+    SC_T *pSC = SC_GetBase(sc);
+    uint32_t reg = u32Mode | (SC_TMRCTL0_CNT_Msk & (u32ETUCount - 1));
 
-    if(sc == 0)
+    if(u32TimerNum == 0)
     {
-        if(u32TimerNum == 0)
-        {
-            outpw(REG_SC0_TMRCTL0, reg);
-            outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) | SC_ALTCTL_CNTEN0_Msk);
-        }
-        else if(u32TimerNum == 1)
-        {
-            outpw(REG_SC0_TMRCTL1, reg);
-            outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) | SC_ALTCTL_CNTEN1_Msk);
-        }
-        else       // timer 2
-        {
-            outpw(REG_SC0_TMRCTL2, reg);
-            outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) | SC_ALTCTL_CNTEN2_Msk);
-        }
+        pSC->TMRCTL0 = reg;
+        pSC->ALTCTL |= SC_ALTCTL_CNTEN0_Msk;
     }
-    else
+    else if(u32TimerNum == 1)
     {
-        if(u32TimerNum == 0)
-        {
-            outpw(REG_SC1_TMRCTL0, reg);
-            outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) | SC_ALTCTL_CNTEN0_Msk);
-        }
-        else if(u32TimerNum == 1)
-        {
-            outpw(REG_SC1_TMRCTL1, reg);
-            outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) | SC_ALTCTL_CNTEN1_Msk);
-        }
-        else       // timer 2
-        {
-            outpw(REG_SC1_TMRCTL2, reg);
-            outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) | SC_ALTCTL_CNTEN2_Msk);
-        }
-
+        pSC->TMRCTL1 = reg;
+        pSC->ALTCTL |= SC_ALTCTL_CNTEN1_Msk;
+    }
+    else    // timer 2
+    {
+        pSC->TMRCTL2 = reg;
+        pSC->ALTCTL |= SC_ALTCTL_CNTEN2_Msk;
     }
 }
 
@@ -342,25 +258,14 @@ void SC_StartTimer(UINT sc, UINT u32TimerNum, UINT u32Mode, UINT u32ETUCount)
   */
 void SC_StopTimer(UINT sc, UINT u32TimerNum)
 {
-    if(sc == 0)
-    {
-        if(u32TimerNum == 0)
-            outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) & ~SC_ALTCTL_CNTEN0_Msk);
-        else if(u32TimerNum == 1)
-            outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) & ~SC_ALTCTL_CNTEN1_Msk);
-        else    // timer 2
-            outpw(REG_SC0_ALTCTL, inpw(REG_SC0_ALTCTL) & ~SC_ALTCTL_CNTEN2_Msk);
+    SC_T *pSC = SC_GetBase(sc);
 
-    }
-    else
-    {
-        if(u32TimerNum == 0)
-            outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) & ~SC_ALTCTL_CNTEN0_Msk);
-        else if(u32TimerNum == 1)
-            outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) & ~SC_ALTCTL_CNTEN1_Msk);
-        else    // timer 2
-            outpw(REG_SC1_ALTCTL, inpw(REG_SC1_ALTCTL) & ~SC_ALTCTL_CNTEN2_Msk);
-    }
+    if(u32TimerNum == 0)
+        pSC->ALTCTL &= ~SC_ALTCTL_CNTEN0_Msk;
+    else if(u32TimerNum == 1)
+        pSC->ALTCTL &= ~SC_ALTCTL_CNTEN1_Msk;
+    else    // timer 2
+        pSC->ALTCTL &= ~SC_ALTCTL_CNTEN2_Msk;
 }
 
 
@@ -369,4 +274,3 @@ void SC_StopTimer(UINT sc, UINT u32TimerNum)
 /*@}*/ /* end of group SC_Driver */
 
 /*@}*/ /* end of group Standard_Driver */
-

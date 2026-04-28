@@ -1,6 +1,6 @@
 /**************************************************************************//**
  * @file     scuart.c
- * @brief    NUC980 series Smartcard UART mode (SCUART) driver source file
+ * @brief    NUC990 series Smartcard UART mode (SCUART) driver source file
  *
  * SPDX-License-Identifier: Apache-2.0
  * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
@@ -28,18 +28,10 @@
   */
 void SCUART_Close(UINT sc)
 {
-    if(sc == 0)
-    {
-        outpw(REG_SC0_INTEN, 0);
-        outpw(REG_SC0_UARTCTL, 0);
-        outpw(REG_SC0_CTL, 0);
-    }
-    else
-    {
-        outpw(REG_SC1_INTEN, 0);
-        outpw(REG_SC1_UARTCTL, 0);
-        outpw(REG_SC1_CTL, 0);
-    }
+    SC_T *pSC = (sc == 0) ? SC0 : SC1;
+    pSC->INTEN = 0;
+    pSC->UARTCTL = 0;
+    pSC->CTL = 0;
 }
 
 /// @cond HIDDEN_SYMBOLS
@@ -53,9 +45,9 @@ static uint32_t SCUART_GetClock(UINT sc)
     uint32_t u32Div;
 
     if(sc == 0)
-        u32Div = ((inpw(REG_CLK_DIVCTL6) >> 24) & 0xF) + 1;
+        u32Div = ((CLK->DIVCTL6 >> CLK_DIVCTL6_SMC0_N_Pos) & 0xF) + 1;
     else
-        u32Div = ((inpw(REG_CLK_DIVCTL6) >> 28) & 0xF) + 1;
+        u32Div = ((CLK->DIVCTL6 >> CLK_DIVCTL6_SMC1_N_Pos) & 0xF) + 1;
 
     return 12000000 / u32Div;
 }
@@ -72,23 +64,15 @@ static uint32_t SCUART_GetClock(UINT sc)
   */
 UINT SCUART_Open(UINT sc, UINT u32baudrate)
 {
+    SC_T *pSC = (sc == 0) ? SC0 : SC1;
     uint32_t u32Clk = SCUART_GetClock(sc), u32Div;
 
     // Calculate divider for target baudrate
     u32Div = (u32Clk + (u32baudrate >> 1) - 1) / u32baudrate - 1;
 
-    if(sc == 0)
-    {
-        outpw(REG_SC0_CTL, SC_CTL_SCEN_Msk | SC_CTL_NSB_Msk);   // Enable smartcard interface and stop bit = 1
-        outpw(REG_SC0_UARTCTL, SCUART_CHAR_LEN_8 | SCUART_PARITY_NONE | SC_UARTCTL_UARTEN_Msk); // Enable UART mode, disable parity and 8 bit per character
-        outpw(REG_SC0_ETUCTL, u32Div);
-    }
-    else
-    {
-        outpw(REG_SC1_CTL, SC_CTL_SCEN_Msk | SC_CTL_NSB_Msk);   // Enable smartcard interface and stop bit = 1
-        outpw(REG_SC1_UARTCTL, SCUART_CHAR_LEN_8 | SCUART_PARITY_NONE | SC_UARTCTL_UARTEN_Msk); // Enable UART mode, disable parity and 8 bit per character
-        outpw(REG_SC1_ETUCTL, u32Div);
-    }
+    pSC->CTL = SC_CTL_SCEN_Msk | SC_CTL_NSB_Msk;   // Enable smartcard interface and stop bit = 1
+    pSC->UARTCTL = SCUART_CHAR_LEN_8 | SCUART_PARITY_NONE | SC_UARTCTL_UARTEN_Msk; // Enable UART mode, disable parity and 8 bit per character
+    pSC->ETUCTL = u32Div;
 
     return(u32Clk / (u32Div + 1));
 }
@@ -104,30 +88,14 @@ UINT SCUART_Open(UINT sc, UINT u32baudrate)
   */
 UINT SCUART_Read(UINT sc, char *pu8RxBuf, UINT u32ReadBytes)
 {
+    SC_T *pSC = (sc == 0) ? SC0 : SC1;
     uint32_t u32Count;
 
-    if(sc == 0)
+    for(u32Count = 0; u32Count < u32ReadBytes; u32Count++)
     {
-        for(u32Count = 0; u32Count < u32ReadBytes; u32Count++)
-        {
-            if(inpw(REG_SC0_STATUS) & SC_STATUS_RXEMPTY_Msk)   // no data available
-            {
-                break;
-            }
-            pu8RxBuf[u32Count] = inpw(REG_SC0_DAT);    // get data from FIFO
-        }
-    }
-    else
-    {
-        for(u32Count = 0; u32Count < u32ReadBytes; u32Count++)
-        {
-            if(inpw(REG_SC1_STATUS) & SC_STATUS_RXEMPTY_Msk)   // no data available
-            {
-                break;
-            }
-            pu8RxBuf[u32Count] = inpw(REG_SC1_DAT);    // get data from FIFO
-        }
-
+        if(pSC->STATUS & SC_STATUS_RXEMPTY_Msk)   // no data available
+            break;
+        pu8RxBuf[u32Count] = pSC->DAT;    // get data from FIFO
     }
 
     return u32Count;
@@ -154,33 +122,23 @@ UINT SCUART_Read(UINT sc, char *pu8RxBuf, UINT u32ReadBytes)
   */
 UINT SCUART_SetLineConfig(UINT sc, UINT u32Baudrate, UINT u32DataWidth, UINT u32Parity, UINT  u32StopBits)
 {
-
+    SC_T *pSC = (sc == 0) ? SC0 : SC1;
     uint32_t u32Clk = SCUART_GetClock(sc), u32Div;
 
     if(u32Baudrate == 0)    // keep original baudrate setting
     {
-        u32Div = (sc == 0) ? inpw(REG_SC0_ETUCTL) & 0xFFF : inpw(REG_SC1_ETUCTL) & 0xFFF;
+        u32Div = pSC->ETUCTL & SC_ETUCTL_ETURDIV_Msk;
     }
     else
     {
         // Calculate divider for target baudrate
         u32Div = (u32Clk + (u32Baudrate >> 1) - 1) / u32Baudrate - 1;
-        if(sc == 0)
-            outpw(REG_SC0_ETUCTL, u32Div);
-        else
-            outpw(REG_SC1_ETUCTL, u32Div);
+        pSC->ETUCTL = u32Div;
     }
 
-    if(sc == 0)
-    {
-        outpw(REG_SC0_CTL, u32StopBits | SC_CTL_SCEN_Msk);  // Set stop bit
-        outpw(REG_SC0_UARTCTL, u32Parity | u32DataWidth | SC_UARTCTL_UARTEN_Msk);   // Set character width and parity
-    }
-    else
-    {
-        outpw(REG_SC1_CTL, u32StopBits | SC_CTL_SCEN_Msk);  // Set stop bit
-        outpw(REG_SC1_UARTCTL, u32Parity | u32DataWidth | SC_UARTCTL_UARTEN_Msk);   // Set character width and parity
-    }
+    pSC->CTL = u32StopBits | SC_CTL_SCEN_Msk;  // Set stop bit
+    pSC->UARTCTL = u32Parity | u32DataWidth | SC_UARTCTL_UARTEN_Msk;   // Set character width and parity
+
     return(u32Clk / (u32Div + 1));
 }
 
@@ -190,16 +148,11 @@ UINT SCUART_SetLineConfig(UINT sc, UINT u32Baudrate, UINT u32DataWidth, UINT u32
   * @param[in] u32TOC Rx timeout counter, using baudrate as counter unit. Valid range are 0~0x1FF,
   *                   set this value to 0 will disable timeout counter.
   * @return None
-  * @details The time-out counter resets and starts counting whenever the RX buffer received a
-  *          new data word. Once the counter decrease to 1 and no new data is received or CPU
-  *          does not read any data from FIFO, a receiver time-out interrupt will be generated.
   */
 void SCUART_SetTimeoutCnt(UINT sc, UINT u32TOC)
 {
-    if(sc == 0)
-        outpw(REG_SC0_RXTOUT, u32TOC);
-    else
-        outpw(REG_SC1_RXTOUT, u32TOC);
+    SC_T *pSC = (sc == 0) ? SC0 : SC1;
+    pSC->RXTOUT = u32TOC;
 }
 
 
@@ -214,23 +167,13 @@ void SCUART_SetTimeoutCnt(UINT sc, UINT u32TOC)
   */
 void SCUART_Write(UINT sc, char *pu8TxBuf, UINT u32WriteBytes)
 {
+    SC_T *pSC = (sc == 0) ? SC0 : SC1;
     uint32_t u32Count;
 
-    if(sc == 0)
+    for(u32Count = 0; u32Count != u32WriteBytes; u32Count++)
     {
-        for(u32Count = 0; u32Count != u32WriteBytes; u32Count++)
-        {
-            while(inpw(REG_SC0_STATUS) & SC_STATUS_TXFULL_Msk);  // Wait 'til FIFO not full
-            outpw(REG_SC0_DAT, pu8TxBuf[u32Count]);    // Write 1 byte to FIFO
-        }
-    }
-    else
-    {
-        for(u32Count = 0; u32Count != u32WriteBytes; u32Count++)
-        {
-            while(inpw(REG_SC0_STATUS) & SC_STATUS_TXFULL_Msk);  // Wait 'til FIFO not full
-            outpw(REG_SC1_DAT, pu8TxBuf[u32Count]);    // Write 1 byte to FIFO
-        }
+        while(pSC->STATUS & SC_STATUS_TXFULL_Msk);  // Wait 'til FIFO not full
+        pSC->DAT = pu8TxBuf[u32Count];    // Write 1 byte to FIFO
     }
 }
 
