@@ -2,7 +2,7 @@
  * @file     eth.c
  * @brief    EMAC driver header
  *
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include "lwip/def.h"
 #include "lwip/pbuf.h"

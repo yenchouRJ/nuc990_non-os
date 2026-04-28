@@ -42,7 +42,6 @@
 
 /* Hardware and starter kit includes. */
 #include "NuMicro.h"
-#include "sys.h"
 
 #include "lwip/netifapi.h"
 #include "lwip/tcpip.h"
@@ -50,18 +49,7 @@
 #include "tcp_echoserver-netconn.h"
 
 /* Priorities for the demo application tasks. */
-#if 0
-#define mainFLASH_TASK_PRIORITY            ( tskIDLE_PRIORITY + 1UL )
-#define mainQUEUE_POLL_PRIORITY            ( tskIDLE_PRIORITY + 2UL )
-#define mainSEM_TEST_PRIORITY              ( tskIDLE_PRIORITY + 1UL )
-#define mainBLOCK_Q_PRIORITY               ( tskIDLE_PRIORITY + 2UL )
 #define mainCHECK_TASK_PRIORITY            ( tskIDLE_PRIORITY + 3UL )
-#else
-#define mainFLASH_TASK_PRIORITY            ( tskIDLE_PRIORITY + 1UL )
-#define mainQUEUE_POLL_PRIORITY            ( tskIDLE_PRIORITY + 1UL )
-#define mainSEM_TEST_PRIORITY              ( tskIDLE_PRIORITY + 1UL )
-#define mainCHECK_TASK_PRIORITY            ( tskIDLE_PRIORITY + 3UL )
-#endif
 
 #define mainCHECK_TASK_STACK_SIZE            ( configMINIMAL_STACK_SIZE )
 

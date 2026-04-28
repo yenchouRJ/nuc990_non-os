@@ -3,7 +3,7 @@
  * @brief    ADC driver header file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright(C) 2024 Nuvoton Technology Corp. All rights reserved.
+ * @copyright(C) 2026 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 #ifndef __ADC_H__
 #define __ADC_H__

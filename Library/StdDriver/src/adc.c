@@ -3,7 +3,7 @@
  * @brief    NUC990 ADC driver source file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright(C) 2024 Nuvoton Technology Corp. All rights reserved.
+ * @copyright(C) 2026 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 #include "NuMicro.h"
 #include "adc.h"
@@ -20,10 +20,6 @@
 /** @addtogroup ADC_EXPORTED_FUNCTIONS ADC Exported Functions
   @{
 */
-
-/*---------------------------------------------------------------*/
-/*  Struct-based API (new style)                                 */
-/*---------------------------------------------------------------*/
 
 /**
   * @brief This API configures ADC module to be ready for convert the input from selected channel
@@ -101,10 +97,6 @@ void ADC_DisableInt(ADC_T *adc, uint32_t u32Mask)
 {
     adc->IER &= ~u32Mask;
 }
-
-/*---------------------------------------------------------------*/
-/*  Callback-based legacy API                                    */
-/*---------------------------------------------------------------*/
 
 /// @cond HIDDEN_SYMBOLS
 #define ADC_FIFO_LENGTH 128
@@ -187,7 +179,7 @@ INT adcOpen2(uint32_t freqKhz)
     /* ADC Engine Clock is set to freq Khz */
     if (freqKhz > 4000) freqKhz = 4000;
     if (freqKhz < 1000) freqKhz = 1000;
-    div = 12000 / freqKhz;
+    div = __HXT / 1000 / freqKhz;
     CLK->DIVCTL7 = (CLK->DIVCTL7 & ~(CLK_DIVCTL7_ADC_S_Msk | CLK_DIVCTL7_ADC_N_Msk)) |
                    ((div - 1) << CLK_DIVCTL7_ADC_N_Pos);
 

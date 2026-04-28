@@ -3,10 +3,10 @@
  * @brief    Unified EMAC driver for NUC990 (supports EMAC0 and EMAC1)
  *           Uses EMAC_T register structure and named bit constants.
  *
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include "NuMicro.h"
-#include "sys.h"
+
 #include "netif/eth.h"
 #include "lwip/opt.h"
 #include "lwip/def.h"

@@ -466,6 +466,11 @@
               <FileType>4</FileType>
               <FilePath>..\..\..\..\Library\SmartcardLib\SmartCardLib_Keil.lib</FilePath>
             </File>
+            <File>
+              <FileName>sc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\Library\StdDriver\src\sc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -220,6 +220,7 @@ void systemIrqHandler(UINT32 irq)
 static void prvSetupTimerInterrupt( void )
 {
 	uint32_t ulCompareMatch;
+	uint32_t prescale;
 
 	// enable timer5 clock
 	CLK->PCLKEN0 |= CLK_PCLKEN0_TMR5CKEN_Msk;
@@ -249,8 +250,9 @@ static void prvSetupTimerInterrupt( void )
 
 	// set up timer and enable timer 5 interrupt
 	TIMER5->CMP = ulCompareMatch;
+	prescale = __HXT / 1000000 - 1;
 	TIMER5->CTL = TIMER_CTL_CNTEN_Msk | TIMER_CTL_INTEN_Msk |
-	      (0x1 << TIMER_CTL_OPMODE_Pos) | 11;  /* count 1000000 per second */
+	      (0x1 << TIMER_CTL_OPMODE_Pos) | (prescale << TIMER_CTL_PSC_Pos);  /* count 1000000 per second */
 	sysEnableInterrupt(TIMER5_IRQn);
 }
 /*-----------------------------------------------------------*/

@@ -2,7 +2,7 @@
  * @file     ethernetif.c
  * @brief    Ethernet interface header
  *
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #ifndef __ETHERNETIF_H__
 #define __ETHERNETIF_H__

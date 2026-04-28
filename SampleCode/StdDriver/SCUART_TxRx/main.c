@@ -2,7 +2,7 @@
  * @file     main.c
  * @brief    Demonstrate smartcard UART mode
  *
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 #include <stdio.h>
 #include "NuMicro.h"
@@ -31,6 +31,8 @@ void SC0_IRQHandler(void)
 
 void UART_Init()
 {
+    SYS_UnlockReg();
+
     CLK_SetModuleClock(UART0_MODULE, CLK_DIV4_UART0SEL_HXT, CLK_DIV4_UART0(1));
 
     sysResetModule(UART0_RST);
@@ -40,6 +42,8 @@ void UART_Init()
     /* GPF11, GPF12 */
     SET_UART0_RXD_PF11();
     SET_UART0_TXD_PF12();
+
+    sysSetLocalInterrupt(ENABLE_IRQ);
 }
 
 int main(void)

@@ -3,13 +3,13 @@
  * @brief    EMAC driver source file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2024 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Numicro.h"
+#include "NuMicro.h"
 #include "sys.h"
 #include "emac.h"
 
@@ -719,7 +719,7 @@ static int ts_init(enum EMACINTF intf)
     emac->TSCTL |= TSCTL_DEFAULT;
 
     // design tsinc to 10ns aka 100MHz, and addend is 2^32/(HCLK/100M) i.e. 2^32*100M/180M
-    addend = ((u64)1 << 32) * (u64)EMAC_TS_ACCURACY_MHZ / (u64)EMAC_HCLK_MHZ;
+    addend = ((u64)1 << 32) * (u64)EMAC_TS_ACCURACY_MHZ / (u64)EMAC_HCLK_MHZ(CLK_GetClockFreq(CLK_HCLK));
     emacdev->ts_addend = (u32)addend;
 
     emac->TSINC = 1000/EMAC_TS_ACCURACY_MHZ;
@@ -941,12 +941,12 @@ int pps_perout_cmd_set(enum EMACINTF intf, struct perout_request *req)
     u32 ticks, hi, lo;
     u64 sec, nsec;
     u32 cmd;
+    uint32_t hclk_freq = CLK_GetClockFreq(CLK_HCLK);
 
     if (req->period == 0) {
         pps_cmd_set(intf, PPSCMD_NO_CMD);
         return 0;
-    // } else if (req->period < 2 * SEC_TO_NSEC / HCLK_FREQ) {
-    } else if (req->period > HCLK_FREQ / 2) {
+    } else if (req->period > hclk_freq / 2) {
         return -1;
     }
 
@@ -957,7 +957,7 @@ int pps_perout_cmd_set(enum EMACINTF intf, struct perout_request *req)
             return -1;
     case PEROUT_START_SEQ_AT:
         // make it close to 50% duty cycle
-        ticks = HCLK_FREQ / req->period;
+        ticks = hclk_freq / req->period;
         hi = ticks / 2;
         lo = ticks - hi;
         emac->PPSHW = hi - 1;
@@ -1057,23 +1057,23 @@ static int emac_init(enum EMACINTF intf)
     if(intf == EMAC_INTF0)
     {
         set_mac_addr(intf, mac_addr0, 0);
-        sysInstallISR(IRQ_LEVEL_1, IRQ_EMAC0_TX, (PVOID)emac0_tx_handler);
-        sysInstallISR(IRQ_LEVEL_1, IRQ_EMAC0_RX, (PVOID)emac0_rx_handler);
+        sysInstallISR(IRQ_LEVEL_1, EMAC0_TX_IRQn, (PVOID)emac0_tx_handler);
+        sysInstallISR(IRQ_LEVEL_1, EMAC0_RX_IRQn, (PVOID)emac0_rx_handler);
         if(!emacdev->configs.reg.bits.dint)
         {
-            sysEnableInterrupt(IRQ_EMAC0_TX);
-            sysEnableInterrupt(IRQ_EMAC0_RX);
+            sysEnableInterrupt(EMAC0_TX_IRQn);
+            sysEnableInterrupt(EMAC0_RX_IRQn);
         }
     }
     else
     {
         set_mac_addr(intf, mac_addr1, 0);
-        sysInstallISR(IRQ_LEVEL_1, IRQ_EMAC1_TX, (PVOID)emac1_tx_handler);
-        sysInstallISR(IRQ_LEVEL_1, IRQ_EMAC1_RX, (PVOID)emac1_rx_handler);
+        sysInstallISR(IRQ_LEVEL_1, EMAC1_TX_IRQn, (PVOID)emac1_tx_handler);
+        sysInstallISR(IRQ_LEVEL_1, EMAC1_RX_IRQn, (PVOID)emac1_rx_handler);
         if(!emacdev->configs.reg.bits.dint)
         {
-            sysEnableInterrupt(IRQ_EMAC1_TX);
-            sysEnableInterrupt(IRQ_EMAC1_RX);
+            sysEnableInterrupt(EMAC1_TX_IRQn);
+            sysEnableInterrupt(EMAC1_RX_IRQn);
         }
     }
 
@@ -1137,7 +1137,6 @@ static int emac_init(enum EMACINTF intf)
     {
         emac->MCMDR |= MCMDR_MGP_WAKE;
         emac->MIEN |= MIEN_WOLIEN;
-        SYS->WKUPSER1 |= SYS_WKUPSER1_EMAC0WKEN_Msk << intf;
         emacdev->wol_flag = 0;
     }
 
@@ -1159,7 +1158,7 @@ int emac_open(enum EMACINTF intf, EMACconfig config)
     memset((void *)emacdev, 0, sizeof(EMACdevice));
 
     if(intf == EMAC_INTF0) {
-        CLK->HCLKEN0 |= CLK_HCLKEN0_EMAC0_Msk;
+        CLK->HCLKEN0 |= CLK_HCLKEN0_EMAC0EN_Msk;
         CLK->DIVCTL8 = (CLK->DIVCTL8 & ~0xFF) | 0xA0; // MDC 1.125MHz
         SYS->GPE_MFPL = (SYS->GPE_MFPL & ~0xFFFFFFFF) | 0x11111111;
         SYS->GPE_MFPH = (SYS->GPE_MFPH & ~0xFF) | 0x11;
@@ -1168,7 +1167,7 @@ int emac_open(enum EMACINTF intf, EMACconfig config)
         emacdev->Base = EMAC0;
         emacdev->Intf = EMAC_INTF0;
     } else {
-        CLK->HCLKEN0 |= CLK_HCLKEN0_EMAC1_Msk;
+        CLK->HCLKEN0 |= CLK_HCLKEN0_EMAC1EN_Msk;
         CLK->DIVCTL8 = (CLK->DIVCTL8 & ~0xFF) | 0xA0; // MDC 1.125MHz
         SYS->GPF_MFPL = (SYS->GPF_MFPL & ~0xFFFFFFFF) | 0x11111111;
         SYS->GPF_MFPH = (SYS->GPF_MFPH & ~0xFF) | 0x11;

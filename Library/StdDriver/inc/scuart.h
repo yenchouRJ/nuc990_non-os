@@ -3,7 +3,7 @@
  * @brief    NUC990 series Smartcard UART mode (SCUART) driver header file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 #ifndef __SCUART_H__
 #define __SCUART_H__

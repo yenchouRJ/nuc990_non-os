@@ -4,13 +4,12 @@
  * @brief    NUC990 ADC Sample Code
  *
  * @note
- * Copyright (C) 2024 Nuvoton Technology Corp. All rights reserved.
+ * Copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "NuMicro.h"
-#include "sys.h"
 #include "adc.h"
 
 /*-----------------------------------------------------------------------------*/

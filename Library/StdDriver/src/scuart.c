@@ -3,7 +3,7 @@
  * @brief    NUC990 series Smartcard UART mode (SCUART) driver source file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include "scuart.h"
 
@@ -49,7 +49,7 @@ static uint32_t SCUART_GetClock(UINT sc)
     else
         u32Div = ((CLK->DIVCTL6 >> CLK_DIVCTL6_SMC1_N_Pos) & 0xF) + 1;
 
-    return 12000000 / u32Div;
+    return __HXT / u32Div;
 }
 /// @endcond HIDDEN_SYMBOLS
 

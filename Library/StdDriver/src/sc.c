@@ -3,7 +3,7 @@
  * @brief    NUC990 series Smartcard(SC) driver source file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include "sc.h"
 

@@ -3,7 +3,7 @@
  * @brief    CLK Driver Source File
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2025 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 
 #include "NuMicro.h"
@@ -544,7 +544,7 @@ uint32_t CLK_GetUPLLClockFreq(void)
     /* PLL bypass mode */
     if (u32PLLCon & CLK_UPLLCON_BYPASS_Msk)
     {
-        return 12000000U; /* HXT */
+        return __HXT; /* HXT */
     }
 
     u32N    = ((u32PLLCon & CLK_UPLLCON_FB_DV_Msk)   >> CLK_UPLLCON_FB_DV_Pos)   + 1U;
@@ -553,7 +553,7 @@ uint32_t CLK_GetUPLLClockFreq(void)
     u32Frac = ((u32PLLCon & CLK_UPLLCON_FRAC_Msk)    >> CLK_UPLLCON_FRAC_Pos);
 
     /* Fractional part: X = FRAC / 2^12 */
-    u64Freq = 12000000ULL * ((uint64_t)u32N * 4096ULL + u32Frac);
+    u64Freq = (uint64_t)__HXT * ((uint64_t)u32N * 4096ULL + u32Frac);
     u64Freq = u64Freq / (4096ULL * u32M * u32P);
 
     return (uint32_t)u64Freq;
@@ -598,7 +598,7 @@ uint32_t CLK_GetAPLLClockFreq(void)
     /* PLL bypass mode */
     if (u32PLLCon & CLK_APLLCON_BYPASS_Msk)
     {
-        return 12000000U; /* HXT */
+        return __HXT; /* HXT */
     }
 
     u32N    = ((u32PLLCon & CLK_APLLCON_FB_DV_Msk)   >> CLK_APLLCON_FB_DV_Pos)   + 1U;
@@ -606,7 +606,7 @@ uint32_t CLK_GetAPLLClockFreq(void)
     u32P    = ((u32PLLCon & CLK_APLLCON_OUT_DV_Msk)  >> CLK_APLLCON_OUT_DV_Pos)  + 1U;
     u32Frac = ((u32PLLCon & CLK_APLLCON_FRAC_Msk)    >> CLK_APLLCON_FRAC_Pos);
 
-    u64Freq = 12000000ULL * ((uint64_t)u32N * 4096ULL + u32Frac);
+    u64Freq = (uint64_t)__HXT * ((uint64_t)u32N * 4096ULL + u32Frac);
     u64Freq = u64Freq / (4096ULL * u32M * u32P);
 
     return (uint32_t)u64Freq;
@@ -654,7 +654,7 @@ uint32_t CLK_GetClockFreq(CLOCK_Type clk)
     switch (reg)
     {
         case 0x0:  /* HXT */
-            clkfreq = 12000000U;
+            clkfreq = __HXT;
             break;
 
         case 0x2:  /* APLL */
@@ -687,24 +687,24 @@ uint32_t CLK_GetClockFreq(CLOCK_Type clk)
             return clkfreq / div;
 
         case CLK_HCLK:
-            /* HCLK = SYS_CLK */
-            return clkfreq;
+            /* HCLK = SYS_CLK / 2 */
+            return clkfreq / 2U;
 
         case CLK_HCLK1:
             /* HCLK1 = HCLK / 2 */
-            return clkfreq / 2U;
+            return clkfreq / 4U;
 
         case CLK_PCLK0:
             /* PCLK0 = HCLK */
-            return clkfreq;
+            return clkfreq / 2U;
 
         case CLK_PCLK1:
             /* PCLK1 = HCLK */
-            return clkfreq;
+            return clkfreq / 2U;
 
         case CLK_PCLK2:
             /* PCLK2 = HCLK / 2 */
-            return clkfreq / 2U;
+            return clkfreq / 4U;
 
         default:
             return 0U;

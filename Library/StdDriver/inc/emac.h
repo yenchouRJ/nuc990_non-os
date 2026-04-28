@@ -3,7 +3,7 @@
  * @brief    EMAC driver header file
  *
  * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2024 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2026 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #ifndef __EMAC_H__
 #define __EMAC_H__
@@ -304,7 +304,7 @@ struct perout_request {
 #define MTU_RESET    2030
 
 #define EMAC_TS_ACCURACY_MHZ 100 // aka 10ns, the maximum resolution is 6ns for HCLK = 180MHz
-#define EMAC_HCLK_MHZ    (HCLK_FREQ/1000000UL)
+#define EMAC_HCLK_MHZ(x)    ((x)/1000000UL)
 #define SEC_TO_NSEC      1000000000ULL
 
 #define MCMDR_DEFAULT    (MCMDR_SPCRC | MCMDR_ACP)
