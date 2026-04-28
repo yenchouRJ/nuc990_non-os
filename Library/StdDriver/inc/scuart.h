@@ -7,7 +7,7 @@
  *****************************************************************************/
 #ifndef __SCUART_H__
 #define __SCUART_H__
-#include "nuc980.h"
+#include "NuMicro.h"
 #ifdef __cplusplus
 extern "C"
 {
