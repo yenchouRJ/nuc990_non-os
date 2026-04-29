@@ -395,7 +395,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\..\..\ThirdParty\FreeRTOS\Source\portable\RVDS\ARM9_NUC980</IncludePath>
+              <IncludePath>..\..\..\..\..\..\ThirdParty\FreeRTOS\Source\portable\RVDS\ARM9_NUC990</IncludePath>
             </VariousControls>
           </Aads>
           <LDads>

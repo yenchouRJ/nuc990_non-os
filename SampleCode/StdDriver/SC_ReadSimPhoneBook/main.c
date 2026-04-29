@@ -199,8 +199,6 @@ void UART_Init()
     /* GPF11, GPF12 */
     SET_UART0_RXD_PF11();
     SET_UART0_TXD_PF12();
-
-    sysSetLocalInterrupt(ENABLE_IRQ);
 }
 
 int main(void)

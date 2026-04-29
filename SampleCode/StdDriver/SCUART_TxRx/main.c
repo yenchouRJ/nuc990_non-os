@@ -42,8 +42,6 @@ void UART_Init()
     /* GPF11, GPF12 */
     SET_UART0_RXD_PF11();
     SET_UART0_TXD_PF12();
-
-    sysSetLocalInterrupt(ENABLE_IRQ);
 }
 
 int main(void)
@@ -74,7 +72,6 @@ int main(void)
     sysInstallISR(IRQ_LEVEL_1, SMC0_IRQn, (PVOID)SC0_IRQHandler);
     sysSetLocalInterrupt(ENABLE_IRQ);
     sysEnableInterrupt(SMC0_IRQn);
-
 
     SCUART_Write(0, au8TxBuf, sizeof(au8TxBuf));
 

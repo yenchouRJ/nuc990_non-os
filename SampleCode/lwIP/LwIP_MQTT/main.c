@@ -44,22 +44,6 @@
 #include "timers.h"
 #include "semphr.h"
 
-/* Demo application includes. */
-#include "partest.h"
-#include "flash.h"
-#include "flop.h"
-#include "integer.h"
-#include "PollQ.h"
-#include "semtest.h"
-#include "dynamic.h"
-#include "BlockQ.h"
-#include "blocktim.h"
-#include "countsem.h"
-#include "GenQTest.h"
-#include "QueueSet.h"
-#include "recmutex.h"
-#include "death.h"
-
 /* Hardware and starter kit includes. */
 #include "NuMicro.h"
 #include "crypto.h"
